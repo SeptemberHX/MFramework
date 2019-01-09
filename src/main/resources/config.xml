@@ -1,0 +1,13 @@
+<MAdaptor>
+    <MObject>
+        <class>test.MMainBusiness</class>
+        <field>
+            <name>user</name>
+            <class>test.MResourceUser</class>
+        </field>
+        <field>
+            <name>addF</name>
+            <class>test.MFunctionAdd</class>
+        </field>
+    </MObject>
+</MAdaptor>
