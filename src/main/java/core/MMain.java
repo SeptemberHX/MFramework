@@ -36,7 +36,7 @@ public class MMain {
 
     public MMain() {
         this.mObjectFieldMap = new HashMap<Class<?>, List<Pair<String, String>>>();
-        this.parseConfigXml("/Users/septemberhx/Workspace/git/MFramework/src/main/resources/config.xml");
+//        this.parseConfigXml("/Users/septemberhx/Workspace/git/MFramework/src/main/resources/config.xml");
 
         
     }

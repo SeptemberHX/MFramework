@@ -21,19 +21,19 @@ public class MObjectProxy implements MethodInterceptor {
 
     private static Logger logger = Logger.getLogger(MObjectProxy.class);
 
-    private Object target;
+    private MObject target;
     private MCallType callType;
 
     public MObjectProxy() {
-        this.callType = MCallType.OBJECT;
+        this.callType = MCallType.REST;
     }
 
-    public Object getInstance(MObject mObject) {
+    public MObject getInstance(MObject mObject) {
         this.target = mObject;
         Enhancer en = new Enhancer();
         en.setSuperclass(mObject.getClass());
         en.setCallback(this);
-        return en.create();
+        return (MObject)en.create();
     }
 
     public <T extends MObject> T getInstance(Class<T> tClass) throws IllegalAccessException, InstantiationException {

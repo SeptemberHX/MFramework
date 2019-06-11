@@ -1,7 +1,7 @@
 package test;
 
+import annotation.MFunctionType;
 import base.MObject;
-import http.MHttpProxy;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -13,40 +13,29 @@ import javax.servlet.http.HttpServletRequest;
 /**
  * @Author: septemberhx
  * @Date: 2018-12-24
- * @Version 0.1
+ * @Version 0.2
  */
 @RestController
 @EnableAutoConfiguration
 @RequestMapping("/MFunctionAdd")
 public class MHttpMainController extends MObject {
 
-    private MHttpProxy mHttpProxy;
+    @MFunctionType
+    private MFunctionAdd functionAdd;
 
     @Autowired
     private HttpServletRequest request;
 
-    public MHttpMainController() {
-        this.mHttpProxy = new MHttpProxy(MFunctionAdd.class);
-    }
-
     @ResponseBody
-    @RequestMapping(path = "/*", method = RequestMethod.POST)
+    @RequestMapping(path = "/add", method = RequestMethod.POST)
     public String execute(@RequestBody String jsonStr) throws HttpRequestMethodNotSupportedException {
         JSONObject jsonObject = new JSONObject(jsonStr);
-        String[] splitResult = request.getRequestURI().split("/");
         System.out.println(jsonObject);
 
-        String result = null;
-        if (splitResult.length > 0) {
-            result = this.mHttpProxy.execute(splitResult[splitResult.length - 1], jsonObject);
-        }
+        int r = this.functionAdd.addInt(jsonObject.getInt("x"), jsonObject.getInt("y"));
 
-        if (result == null) {
-            throw new HttpRequestMethodNotSupportedException(splitResult[splitResult.length - 1]);
-        } else {
-            JSONObject resultJsonObject = new JSONObject();
-            resultJsonObject.put("result", result);
-            return resultJsonObject.toString();
-        }
+        JSONObject resultJsonObject = new JSONObject();
+        resultJsonObject.put("result", r);
+        return resultJsonObject.toString();
     }
 }

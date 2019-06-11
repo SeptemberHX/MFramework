@@ -17,7 +17,9 @@ public class ApplicationMain {
     public static void main(String[] args) {
         BasicConfigurator.configure();
 
-        MMain mMain = MMain.getInstance();
+//        MHttpMainController mmc = new MHttpMainController();
+
+//        MMain mMain = MMain.getInstance();
         SpringApplication.run(ApplicationMain.class, args);
     }
 }
