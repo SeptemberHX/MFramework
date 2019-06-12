@@ -51,9 +51,9 @@ public class MObjectProxy implements MethodInterceptor {
                 result = methodProxy.invoke(target, args);
                 break;
             case REST:
-                logger.info(((MObject)this.target).getId());
-                logger.info(method.getName());
-                logger.info(RequestUtils.methodParamToJsonString(method, args));
+//                logger.info(((MObject)this.target).getId());
+//                logger.info(method.getName());
+//                logger.info(RequestUtils.methodParamToJsonString(method, args));
                 break;
             default:
                 break;

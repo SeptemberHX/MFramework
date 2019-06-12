@@ -2,6 +2,7 @@ package test;
 
 import annotation.MFunctionType;
 import base.MObject;
+import core.MClient;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;

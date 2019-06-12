@@ -1,6 +1,7 @@
 package test;
 
 
+import core.MClient;
 import core.MMain;
 import org.apache.log4j.BasicConfigurator;
 import org.springframework.boot.SpringApplication;
