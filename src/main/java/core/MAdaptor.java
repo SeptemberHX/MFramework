@@ -14,7 +14,7 @@ import java.util.Map;
  */
 public class MAdaptor {
 
-    private static volatile MAdaptor instance = null;
+    private static volatile MAdaptor instance = new MAdaptor();
     private static Logger logger = Logger.getLogger(MAdaptor.class);
     private Map<String, MObjectProxy> proxyMap;
 

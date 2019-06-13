@@ -2,8 +2,9 @@ package core;
 
 import base.MObject;
 import org.apache.log4j.Logger;
-
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -52,5 +53,13 @@ public class MClient {
 
     public void printParentIdMap() {
         logger.debug(this.parentIdMap.toString());
+    }
+
+    public List<String> getMObjectIdList() {
+        return new ArrayList<>(this.mObjectMap.keySet());
+    }
+
+    public Map<String, String> getParentIdMap() {
+        return parentIdMap;
     }
 }
