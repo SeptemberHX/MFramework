@@ -1,13 +1,13 @@
 <MAdaptor>
     <MObject>
-        <class>test.MMainBusiness</class>
+        <class>com.septemberhx.mclient.MMainBusiness</class>
         <field>
             <name>user</name>
-            <class>test.MResourceUser</class>
+            <class>com.septemberhx.mclient.MResourceUser</class>
         </field>
         <field>
             <name>addF</name>
-            <class>test.MFunctionAdd</class>
+            <class>com.septemberhx.mclient.MFunctionAdd</class>
         </field>
     </MObject>
 </MAdaptor>
