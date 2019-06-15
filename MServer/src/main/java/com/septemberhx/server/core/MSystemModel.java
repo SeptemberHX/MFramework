@@ -9,6 +9,11 @@ public class MSystemModel {
     private MServiceInstanceManager mSIManager;
     private MServerNodeManager mSNManager;
 
+    public MSystemModel() {
+        this.mSIManager = new MServiceInstanceManager();
+        this.mSNManager = new MServerNodeManager();
+    }
+
     public void loadInstanceInfo(InstanceInfoBean instanceInfo) {
         this.mSIManager.add(new MServiceInstance(
                 instanceInfo.getParentIdMap(),

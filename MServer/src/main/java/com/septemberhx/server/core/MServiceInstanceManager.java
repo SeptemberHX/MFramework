@@ -1,6 +1,6 @@
 package com.septemberhx.server.core;
 
-import com.septemberhx.server.base.MObjectManager;
+import com.septemberhx.common.base.MObjectManager;
 import com.septemberhx.server.base.MServiceInstance;
 
 
