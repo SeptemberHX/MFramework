@@ -10,6 +10,7 @@
     <modules>
         <module>MClient</module>
         <module>MServer</module>
+        <module>common</module>
     </modules>
     <packaging>pom</packaging>
 
