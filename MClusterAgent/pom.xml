@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>MServer</artifactId>
+    <artifactId>MClusterAgent</artifactId>
 
     <properties>
         <maven.compiler.target>${compiler.target}</maven.compiler.target>
@@ -52,12 +52,6 @@
             <groupId>io.kubernetes</groupId>
             <artifactId>client-java</artifactId>
             <version>5.0.0</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>septemberhx</groupId>
-            <artifactId>MClusterAgent</artifactId>
-            <version>1.0-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>

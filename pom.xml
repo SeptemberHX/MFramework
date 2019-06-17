@@ -11,6 +11,7 @@
         <module>MClient</module>
         <module>MServer</module>
         <module>common</module>
+        <module>MClusterAgent</module>
     </modules>
     <packaging>pom</packaging>
 
