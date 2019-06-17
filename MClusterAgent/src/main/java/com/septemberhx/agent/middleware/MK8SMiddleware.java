@@ -1,5 +1,6 @@
 package com.septemberhx.agent.middleware;
 
+import com.septemberhx.agent.utils.MClientUtils;
 import com.septemberhx.common.bean.MInstanceInfoBean;
 import io.kubernetes.client.ApiClient;
 import io.kubernetes.client.ApiException;
@@ -67,16 +68,17 @@ public class MK8SMiddleware implements MClusterMiddlewareInterface {
      * Todo: Select all pods with selector
      * @return
      */
+    @Override
     public List<MInstanceInfoBean> getInstanceInfoList() {
         List<MInstanceInfoBean> infoBeanList = new LinkedList<>();
         try {
-            V1PodList list = this.coreV1Api.listPodForAllNamespaces(null, null, null, null, null, null, null, null, null);
+            V1PodList list = this.coreV1Api.listNamespacedPod("kube-test", null, null, null, null, null, null, null, null, null);
             for (V1Pod item : list.getItems()) {
                 MInstanceInfoBean instanceInfoBean = new MInstanceInfoBean();
                 instanceInfoBean.setId(item.getMetadata().getUid());
                 instanceInfoBean.setIp(item.getStatus().getPodIP());
                 instanceInfoBean.setNodeId(item.getStatus().getHostIP());
-                // Todo: get the parentIdMap of the instance and set it to instanceInfoBean
+                instanceInfoBean.setParentIdMap(MClientUtils.getParentIdMap(instanceInfoBean.getIp()));
                 infoBeanList.add(instanceInfoBean);
             }
         } catch (ApiException e) {

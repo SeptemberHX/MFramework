@@ -1,6 +1,8 @@
 package com.septemberhx.test;
 
+import mclient.annotation.MApiType;
 import mclient.annotation.MFunctionType;
+import mclient.annotation.MServiceType;
 import mclient.base.MObject;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +20,7 @@ import javax.servlet.http.HttpServletRequest;
 @RestController
 @EnableAutoConfiguration
 @RequestMapping("/MFunctionAdd")
+@MServiceType
 public class MHttpMainController extends MObject {
 
     @MFunctionType
@@ -37,5 +40,11 @@ public class MHttpMainController extends MObject {
         JSONObject resultJsonObject = new JSONObject();
         resultJsonObject.put("result", r);
         return resultJsonObject.toString();
+    }
+
+    @MApiType
+    @RequestMapping(path = "/hello", method = RequestMethod.GET)
+    public String hello() {
+        return "Hello, world!";
     }
 }

@@ -1,5 +1,6 @@
 package mclient.core;
 
+import mclient.annotation.MApiType;
 import mclient.base.MCallType;
 import mclient.base.MObject;
 import net.sf.cglib.proxy.Enhancer;
@@ -43,7 +44,12 @@ public class MObjectProxy implements MethodInterceptor {
         return tClass.cast(en.create());
     }
 
+    @Override
     public Object intercept(Object o, Method method, Object[] args, MethodProxy methodProxy) throws Throwable {
+        if (method.getAnnotation(MApiType.class) != null) {
+            logger.debug("=================== WE ARE HERE !!! ====================");
+        }
+
         Object result = null;
         switch (this.callType) {
             case OBJECT:

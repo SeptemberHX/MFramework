@@ -1,5 +1,6 @@
 package mclient.controller;
 
+import com.septemberhx.common.bean.MInstanceParentIdMapResponse;
 import mclient.core.MClient;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -8,7 +9,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * @Author: septemberhx
@@ -28,7 +28,9 @@ public class MClientController {
 
     @ResponseBody
     @RequestMapping(path = "/getParentIdMap", method = RequestMethod.GET)
-    public Map<String, String> getParentIdMap() {
-        return MClient.getInstance().getParentIdMap();
+    public MInstanceParentIdMapResponse getParentIdMap() {
+        MInstanceParentIdMapResponse parentIdMapBean = new MInstanceParentIdMapResponse();
+        parentIdMapBean.setParentIdMap(MClient.getInstance().getParentIdMap());
+        return parentIdMapBean;
     }
 }
