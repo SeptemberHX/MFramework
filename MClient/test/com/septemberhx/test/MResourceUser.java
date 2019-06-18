@@ -1,6 +1,6 @@
 package com.septemberhx.test;
 
-import mclient.base.MResource;
+import com.septemberhx.mclient.base.MResource;
 
 /**
  * @Author: septemberhx

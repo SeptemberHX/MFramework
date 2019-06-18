@@ -1,8 +1,8 @@
-package mclient.core;
+package com.septemberhx.mclient.core;
 
-import mclient.annotation.MApiType;
-import mclient.base.MCallType;
-import mclient.base.MObject;
+import com.septemberhx.mclient.annotation.MApiType;
+import com.septemberhx.mclient.base.MCallType;
+import com.septemberhx.mclient.base.MObject;
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.MethodProxy;

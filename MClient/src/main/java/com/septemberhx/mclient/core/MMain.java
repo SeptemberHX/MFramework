@@ -1,4 +1,4 @@
-package mclient.core;
+package com.septemberhx.mclient.core;
 
 import javafx.util.Pair;
 import org.dom4j.Document;

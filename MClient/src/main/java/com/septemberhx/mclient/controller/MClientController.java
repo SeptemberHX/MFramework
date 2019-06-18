@@ -1,7 +1,7 @@
-package mclient.controller;
+package com.septemberhx.mclient.controller;
 
 import com.septemberhx.common.bean.MInstanceParentIdMapResponse;
-import mclient.core.MClient;
+import com.septemberhx.mclient.core.MClient;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -17,7 +17,7 @@ import java.util.List;
  */
 @RestController
 @EnableAutoConfiguration
-@RequestMapping("/mclient")
+@RequestMapping("/com/septemberhx/mclient")
 public class MClientController {
 
     @ResponseBody

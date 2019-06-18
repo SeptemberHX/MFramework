@@ -1,4 +1,4 @@
-package mclient.utils;
+package com.septemberhx.mclient.utils;
 
 import java.util.UUID;
 

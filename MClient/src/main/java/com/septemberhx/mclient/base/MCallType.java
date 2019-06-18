@@ -1,4 +1,4 @@
-package mclient.base;
+package com.septemberhx.mclient.base;
 
 /**
  * @Author: septemberhx

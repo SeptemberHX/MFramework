@@ -1,9 +1,9 @@
 package com.septemberhx.test;
 
-import mclient.annotation.MApiType;
-import mclient.annotation.MFunctionType;
-import mclient.annotation.MServiceType;
-import mclient.base.MObject;
+import com.septemberhx.mclient.annotation.MApiType;
+import com.septemberhx.mclient.annotation.MFunctionType;
+import com.septemberhx.mclient.annotation.MServiceType;
+import com.septemberhx.mclient.base.MObject;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;

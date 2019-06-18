@@ -1,6 +1,6 @@
-package mclient.http;
+package com.septemberhx.mclient.http;
 
-import mclient.base.MObject;
+import com.septemberhx.mclient.base.MObject;
 import org.json.JSONObject;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 

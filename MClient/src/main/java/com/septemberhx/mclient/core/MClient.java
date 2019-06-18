@@ -1,6 +1,6 @@
-package mclient.core;
+package com.septemberhx.mclient.core;
 
-import mclient.base.MObject;
+import com.septemberhx.mclient.base.MObject;
 import org.apache.log4j.Logger;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -61,5 +61,14 @@ public class MClient {
 
     public Map<String, String> getParentIdMap() {
         return parentIdMap;
+    }
+
+    public static boolean isRestNeeded(String mObjectId, String functionName) {
+        return true;
+    }
+
+    public static Object restRequest(String mObjectId, String functioName, Object... args) {
+
+        return null;
     }
 }

@@ -1,4 +1,4 @@
-package mclient.utils;
+package com.septemberhx.mclient.utils;
 
 import org.apache.log4j.Logger;
 import org.json.JSONObject;

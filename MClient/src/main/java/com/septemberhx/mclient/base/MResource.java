@@ -1,6 +1,6 @@
-package mclient.base;
+package com.septemberhx.mclient.base;
 
-import mclient.utils.StringUtils;
+import com.septemberhx.mclient.utils.StringUtils;
 
 /**
  * @Author: septemberhx

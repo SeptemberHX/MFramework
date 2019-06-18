@@ -1,7 +1,6 @@
 package com.septemberhx.test;
 
-import mclient.annotation.MApiType;
-import mclient.base.MObject;
+import com.septemberhx.mclient.base.MObject;
 
 /**
  * @Author: septemberhx
@@ -11,7 +10,7 @@ import mclient.base.MObject;
 
 public class MFunctionAdd extends MObject {
 
-    @MApiType
+//    @MApiType
     public int addInt(int a, int b) {
         return a + b;
     }

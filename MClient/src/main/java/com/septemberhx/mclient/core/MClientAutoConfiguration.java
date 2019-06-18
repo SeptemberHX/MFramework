@@ -1,6 +1,6 @@
-package mclient.core;
+package com.septemberhx.mclient.core;
 
-import mclient.controller.MClientController;
+import com.septemberhx.mclient.controller.MClientController;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 

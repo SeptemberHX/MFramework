@@ -1,7 +1,7 @@
-package mclient.core;
+package com.septemberhx.mclient.core;
 
-import mclient.base.MCallType;
-import mclient.base.MObject;
+import com.septemberhx.mclient.base.MCallType;
+import com.septemberhx.mclient.base.MObject;
 import org.apache.log4j.Logger;
 
 import java.util.HashMap;
