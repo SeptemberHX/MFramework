@@ -23,7 +23,7 @@ public class MAgentController {
     }
 
     @ResponseBody
-    @RequestMapping(path = "/instanceInfoList", method = RequestMethod.POST)
+    @RequestMapping(path = "/instanceInfoList", method = RequestMethod.GET)
     public List<MInstanceInfoBean> getInstanceInfoList() {
         return this.clusterMiddleware.getInstanceInfoList();
     }

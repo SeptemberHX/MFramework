@@ -6,6 +6,7 @@ import lombok.ToString;
 
 import java.io.Serializable;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * MInstanceInfoBean
@@ -25,4 +26,5 @@ public class MInstanceInfoBean implements Serializable {
      * to build the topology
      */
     private Map<String, String> parentIdMap;
+    private Map<String, Set<String>> apiMap;
 }

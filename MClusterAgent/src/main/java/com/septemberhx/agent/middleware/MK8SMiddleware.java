@@ -79,6 +79,7 @@ public class MK8SMiddleware implements MClusterMiddlewareInterface {
                 instanceInfoBean.setIp(item.getStatus().getPodIP());
                 instanceInfoBean.setNodeId(item.getStatus().getHostIP());
                 instanceInfoBean.setParentIdMap(MClientUtils.getParentIdMap(instanceInfoBean.getIp()));
+                instanceInfoBean.setApiMap(MClientUtils.getApiMap(instanceInfoBean.getIp()));
                 infoBeanList.add(instanceInfoBean);
             }
         } catch (ApiException e) {
