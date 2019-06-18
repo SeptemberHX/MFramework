@@ -12,6 +12,7 @@
         <module>MServer</module>
         <module>common</module>
         <module>MClusterAgent</module>
+        <module>SampleService</module>
     </modules>
     <packaging>pom</packaging>
 

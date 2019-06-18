@@ -1,5 +1,6 @@
 package com.septemberhx.test;
 
+import com.septemberhx.mclient.annotation.MApiFunction;
 import com.septemberhx.mclient.annotation.MApiType;
 import com.septemberhx.mclient.annotation.MFunctionType;
 import com.septemberhx.mclient.annotation.MServiceType;
@@ -42,8 +43,9 @@ public class MHttpMainController extends MObject {
         return resultJsonObject.toString();
     }
 
-    @MApiType
     @RequestMapping(path = "/hello", method = RequestMethod.GET)
+    @MApiFunction
+    @MApiType
     public String hello() {
         return "Hello, world!";
     }

@@ -1,11 +1,10 @@
 package com.septemberhx.mclient.core;
 
 import com.septemberhx.mclient.base.MObject;
+import lombok.Getter;
 import org.apache.log4j.Logger;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+
+import java.util.*;
 
 /**
  * @Author: septemberhx
@@ -15,13 +14,18 @@ import java.util.Map;
 public class MClient {
 
     private static volatile MClient instance;
+    @Getter
     private Map<String, MObject> mObjectMap;
+    @Getter
     private Map<String, String> parentIdMap;
+    @Getter
+    private Map<String, Set<String>> objectId2ApiSet;
     private org.apache.log4j.Logger logger = Logger.getLogger(this.getClass());
 
     private MClient() {
         this.mObjectMap = new HashMap<>();
         this.parentIdMap = new HashMap<>();
+        this.objectId2ApiSet = new HashMap<>();
     }
 
     public static MClient getInstance() {
@@ -59,16 +63,19 @@ public class MClient {
         return new ArrayList<>(this.mObjectMap.keySet());
     }
 
-    public Map<String, String> getParentIdMap() {
-        return parentIdMap;
-    }
-
     public static boolean isRestNeeded(String mObjectId, String functionName) {
-        return true;
+        return false;
     }
 
     public static Object restRequest(String mObjectId, String functioName, Object... args) {
 
         return null;
+    }
+
+    public void registerObjectAndApi(String mObjectId, String apiName) {
+        if (!this.objectId2ApiSet.containsKey(mObjectId)) {
+            this.objectId2ApiSet.put(mObjectId, new HashSet<>());
+        }
+        this.objectId2ApiSet.get(mObjectId).add(apiName);
     }
 }

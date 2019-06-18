@@ -1,5 +1,6 @@
 package com.septemberhx.mclient.core;
 
+import com.septemberhx.mclient.annotation.MApiFunction;
 import com.septemberhx.mclient.annotation.MApiType;
 import com.septemberhx.mclient.base.MCallType;
 import com.septemberhx.mclient.base.MObject;
@@ -25,7 +26,8 @@ public class MObjectProxy implements MethodInterceptor {
     private MCallType callType;
 
     public MObjectProxy() {
-        this.callType = MCallType.REST;
+        this.callType = MCallType.OBJECT;
+        logger.debug(this.callType);
     }
 
     public MObject getInstance(MObject mObject) {
@@ -46,8 +48,8 @@ public class MObjectProxy implements MethodInterceptor {
 
     @Override
     public Object intercept(Object o, Method method, Object[] args, MethodProxy methodProxy) throws Throwable {
-        if (method.getAnnotation(MApiType.class) != null) {
-            logger.debug("=================== WE ARE HERE !!! ====================");
+        if (method.getAnnotation(MApiFunction.class) != null) {
+            System.out.println("=================== WE ARE HERE !!! ====================");
         }
 
         Object result = null;
