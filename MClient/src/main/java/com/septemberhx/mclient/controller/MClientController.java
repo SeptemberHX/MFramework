@@ -2,12 +2,10 @@ package com.septemberhx.mclient.controller;
 
 import com.septemberhx.common.bean.MInstanceApiMapResponse;
 import com.septemberhx.common.bean.MInstanceParentIdMapResponse;
+import com.septemberhx.common.bean.MInstanceRestInfoBean;
 import com.septemberhx.mclient.core.MClient;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -41,5 +39,16 @@ public class MClientController {
         MInstanceApiMapResponse response = new MInstanceApiMapResponse();
         response.setApiMap(MClient.getInstance().getObjectId2ApiSet());
         return response;
+    }
+
+    @RequestMapping(path = "/setRestInfo", method = RequestMethod.POST)
+    public void setRestInfo(@RequestBody MInstanceRestInfoBean restInfoBean) {
+        MClient.getInstance().addRestInfo(restInfoBean);
+    }
+
+    @ResponseBody
+    @RequestMapping(path = "/getRestInfoList", method = RequestMethod.GET)
+    public List<MInstanceRestInfoBean> getRestInfoList() {
+        return MClient.getInstance().getRestInfoBeanList();
     }
 }

@@ -1,5 +1,6 @@
 package com.septemberhx.mclient.core;
 
+import com.septemberhx.common.bean.MInstanceRestInfoBean;
 import com.septemberhx.mclient.base.MObject;
 import lombok.Getter;
 import org.apache.log4j.Logger;
@@ -20,12 +21,16 @@ public class MClient {
     private Map<String, String> parentIdMap;
     @Getter
     private Map<String, Set<String>> objectId2ApiSet;
+
+    private Map<String, Map<String, MInstanceRestInfoBean>> restInfoMap;
     private org.apache.log4j.Logger logger = Logger.getLogger(this.getClass());
+    private final static String CLUSTER_AGENT_URL = "localhost:46832";
 
     private MClient() {
         this.mObjectMap = new HashMap<>();
         this.parentIdMap = new HashMap<>();
         this.objectId2ApiSet = new HashMap<>();
+        this.restInfoMap = new HashMap<>();
     }
 
     public static MClient getInstance() {
@@ -63,13 +68,63 @@ public class MClient {
         return new ArrayList<>(this.mObjectMap.keySet());
     }
 
-    public static boolean isRestNeeded(String mObjectId, String functionName) {
-        return false;
+    public void addRestInfo(MInstanceRestInfoBean infoBean) {
+        if (!this.restInfoMap.containsKey(infoBean.getObjectId())) {
+            this.restInfoMap.put(infoBean.getObjectId(), new HashMap<>());
+        }
+        this.restInfoMap.get(infoBean.getObjectId()).put(infoBean.getFunctionName(), infoBean);
     }
 
-    public static Object restRequest(String mObjectId, String functioName, Object... args) {
+    public void removeRestInfo(MInstanceRestInfoBean infoBean) {
+        if (this.restInfoMap.containsKey(infoBean.getObjectId())) {
+            this.restInfoMap.get(infoBean.getObjectId()).remove(infoBean.getFunctionName());
+        }
+    }
 
+    public List<MInstanceRestInfoBean> getRestInfoBeanList() {
+        List<MInstanceRestInfoBean> restInfoBeans = new ArrayList<>();
+        for (String mObjectId : this.restInfoMap.keySet()) {
+            restInfoBeans.addAll(this.restInfoMap.get(mObjectId).values());
+        }
+        return restInfoBeans;
+    }
+
+    /**
+     * It will be used by MApiType annotation
+     * @param mObjectId
+     * @param functionName
+     * @return
+     */
+    public static boolean isRestNeeded(String mObjectId, String functionName) {
+        return MClient.getInstance().checkIfHasRestInfo(mObjectId, functionName);
+    }
+
+    /**
+     * It will be used by MApiType annotation
+     * @param mObjectId
+     * @param functioName
+     * @param args
+     * @return
+     */
+    public static Object restRequest(String mObjectId, String functioName, Object... args) {
         return null;
+    }
+
+    /**
+     * request the information that needed by rest request for remote call
+     * @param mObjectId
+     * @param functionName
+     * @return
+     */
+    public String getRestInfo(String mObjectId, String functionName) {
+        if (!this.checkIfHasRestInfo(mObjectId, functionName)) {
+            throw new RuntimeException("Failed to fetch remote url for " + functionName + " in " + mObjectId);
+        }
+        return this.restInfoMap.get(mObjectId).get(functionName).getRestAddress();
+    }
+
+    public boolean checkIfHasRestInfo(String mObjectId, String functionName) {
+        return this.restInfoMap.containsKey(mObjectId) && this.restInfoMap.get(mObjectId).containsKey(functionName);
     }
 
     public void registerObjectAndApi(String mObjectId, String apiName) {
