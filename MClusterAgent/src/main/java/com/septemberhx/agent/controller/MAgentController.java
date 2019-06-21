@@ -2,14 +2,13 @@ package com.septemberhx.agent.controller;
 
 import com.septemberhx.agent.middleware.MClusterMiddlewareInterface;
 import com.septemberhx.agent.middleware.MK8SMiddleware;
-import com.septemberhx.common.bean.MInstanceInfoBean;
+import com.septemberhx.common.bean.MInstanceInfoResponse;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
 
 @RestController
 @EnableAutoConfiguration
@@ -24,7 +23,9 @@ public class MAgentController {
 
     @ResponseBody
     @RequestMapping(path = "/instanceInfoList", method = RequestMethod.GET)
-    public List<MInstanceInfoBean> getInstanceInfoList() {
-        return this.clusterMiddleware.getInstanceInfoList();
+    public MInstanceInfoResponse getInstanceInfoList() {
+        MInstanceInfoResponse response = new MInstanceInfoResponse();
+        response.setInfoBeanList(this.clusterMiddleware.getInstanceInfoList());
+        return response;
     }
 }
