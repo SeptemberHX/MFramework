@@ -1,7 +1,6 @@
 package com.septemberhx.mclient.controller;
 
-import com.septemberhx.common.bean.MInstanceApiMapResponse;
-import com.septemberhx.common.bean.MInstanceParentIdMapResponse;
+import com.septemberhx.common.bean.MClientInfoBean;
 import com.septemberhx.common.bean.MInstanceRestInfoBean;
 import com.septemberhx.mclient.core.MClient;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -26,19 +25,12 @@ public class MClientController {
     }
 
     @ResponseBody
-    @RequestMapping(path = "/getParentIdMap", method = RequestMethod.GET)
-    public MInstanceParentIdMapResponse getParentIdMap() {
-        MInstanceParentIdMapResponse parentIdMapBean = new MInstanceParentIdMapResponse();
-        parentIdMapBean.setParentIdMap(MClient.getInstance().getParentIdMap());
-        return parentIdMapBean;
-    }
-
-    @ResponseBody
-    @RequestMapping(path = "/getApiMap", method = RequestMethod.GET)
-    public MInstanceApiMapResponse getApiMap() {
-        MInstanceApiMapResponse response = new MInstanceApiMapResponse();
-        response.setApiMap(MClient.getInstance().getObjectId2ApiSet());
-        return response;
+    @RequestMapping(path = "/info", method = RequestMethod.GET)
+    public MClientInfoBean getInfo() {
+        MClientInfoBean infoBean = new MClientInfoBean();
+        infoBean.setApiMap(MClient.getInstance().getObjectId2ApiSet());
+        infoBean.setParentIdMap(MClient.getInstance().getParentIdMap());
+        return infoBean;
     }
 
     @RequestMapping(path = "/setRestInfo", method = RequestMethod.POST)

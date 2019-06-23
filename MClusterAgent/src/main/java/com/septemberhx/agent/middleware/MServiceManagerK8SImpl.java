@@ -1,6 +1,7 @@
 package com.septemberhx.agent.middleware;
 
 import com.septemberhx.agent.utils.MClientUtils;
+import com.septemberhx.common.bean.MClientInfoBean;
 import com.septemberhx.common.bean.MInstanceInfoBean;
 import io.kubernetes.client.ApiClient;
 import io.kubernetes.client.ApiException;
@@ -12,16 +13,16 @@ import io.kubernetes.client.util.Config;
 import java.io.IOException;
 import java.util.*;
 
-public class MK8SMiddleware implements MClusterMiddlewareInterface {
+public class MServiceManagerK8SImpl implements MServiceManager {
 
     private ApiClient client;
     private CoreV1Api coreV1Api;
 
-    public MK8SMiddleware(String k8sClientUrl) {
+    public MServiceManagerK8SImpl(String k8sClientUrl) {
         this.initConnection(k8sClientUrl);
     }
 
-    public MK8SMiddleware() {
+    public MServiceManagerK8SImpl() {
         this.initConnection(null);
     }
 
@@ -78,8 +79,9 @@ public class MK8SMiddleware implements MClusterMiddlewareInterface {
                 instanceInfoBean.setId(item.getMetadata().getUid());
                 instanceInfoBean.setIp(item.getStatus().getPodIP());
                 instanceInfoBean.setNodeId(item.getStatus().getHostIP());
-                instanceInfoBean.setParentIdMap(MClientUtils.getParentIdMap(instanceInfoBean.getIp()));
-                instanceInfoBean.setApiMap(MClientUtils.getApiMap(instanceInfoBean.getIp()));
+                MClientInfoBean infoBean = MClientUtils.getMClientInfo(instanceInfoBean.getIp());
+                instanceInfoBean.setParentIdMap(infoBean.getParentIdMap());
+                instanceInfoBean.setApiMap(infoBean.getApiMap());
                 infoBeanList.add(instanceInfoBean);
             }
         } catch (ApiException e) {

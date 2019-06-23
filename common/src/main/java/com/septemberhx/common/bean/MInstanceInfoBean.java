@@ -21,10 +21,11 @@ import java.util.Set;
 public class MInstanceInfoBean implements Serializable {
     private String id;
     private String ip;
-    private String nodeId;
+    private int port;
     /**
      * to build the topology
      */
     private Map<String, String> parentIdMap;
     private Map<String, Set<String>> apiMap;
+    private MDockerInfoBean dockerInfo;
 }

@@ -1,43 +1,30 @@
 package com.septemberhx.agent.utils;
 
-import com.septemberhx.common.bean.MInstanceApiMapResponse;
-import com.septemberhx.common.bean.MInstanceParentIdMapResponse;
+import com.septemberhx.agent.middleware.MDockerManager;
+import com.septemberhx.agent.middleware.MDockerManagerK8SImpl;
+import com.septemberhx.common.bean.MClientInfoBean;
+import com.septemberhx.common.bean.MDockerInfoBean;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
 
 public class MClientUtils {
 
     private static final String MCLIENTPORT = "8081";
     private static RestTemplate restTemplate = new RestTemplate();
 
-    public static Map<String, String> getParentIdMap(String serverIp) {
-        Map<String, String> resultMap = new HashMap<>();
-        try {
-            MInstanceParentIdMapResponse parentIdMapResponse
-                    = restTemplate.getForObject("http://" + serverIp + ":" + MCLIENTPORT +  "/mclient/getParentIdMap",
-                                                MInstanceParentIdMapResponse.class);
-            resultMap = parentIdMapResponse.getParentIdMap();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return resultMap;
-        }
-        return resultMap;
-    }
+    private static MDockerManager dockerManager = new MDockerManagerK8SImpl();
 
-    public static Map<String, Set<String>> getApiMap(String serverIp) {
-        Map<String, Set<String>> resultMap = new HashMap<>();
+    public static MClientInfoBean getMClientInfo(String serverIp) {
+        MClientInfoBean result = null;
+        MDockerInfoBean dockerInfoBean = null;
         try {
-            MInstanceApiMapResponse response
-                    = restTemplate.getForObject("http://" + serverIp + ":" + MCLIENTPORT +  "/mclient/getApiMap",
-                    MInstanceApiMapResponse.class);
-            resultMap = response.getApiMap();
+            result = restTemplate.getForObject("http://" + serverIp + ":" + MCLIENTPORT +  "/mclient/info",
+                    MClientInfoBean.class);
+            dockerInfoBean = dockerManager.getDockerInfoByIpAddr(serverIp);
+            result.setDockerInfoBean(dockerInfoBean);
         } catch (Exception e) {
             e.printStackTrace();
-            return resultMap;
         }
-        return resultMap;
+        return result;
     }
 }

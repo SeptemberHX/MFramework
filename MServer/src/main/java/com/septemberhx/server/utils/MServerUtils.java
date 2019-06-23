@@ -1,6 +1,7 @@
 package com.septemberhx.server.utils;
 
 import com.septemberhx.common.bean.MInstanceInfoResponse;
+import com.septemberhx.common.utils.MUrlUtils;
 import com.septemberhx.common.utils.RequestUtils;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.client.RestTemplate;

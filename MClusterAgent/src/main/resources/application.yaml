@@ -1,2 +1,13 @@
 server:
   port: 46832
+eureka:
+  instance:
+    prefer-ip-address: true
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://192.168.1.104:30761/eureka
+spring:
+  application:
+    name: MClusterAgent

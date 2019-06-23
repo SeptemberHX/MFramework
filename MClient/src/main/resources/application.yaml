@@ -1,0 +1,4 @@
+eureka:
+  instance:
+    metadata-map:
+      mclient: true

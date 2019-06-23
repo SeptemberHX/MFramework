@@ -1,8 +1,8 @@
 package com.septemberhx.server.core;
 
 
-import com.septemberhx.agent.middleware.MClusterMiddlewareInterface;
-import com.septemberhx.agent.middleware.MK8SMiddleware;
+import com.septemberhx.agent.middleware.MServiceManager;
+import com.septemberhx.agent.middleware.MServiceManagerK8SImpl;
 import com.septemberhx.common.bean.MInstanceInfoBean;
 import com.septemberhx.server.base.MServiceInstance;
 
@@ -12,12 +12,12 @@ public class MSystemModel {
 
     private MServiceInstanceManager mSIManager;
     private MServerNodeManager mSNManager;
-    private MClusterMiddlewareInterface clusterMiddleware;
+    private MServiceManager clusterMiddleware;
 
     public MSystemModel() {
         this.mSIManager = new MServiceInstanceManager();
         this.mSNManager = new MServerNodeManager();
-        this.clusterMiddleware = new MK8SMiddleware();
+        this.clusterMiddleware = new MServiceManagerK8SImpl();
     }
 
     public void loadInstanceInfo(MInstanceInfoBean instanceInfo, String instanceIp) {
