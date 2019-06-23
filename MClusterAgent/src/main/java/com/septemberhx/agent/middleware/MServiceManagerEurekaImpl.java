@@ -47,24 +47,6 @@ public class MServiceManagerEurekaImpl implements MServiceManager {
     public List<MInstanceInfoBean> getInstanceInfoList() {
         List<MInstanceInfoBean> resultList = new ArrayList<>();
 
-//        for (String service : this.discoveryClient.getServices()) {
-//            for (ServiceInstance instanceInfo : this.discoveryClient.getInstances(service)) {
-//                MInstanceInfoBean instanceInfoBean = new MInstanceInfoBean();
-//                instanceInfoBean.setId(instanceInfo.getInstanceId());
-//                instanceInfoBean.setNodeId(instanceInfo.getHost());
-//                instanceInfoBean.setPort(instanceInfo.getPort());
-//
-////                MClientInfoBean response = RequestUtils.sendRequest(
-////                        MUrlUtils.getMClusterAgentFetchClientInfoUri(instanceInfo.get, instanceInfo.getPort()),
-////                        null,
-////                        MClientInfoBean.class,
-////                        RequestMethod.GET
-////                );
-////                instanceInfoBean.setParentIdMap(response.getParentIdMap());
-////                instanceInfoBean.setApiMap(response.getApiMap());
-//                resultList.add(instanceInfoBean);
-//            }
-//        }
         for (Application application : this.discoveryClient.getApplications().getRegisteredApplications()) {
             for (InstanceInfo instanceInfo : application.getInstances()) {
                 MInstanceInfoBean instanceInfoBean = new MInstanceInfoBean();
@@ -72,6 +54,9 @@ public class MServiceManagerEurekaImpl implements MServiceManager {
                 instanceInfoBean.setIp(instanceInfo.getIPAddr());
                 instanceInfoBean.setPort(instanceInfo.getPort());
 
+                if (!this.dockerManager.checkIfDockerRunning(instanceInfo.getIPAddr())) {
+                    continue;
+                }
                 MClientInfoBean response = RequestUtils.sendRequest(
                         MUrlUtils.getMClusterAgentFetchClientInfoUri(instanceInfo.getIPAddr(), instanceInfo.getPort()),
                         null,

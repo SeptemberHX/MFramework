@@ -19,6 +19,7 @@ public class MClusterConfig {
 
     public final static String MCLUSTER_FETCH_INSTANCE_INFO = "/magent/instanceInfoList";
     public final static String MCLUSTERAGENT_FETCH_CLIENT_INFO = "/mclient/info";
+    public final static String MCLUSTER_DOCKER_NAMESPACE = "kube-test";
 
     private static MClusterConfig ourInstance = new MClusterConfig();
 

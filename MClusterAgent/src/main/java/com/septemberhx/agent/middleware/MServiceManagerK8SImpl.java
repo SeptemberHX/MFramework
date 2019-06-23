@@ -78,7 +78,6 @@ public class MServiceManagerK8SImpl implements MServiceManager {
                 MInstanceInfoBean instanceInfoBean = new MInstanceInfoBean();
                 instanceInfoBean.setId(item.getMetadata().getUid());
                 instanceInfoBean.setIp(item.getStatus().getPodIP());
-                instanceInfoBean.setNodeId(item.getStatus().getHostIP());
                 MClientInfoBean infoBean = MClientUtils.getMClientInfo(instanceInfoBean.getIp());
                 instanceInfoBean.setParentIdMap(infoBean.getParentIdMap());
                 instanceInfoBean.setApiMap(infoBean.getApiMap());

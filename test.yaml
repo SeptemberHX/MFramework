@@ -1,0 +1,19 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: sampleservice-01
+  namespace: kube-test
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: sampleservice-01
+    spec:
+      containers:
+      - image: 192.168.1.104:5000/septemberhx/lab2sampleservice:v1.1.1
+        name: sampleservice
+        ports:
+        - containerPort: 8801
+      nodeSelector:
+        node: ices-104

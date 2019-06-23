@@ -5,13 +5,11 @@ import com.septemberhx.agent.middleware.MDockerManager;
 import com.septemberhx.agent.middleware.MServiceManager;
 import com.septemberhx.agent.middleware.MServiceManagerEurekaImpl;
 import com.septemberhx.agent.middleware.MServiceManagerK8SImpl;
+import com.septemberhx.agent.utils.MClientUtils;
 import com.septemberhx.common.bean.MInstanceInfoResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 
 @RestController
@@ -45,5 +43,11 @@ public class MAgentController {
                 eurekaImpl.setDiscoveryClient(this.discoveryClient);
             }
         }
+    }
+
+    @ResponseBody
+    @RequestMapping(path = "/deleteInstance", method = RequestMethod.GET)
+    public void deleteInstance(@RequestParam("dockerInstanceId") String instanceId) {
+        MClientUtils.deleteInstanceById(instanceId);
     }
 }
