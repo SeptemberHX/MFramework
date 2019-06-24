@@ -55,6 +55,12 @@
             <artifactId>spring-boot-starter</artifactId>
             <version>${springboot.version}</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-starter-netflix-eureka-client -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+            <version>${springcloud.version}</version>
+        </dependency>
         <dependency>
             <groupId>septemberhx</groupId>
             <artifactId>common</artifactId>

@@ -3,6 +3,7 @@ package com.septemberhx.agent.middleware;
 import com.netflix.appinfo.InstanceInfo;
 import com.netflix.discovery.EurekaClient;
 import com.netflix.discovery.shared.Application;
+import com.septemberhx.common.base.MClusterConfig;
 import com.septemberhx.common.bean.MClientInfoBean;
 import com.septemberhx.common.bean.MInstanceInfoBean;
 import com.septemberhx.common.utils.MUrlUtils;
@@ -49,6 +50,13 @@ public class MServiceManagerEurekaImpl implements MServiceManager {
 
         for (Application application : this.discoveryClient.getApplications().getRegisteredApplications()) {
             for (InstanceInfo instanceInfo : application.getInstances()) {
+                // when the application is not supported by our framework, just jump over it.
+                if (!instanceInfo.getMetadata().containsKey(MClusterConfig.MCLUSTER_SERVICE_METADATA_NAME)
+                    || instanceInfo.getMetadata().get(MClusterConfig.MCLUSTER_SERVICE_METADATA_NAME).equals(
+                            MClusterConfig.MCLUSTER_SERVICE_METADATA_VALUE)) {
+                    continue;
+                }
+
                 MInstanceInfoBean instanceInfoBean = new MInstanceInfoBean();
                 instanceInfoBean.setId(instanceInfo.getId());
                 instanceInfoBean.setIp(instanceInfo.getIPAddr());
@@ -64,7 +72,6 @@ public class MServiceManagerEurekaImpl implements MServiceManager {
                         RequestMethod.GET
                 );
 
-                // when the application is not supported by our framework, just jump over it.
                 if (response == null) {
                     continue;
                 }

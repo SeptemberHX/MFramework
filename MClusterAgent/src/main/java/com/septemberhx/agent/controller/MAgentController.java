@@ -1,10 +1,8 @@
 package com.septemberhx.agent.controller;
 
 import com.netflix.discovery.EurekaClient;
-import com.septemberhx.agent.middleware.MDockerManager;
 import com.septemberhx.agent.middleware.MServiceManager;
 import com.septemberhx.agent.middleware.MServiceManagerEurekaImpl;
-import com.septemberhx.agent.middleware.MServiceManagerK8SImpl;
 import com.septemberhx.agent.utils.MClientUtils;
 import com.septemberhx.common.bean.MInstanceInfoResponse;
 import org.springframework.beans.factory.annotation.Autowired;

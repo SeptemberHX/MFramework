@@ -1,6 +1,5 @@
 package com.septemberhx.mclient.core;
 
-import com.septemberhx.mclient.base.MCallType;
 import com.septemberhx.mclient.base.MObject;
 import org.apache.log4j.Logger;
 
@@ -88,11 +87,5 @@ public class MAdaptor {
     private void registerProxy(String mObjectId, MObjectProxy mObjectProxy) {
         System.out.println("Resiger " + mObjectId);
         this.proxyMap.put(mObjectId, mObjectProxy);
-    }
-
-    public void setCallType(String mObjectId, MCallType mCallType) {
-        if (this.proxyMap.containsKey(mObjectId)) {
-            this.proxyMap.get(mObjectId).setCallType(mCallType);
-        }
     }
 }

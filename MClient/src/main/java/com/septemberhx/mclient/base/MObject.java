@@ -1,10 +1,8 @@
 package com.septemberhx.mclient.base;
 
 import com.septemberhx.mclient.annotation.MApiFunction;
-import com.septemberhx.mclient.annotation.MApiType;
 import com.septemberhx.mclient.annotation.MFunctionType;
-import com.septemberhx.mclient.annotation.MServiceType;
-import com.septemberhx.mclient.core.MClient;
+import com.septemberhx.mclient.core.MClientInstance;
 import com.septemberhx.mclient.core.MObjectProxy;
 import org.apache.log4j.Logger;
 
@@ -25,7 +23,7 @@ public abstract class MObject {
     private MObject objectProxy;
 
     protected MObject() {
-        this.id = this.getClass().getCanonicalName() + UUID.randomUUID().toString();
+        this.id = this.getClass().getCanonicalName() + "_" + UUID.randomUUID().toString();
 
         // exclude the cglib object
         if (this.getId() != null) {
@@ -43,7 +41,7 @@ public abstract class MObject {
                             Class<?> clazz = field.getType();
                             Constructor<?> ctor = clazz.getConstructor();
                             MObject obj = (MObject) ctor.newInstance(new Object[]{});
-                            MClient.getInstance().registerParent(obj, this.getId());
+                            MClientInstance.getInstance().registerParent(obj, this.getId());
 
                             // set the proxy object
                             field.setAccessible(true);
@@ -63,13 +61,12 @@ public abstract class MObject {
 
             for (Method method : this.getClass().getDeclaredMethods()) {
                 if (method.getAnnotation(MApiFunction.class) != null) {
-                    System.out.println("=================================+++++++++++++++++++++++++++++++++++");
-                    MClient.getInstance().registerObjectAndApi(this.getId(), method.getName());
+                    MClientInstance.getInstance().registerObjectAndApi(this.getId(), method.getName());
                 }
             }
-            MClient.getInstance().registerMObject(this);
+            MClientInstance.getInstance().registerMObject(this);
             logger.debug(this.getId() + " created");
-            MClient.getInstance().printParentIdMap();
+            MClientInstance.getInstance().printParentIdMap();
         }
     }
 

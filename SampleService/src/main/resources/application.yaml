@@ -6,6 +6,8 @@ eureka:
   client:
     service-url:
       defaultZone: http://192.168.1.104:30761/eureka
+    healthcheck:
+      enabled: true
 spring:
   application:
     name: SampleService

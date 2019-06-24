@@ -1,8 +1,6 @@
 package com.septemberhx.mclient.core;
 
 import com.septemberhx.mclient.annotation.MApiFunction;
-import com.septemberhx.mclient.annotation.MApiType;
-import com.septemberhx.mclient.base.MCallType;
 import com.septemberhx.mclient.base.MObject;
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.MethodInterceptor;
@@ -23,11 +21,9 @@ public class MObjectProxy implements MethodInterceptor {
     private static Logger logger = Logger.getLogger(MObjectProxy.class);
 
     private MObject target;
-    private MCallType callType;
 
     public MObjectProxy() {
-        this.callType = MCallType.OBJECT;
-        logger.debug(this.callType);
+
     }
 
     public MObject getInstance(MObject mObject) {
@@ -53,28 +49,11 @@ public class MObjectProxy implements MethodInterceptor {
         }
 
         Object result = null;
-        switch (this.callType) {
-            case OBJECT:
-                result = methodProxy.invoke(target, args);
-                break;
-            case REST:
-//                logger.info(((MObject)this.target).getId());
-//                logger.info(method.getName());
-//                logger.info(RequestUtils.methodParamToJsonString(method, args));
-                break;
-            default:
-                break;
+        if (MClientInstance.isRestNeeded(this.target.getId(), method.getName())) {
+            result = MClientInstance.restRequest(this.target.getId(), method.getName(), args);
+        } else {
+            result = methodProxy.invoke(target, args);
         }
         return result;
-    }
-
-    // Getters and Setters below
-
-    public MCallType getCallType() {
-        return callType;
-    }
-
-    public void setCallType(MCallType callType) {
-        this.callType = callType;
     }
 }

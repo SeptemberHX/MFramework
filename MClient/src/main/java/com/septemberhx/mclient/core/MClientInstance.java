@@ -12,9 +12,9 @@ import java.util.*;
  * @Date: 2019-06-12
  * @Version 0.1
  */
-public class MClient {
+public class MClientInstance {
 
-    private static volatile MClient instance;
+    private static volatile MClientInstance instance;
     @Getter
     private Map<String, MObject> mObjectMap;
     @Getter
@@ -24,20 +24,20 @@ public class MClient {
 
     private Map<String, Map<String, MInstanceRestInfoBean>> restInfoMap;
     private org.apache.log4j.Logger logger = Logger.getLogger(this.getClass());
-    private final static String CLUSTER_AGENT_URL = "localhost:46832";
 
-    private MClient() {
+
+    private MClientInstance() {
         this.mObjectMap = new HashMap<>();
         this.parentIdMap = new HashMap<>();
         this.objectId2ApiSet = new HashMap<>();
         this.restInfoMap = new HashMap<>();
     }
 
-    public static MClient getInstance() {
+    public static MClientInstance getInstance() {
         if (instance == null) {
-            synchronized (MClient.class) {
+            synchronized (MClientInstance.class) {
                 if (instance == null) {
-                    instance = new MClient();
+                    instance = new MClientInstance();
                 }
             }
         }
@@ -96,7 +96,7 @@ public class MClient {
      * @return
      */
     public static boolean isRestNeeded(String mObjectId, String functionName) {
-        return MClient.getInstance().checkIfHasRestInfo(mObjectId, functionName);
+        return MClientInstance.getInstance().checkIfHasRestInfo(mObjectId, functionName);
     }
 
     /**
