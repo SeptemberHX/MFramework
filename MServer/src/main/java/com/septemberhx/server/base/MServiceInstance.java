@@ -13,12 +13,14 @@ public class MServiceInstance extends MBaseObject {
     private Map<String, String> parentIdMap;
     private String nodeId;
     private String ip;
+    private int port;
     private String instanceId;
 
-    public MServiceInstance(Map<String, String> parentIdMap, String nodeId, String ip, String instanceId) {
+    public MServiceInstance(Map<String, String> parentIdMap, String nodeId, String ip, int port, String instanceId) {
         this.parentIdMap = parentIdMap;
         this.nodeId = nodeId;
         this.ip = ip;
+        this.port = port;
         this.instanceId = instanceId;
     }
 

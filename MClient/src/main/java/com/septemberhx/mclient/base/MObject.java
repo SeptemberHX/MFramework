@@ -2,7 +2,7 @@ package com.septemberhx.mclient.base;
 
 import com.septemberhx.mclient.annotation.MApiFunction;
 import com.septemberhx.mclient.annotation.MFunctionType;
-import com.septemberhx.mclient.core.MClientInstance;
+import com.septemberhx.mclient.core.MClientSkeleton;
 import com.septemberhx.mclient.core.MObjectProxy;
 import org.apache.log4j.Logger;
 
@@ -41,7 +41,7 @@ public abstract class MObject {
                             Class<?> clazz = field.getType();
                             Constructor<?> ctor = clazz.getConstructor();
                             MObject obj = (MObject) ctor.newInstance(new Object[]{});
-                            MClientInstance.getInstance().registerParent(obj, this.getId());
+                            MClientSkeleton.getInstance().registerParent(obj, this.getId());
 
                             // set the proxy object
                             field.setAccessible(true);
@@ -61,12 +61,12 @@ public abstract class MObject {
 
             for (Method method : this.getClass().getDeclaredMethods()) {
                 if (method.getAnnotation(MApiFunction.class) != null) {
-                    MClientInstance.getInstance().registerObjectAndApi(this.getId(), method.getName());
+                    MClientSkeleton.getInstance().registerObjectAndApi(this.getId(), method.getName());
                 }
             }
-            MClientInstance.getInstance().registerMObject(this);
+            MClientSkeleton.getInstance().registerMObject(this);
             logger.debug(this.getId() + " created");
-            MClientInstance.getInstance().printParentIdMap();
+            MClientSkeleton.getInstance().printParentIdMap();
         }
     }
 

@@ -49,8 +49,8 @@ public class MObjectProxy implements MethodInterceptor {
         }
 
         Object result = null;
-        if (MClientInstance.isRestNeeded(this.target.getId(), method.getName())) {
-            result = MClientInstance.restRequest(this.target.getId(), method.getName(), args);
+        if (MClientSkeleton.isRestNeeded(this.target.getId(), method.getName())) {
+            result = MClientSkeleton.restRequest(this.target.getId(), method.getName(), args);
         } else {
             result = methodProxy.invoke(target, args);
         }

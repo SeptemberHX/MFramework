@@ -4,7 +4,7 @@ import com.netflix.appinfo.ApplicationInfoManager;
 import com.septemberhx.common.base.MClusterConfig;
 import com.septemberhx.common.bean.MClientInfoBean;
 import com.septemberhx.common.bean.MInstanceRestInfoBean;
-import com.septemberhx.mclient.core.MClientInstance;
+import com.septemberhx.mclient.core.MClientSkeleton;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.web.bind.annotation.*;
@@ -29,7 +29,7 @@ public class MClientController {
     @ResponseBody
     @RequestMapping(path = "/getMObjectIdList", method = RequestMethod.GET)
     public List<String> getMObjectIdList() {
-        return MClientInstance.getInstance().getMObjectIdList();
+        return MClientSkeleton.getInstance().getMObjectIdList();
     }
 
     /**
@@ -46,19 +46,19 @@ public class MClientController {
     @RequestMapping(path = "/info", method = RequestMethod.GET)
     public MClientInfoBean getInfo() {
         MClientInfoBean infoBean = new MClientInfoBean();
-        infoBean.setApiMap(MClientInstance.getInstance().getObjectId2ApiSet());
-        infoBean.setParentIdMap(MClientInstance.getInstance().getParentIdMap());
+        infoBean.setApiMap(MClientSkeleton.getInstance().getObjectId2ApiSet());
+        infoBean.setParentIdMap(MClientSkeleton.getInstance().getParentIdMap());
         return infoBean;
     }
 
     @RequestMapping(path = "/setRestInfo", method = RequestMethod.POST)
     public void setRestInfo(@RequestBody MInstanceRestInfoBean restInfoBean) {
-        MClientInstance.getInstance().addRestInfo(restInfoBean);
+        MClientSkeleton.getInstance().addRestInfo(restInfoBean);
     }
 
     @ResponseBody
     @RequestMapping(path = "/getRestInfoList", method = RequestMethod.GET)
     public List<MInstanceRestInfoBean> getRestInfoList() {
-        return MClientInstance.getInstance().getRestInfoBeanList();
+        return MClientSkeleton.getInstance().getRestInfoBeanList();
     }
 }

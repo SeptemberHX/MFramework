@@ -82,13 +82,13 @@ public class MApiTypeProcessor extends AbstractProcessor {
         treeMaker.pos = jcMethodDecl.pos;
         JCTree.JCExpressionStatement restJudgeStatement = treeMaker.Exec(treeMaker.Apply(
                 List.of(memberAccess("java.lang.String"), memberAccess("java.lang.String")),
-                memberAccess("com.septemberhx.mclient.core.MClientInstance.isRestNeeded"),
+                memberAccess("com.septemberhx.mclient.core.MClientSkeleton.isRestNeeded"),
                 List.of(treeMaker.Ident(getNameFromString("id")), treeMaker.Literal(jcMethodDecl.name.toString()))
         ));
 
         JCTree.JCExpressionStatement restCallStatement = treeMaker.Exec(treeMaker.Apply(
                 parameterTypeList,
-                memberAccess("com.septemberhx.mclient.core.MClientInstance.restRequest"),
+                memberAccess("com.septemberhx.mclient.core.MClientSkeleton.restRequest"),
                 List.from(parameters)
         ));
 

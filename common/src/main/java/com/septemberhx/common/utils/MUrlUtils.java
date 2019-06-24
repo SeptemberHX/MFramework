@@ -16,19 +16,11 @@ public class MUrlUtils {
      * @return URI
      */
     public static URI getMclusterFetchInstanceInfoUri() {
-        URI uri = null;
-        try {
-            uri = new URI(
-                    "http",
-                    null,
+            return MUrlUtils.getRemoteUri(
                     MClusterConfig.getInstance().getMClusterHost(),
                     MClusterConfig.getInstance().getMClusterPort(),
-                    MClusterConfig.MCLUSTER_FETCH_INSTANCE_INFO, null, null);
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
-        logger.debug(uri);
-        return uri;
+                    MClusterConfig.MCLUSTER_FETCH_INSTANCE_INFO
+            );
     }
 
     /**
@@ -38,14 +30,18 @@ public class MUrlUtils {
      * @return URI
      */
     public static URI getMClusterAgentFetchClientInfoUri(String instanceIpAddr, int port) {
+        return MUrlUtils.getRemoteUri(instanceIpAddr, port, MClusterConfig.MCLUSTERAGENT_FETCH_CLIENT_INFO);
+    }
+
+    public static URI getRemoteUri(String ipAddr, int port, String path) {
         URI uri = null;
         try {
             uri = new URI(
                     "http",
                     null,
-                    instanceIpAddr,
+                    ipAddr,
                     port,
-                    MClusterConfig.MCLUSTERAGENT_FETCH_CLIENT_INFO, null, null
+                    path, null, null
             );
         } catch (URISyntaxException e) {
             e.printStackTrace();

@@ -2,9 +2,12 @@ package com.septemberhx.mclient.core;
 
 import com.septemberhx.common.bean.MInstanceRestInfoBean;
 import com.septemberhx.mclient.base.MObject;
+import com.septemberhx.mclient.service.MClusterAgentClient;
 import lombok.Getter;
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 
+import java.net.URI;
 import java.util.*;
 
 /**
@@ -12,9 +15,9 @@ import java.util.*;
  * @Date: 2019-06-12
  * @Version 0.1
  */
-public class MClientInstance {
+public class MClientSkeleton {
 
-    private static volatile MClientInstance instance;
+    private static volatile MClientSkeleton instance;
     @Getter
     private Map<String, MObject> mObjectMap;
     @Getter
@@ -22,22 +25,25 @@ public class MClientInstance {
     @Getter
     private Map<String, Set<String>> objectId2ApiSet;
 
+    @Autowired
+    private MClusterAgentClient mClusterAgentClient;
+
     private Map<String, Map<String, MInstanceRestInfoBean>> restInfoMap;
     private org.apache.log4j.Logger logger = Logger.getLogger(this.getClass());
 
 
-    private MClientInstance() {
+    private MClientSkeleton() {
         this.mObjectMap = new HashMap<>();
         this.parentIdMap = new HashMap<>();
         this.objectId2ApiSet = new HashMap<>();
         this.restInfoMap = new HashMap<>();
     }
 
-    public static MClientInstance getInstance() {
+    public static MClientSkeleton getInstance() {
         if (instance == null) {
-            synchronized (MClientInstance.class) {
+            synchronized (MClientSkeleton.class) {
                 if (instance == null) {
-                    instance = new MClientInstance();
+                    instance = new MClientSkeleton();
                 }
             }
         }
@@ -96,7 +102,7 @@ public class MClientInstance {
      * @return
      */
     public static boolean isRestNeeded(String mObjectId, String functionName) {
-        return MClientInstance.getInstance().checkIfHasRestInfo(mObjectId, functionName);
+        return MClientSkeleton.getInstance().checkIfHasRestInfo(mObjectId, functionName);
     }
 
     /**
@@ -107,6 +113,7 @@ public class MClientInstance {
      * @return
      */
     public static Object restRequest(String mObjectId, String functioName, Object... args) {
+        URI uri = MClientSkeleton.getInstance().mClusterAgentClient.getRemoteUri(mObjectId, functioName);
         return null;
     }
 

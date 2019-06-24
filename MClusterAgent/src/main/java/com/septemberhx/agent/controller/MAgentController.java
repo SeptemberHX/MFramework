@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
+
 
 @RestController
 @EnableAutoConfiguration
@@ -47,5 +49,11 @@ public class MAgentController {
     @RequestMapping(path = "/deleteInstance", method = RequestMethod.GET)
     public void deleteInstance(@RequestParam("dockerInstanceId") String instanceId) {
         MClientUtils.deleteInstanceById(instanceId);
+    }
+
+    @ResponseBody
+    @RequestMapping(path = "/remoteuri", method = RequestMethod.GET)
+    public URI getRemoteUri(@RequestParam("objectId") String mObjectId, @RequestParam("functionName") String funcName) {
+        return null;
     }
 }
