@@ -6,6 +6,7 @@ import com.septemberhx.mclient.service.MClusterAgentClient;
 import lombok.Getter;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.net.URI;
 import java.util.*;
@@ -15,6 +16,7 @@ import java.util.*;
  * @Date: 2019-06-12
  * @Version 0.1
  */
+@Component
 public class MClientSkeleton {
 
     private static volatile MClientSkeleton instance;
@@ -50,6 +52,9 @@ public class MClientSkeleton {
         return instance;
     }
 
+    /*
+     * register object
+     */
     public void registerMObject(MObject object) {
         if (this.mObjectMap.containsKey(object.getId())) {
             logger.warn("MObject " + object.getId() + " has been registered before !!!");
@@ -58,6 +63,9 @@ public class MClientSkeleton {
         }
     }
 
+    /*
+     * register the parent id of object
+     */
     public void registerParent(MObject object, String parentId) {
         if (this.mObjectMap.containsKey(object.getId())) {
             this.parentIdMap.put(object.getId(), parentId);
@@ -74,6 +82,9 @@ public class MClientSkeleton {
         return new ArrayList<>(this.mObjectMap.keySet());
     }
 
+    /*
+     * add an info bean
+     */
     public void addRestInfo(MInstanceRestInfoBean infoBean) {
         if (infoBean.getRestAddress() == null) {
             this.removeRestInfo(infoBean);
@@ -86,12 +97,19 @@ public class MClientSkeleton {
         this.restInfoMap.get(infoBean.getObjectId()).put(infoBean.getFunctionName(), infoBean);
     }
 
-    public void removeRestInfo(MInstanceRestInfoBean infoBean) {
+    /*
+     * delete an info bean
+     */
+    private void removeRestInfo(MInstanceRestInfoBean infoBean) {
         if (this.restInfoMap.containsKey(infoBean.getObjectId())) {
             this.restInfoMap.get(infoBean.getObjectId()).remove(infoBean.getFunctionName());
         }
     }
 
+    /**
+     * Get all Rest info
+     * @return List
+     */
     public List<MInstanceRestInfoBean> getRestInfoBeanList() {
         List<MInstanceRestInfoBean> restInfoBeans = new ArrayList<>();
         for (String mObjectId : this.restInfoMap.keySet()) {
@@ -102,9 +120,9 @@ public class MClientSkeleton {
 
     /**
      * It will be used by MApiType annotation
-     * @param mObjectId
-     * @param functionName
-     * @return
+     * @param mObjectId: the id of MObject
+     * @param functionName: the function will be used/called
+     * @return boolean
      */
     public static boolean isRestNeeded(String mObjectId, String functionName) {
         return MClientSkeleton.getInstance().checkIfHasRestInfo(mObjectId, functionName);
@@ -112,21 +130,21 @@ public class MClientSkeleton {
 
     /**
      * It will be used by MApiType annotation
-     * @param mObjectId
-     * @param functioName
-     * @param args
-     * @return
+     * @param mObjectId: the id of MObject
+     * @param functionName: the function will be used/called
+     * @param args: the arguments
+     * @return Object
      */
-    public static Object restRequest(String mObjectId, String functioName, Object... args) {
-        URI uri = MClientSkeleton.getInstance().mClusterAgentClient.getRemoteUri(mObjectId, functioName);
+    private static Object restRequest(String mObjectId, String functionName, Object... args) {
+        URI uri = MClientSkeleton.getInstance().mClusterAgentClient.getRemoteUri(mObjectId, functionName);
         return null;
     }
 
     /**
      * request the information that needed by rest request for remote call
-     * @param mObjectId
-     * @param functionName
-     * @return
+     * @param mObjectId: the id of MObject
+     * @param functionName: the function will be used/called
+     * @return String
      */
     public String getRestInfo(String mObjectId, String functionName) {
         if (!this.checkIfHasRestInfo(mObjectId, functionName)) {
@@ -135,7 +153,13 @@ public class MClientSkeleton {
         return this.restInfoMap.get(mObjectId).get(functionName).getRestAddress();
     }
 
-    public boolean checkIfHasRestInfo(String mObjectId, String functionName) {
+    /**
+     * check whether need to use remote call or not
+     * @param mObjectId: the id of MObject
+     * @param functionName: the function will be used/called
+     * @return boolean
+     */
+    private boolean checkIfHasRestInfo(String mObjectId, String functionName) {
         return this.restInfoMap.containsKey(mObjectId) && this.restInfoMap.get(mObjectId).containsKey(functionName);
     }
 

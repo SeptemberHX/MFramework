@@ -31,6 +31,8 @@ public class MServerSkeleton {
         return instance;
     }
 
+    // Remote Uri stuffs below ---------------------------------
+
     public URI getRemoteUri(String mObjectId, String funcName) {
         URI uri = null;
         if (this.remoteInstanceIdMap.containsKey(mObjectId)

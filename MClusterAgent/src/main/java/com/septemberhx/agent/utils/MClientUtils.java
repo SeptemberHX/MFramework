@@ -21,7 +21,7 @@ public class MClientUtils {
     private static MDockerManager dockerManager = new MDockerManagerK8SImpl();
 
     public static void sendRestInfo(URI uri, MInstanceRestInfoBean infoBean) {
-        RequestUtils.sendRequest(uri, infoBean, Object.class, RequestMethod.GET);
+        RequestUtils.sendRequest(uri, infoBean, Object.class, RequestMethod.POST);
     }
 
     public static void deleteInstanceById(String instanceId) {

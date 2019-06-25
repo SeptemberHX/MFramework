@@ -64,7 +64,7 @@ public class MAgentController {
 
     @ResponseBody
     @RequestMapping(path = "/setRestInfo", method = RequestMethod.POST)
-    public void setRemoteUri(@RequestParam("restInfo")MSetRestInfoRequest mSetRestInfoRequest) {
+    public void setRemoteUri(@RequestBody MSetRestInfoRequest mSetRestInfoRequest) {
         this.stupidCheck();
 
         MInstanceInfoBean infoBean = this.clusterMiddleware.getInstanceInfoById(mSetRestInfoRequest.getInstanceId());
