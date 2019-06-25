@@ -51,38 +51,62 @@ public class MServiceManagerEurekaImpl implements MServiceManager {
         for (Application application : this.discoveryClient.getApplications().getRegisteredApplications()) {
             for (InstanceInfo instanceInfo : application.getInstances()) {
                 // when the application is not supported by our framework, just jump over it.
-                if (!instanceInfo.getMetadata().containsKey(MClusterConfig.MCLUSTER_SERVICE_METADATA_NAME)
-                    || instanceInfo.getMetadata().get(MClusterConfig.MCLUSTER_SERVICE_METADATA_NAME).equals(
-                            MClusterConfig.MCLUSTER_SERVICE_METADATA_VALUE)) {
-                    continue;
+                MInstanceInfoBean instanceInfoBean = this.transformInstance(instanceInfo);
+                if (instanceInfoBean != null) {
+                    resultList.add(instanceInfoBean);
                 }
-
-                MInstanceInfoBean instanceInfoBean = new MInstanceInfoBean();
-                instanceInfoBean.setId(instanceInfo.getId());
-                instanceInfoBean.setIp(instanceInfo.getIPAddr());
-                instanceInfoBean.setPort(instanceInfo.getPort());
-
-                if (!this.dockerManager.checkIfDockerRunning(instanceInfo.getIPAddr())) {
-                    continue;
-                }
-                MClientInfoBean response = RequestUtils.sendRequest(
-                        MUrlUtils.getMClusterAgentFetchClientInfoUri(instanceInfo.getIPAddr(), instanceInfo.getPort()),
-                        null,
-                        MClientInfoBean.class,
-                        RequestMethod.GET
-                );
-
-                if (response == null) {
-                    continue;
-                }
-
-                instanceInfoBean.setParentIdMap(response.getParentIdMap());
-                instanceInfoBean.setApiMap(response.getApiMap());
-                instanceInfoBean.setDockerInfo(dockerManager.getDockerInfoByIpAddr(instanceInfo.getIPAddr()));
-                resultList.add(instanceInfoBean);
             }
         }
 
         return resultList;
+    }
+
+    @Override
+    public MInstanceInfoBean getInstanceInfoById(String instanceId) {
+        List<InstanceInfo> instanceInfos = this.discoveryClient.getInstancesById(instanceId);
+        if (instanceInfos.size() > 0) {
+            return this.transformInstance(instanceInfos.get(0));
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * collect necessary information so we can build a MInstanceInfoBean from InstanceInfo
+     * @param instanceInfo
+     * @return
+     */
+    private MInstanceInfoBean transformInstance(InstanceInfo instanceInfo) {
+        MInstanceInfoBean instanceInfoBean = new MInstanceInfoBean();
+
+        if (!instanceInfo.getMetadata().containsKey(MClusterConfig.MCLUSTER_SERVICE_METADATA_NAME)
+                || !instanceInfo.getMetadata().get(MClusterConfig.MCLUSTER_SERVICE_METADATA_NAME).equals(
+                MClusterConfig.MCLUSTER_SERVICE_METADATA_VALUE)) {
+            return null;
+        }
+
+        instanceInfoBean.setId(instanceInfo.getId());
+        instanceInfoBean.setIp(instanceInfo.getIPAddr());
+        instanceInfoBean.setPort(instanceInfo.getPort());
+
+        if (!this.dockerManager.checkIfDockerRunning(instanceInfo.getIPAddr())) {
+            return instanceInfoBean;
+        }
+        MClientInfoBean response = RequestUtils.sendRequest(
+                MUrlUtils.getMClusterAgentFetchClientInfoUri(instanceInfo.getIPAddr(), instanceInfo.getPort()),
+                null,
+                MClientInfoBean.class,
+                RequestMethod.GET
+        );
+
+        if (response == null) {
+            return instanceInfoBean;
+        }
+
+        instanceInfoBean.setParentIdMap(response.getParentIdMap());
+        instanceInfoBean.setApiMap(response.getApiMap());
+        instanceInfoBean.setMObjectIdMap(response.getMObjectIdSet());
+        instanceInfoBean.setDockerInfo(dockerManager.getDockerInfoByIpAddr(instanceInfo.getIPAddr()));
+        return instanceInfoBean;
     }
 }

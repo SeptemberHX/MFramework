@@ -11,4 +11,5 @@ public interface MServiceManager {
     Optional<String> getInstanceIdByIp(String ip);
     Optional<String> getNodeIdOfInstance(String instanceId);
     List<MInstanceInfoBean> getInstanceInfoList();
+    MInstanceInfoBean getInstanceInfoById(String instanceId);
 }

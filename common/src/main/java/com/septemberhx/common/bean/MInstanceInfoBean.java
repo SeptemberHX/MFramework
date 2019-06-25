@@ -27,5 +27,6 @@ public class MInstanceInfoBean implements Serializable {
      */
     private Map<String, String> parentIdMap;
     private Map<String, Set<String>> apiMap;
+    private Set<String> mObjectIdMap;
     private MDockerInfoBean dockerInfo;
 }

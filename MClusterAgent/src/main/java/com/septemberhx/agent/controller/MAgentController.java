@@ -4,7 +4,11 @@ import com.netflix.discovery.EurekaClient;
 import com.septemberhx.agent.middleware.MServiceManager;
 import com.septemberhx.agent.middleware.MServiceManagerEurekaImpl;
 import com.septemberhx.agent.utils.MClientUtils;
+import com.septemberhx.common.bean.MInstanceInfoBean;
 import com.septemberhx.common.bean.MInstanceInfoResponse;
+import com.septemberhx.common.bean.MInstanceRestInfoBean;
+import com.septemberhx.common.bean.MSetRestInfoRequest;
+import com.septemberhx.common.utils.MUrlUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.web.bind.annotation.*;
@@ -55,5 +59,17 @@ public class MAgentController {
     @RequestMapping(path = "/remoteuri", method = RequestMethod.GET)
     public URI getRemoteUri(@RequestParam("objectId") String mObjectId, @RequestParam("functionName") String funcName) {
         return null;
+    }
+
+
+    @ResponseBody
+    @RequestMapping(path = "/setRestInfo", method = RequestMethod.POST)
+    public void setRemoteUri(@RequestParam("restInfo")MSetRestInfoRequest mSetRestInfoRequest) {
+        this.stupidCheck();
+
+        MInstanceInfoBean infoBean = this.clusterMiddleware.getInstanceInfoById(mSetRestInfoRequest.getInstanceId());
+        MClientUtils.sendRestInfo(
+                MUrlUtils.getMClusterSetRestInfoUri(infoBean.getIp(), infoBean.getPort()),
+                mSetRestInfoRequest.getRestInfoBean());
     }
 }

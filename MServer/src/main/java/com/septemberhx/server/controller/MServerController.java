@@ -36,4 +36,12 @@ public class MServerController {
     public URI getRemoteUri(@RequestParam("objectId") String mObjectId, @RequestParam("functionName") String funcName) {
         return MServerSkeleton.getInstance().getRemoteUri(mObjectId, funcName);
     }
+
+    @ResponseBody
+    @RequestMapping(path = "/setRemoteUri", method = RequestMethod.GET)
+    public void setRemoteUri(@RequestParam("instanceId") String instanceId,
+                             @RequestParam("objectId") String mObjectId,
+                             @RequestParam("functionName") String funcName) {
+        MServerSkeleton.getInstance().setRemoteUri(instanceId, mObjectId, funcName);
+    }
 }

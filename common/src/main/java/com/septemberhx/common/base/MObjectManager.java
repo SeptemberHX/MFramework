@@ -9,8 +9,8 @@ import java.util.Optional;
 
 public class MObjectManager<T extends MBaseObject> {
 
-    private Map<String, T> objectMap;
-    private Logger logger = LogManager.getLogger(this.getClass());
+    protected Map<String, T> objectMap;
+    protected Logger logger = LogManager.getLogger(this.getClass());
 
     public MObjectManager() {
         this.objectMap = new HashMap<>();

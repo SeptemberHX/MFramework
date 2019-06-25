@@ -17,4 +17,12 @@ public class MServerUtils {
                 MInstanceInfoResponse.class,
                 RequestMethod.GET);
     }
+
+    public static void notifyAddNewRemoteUri(String ipAddr, String mObjectId, String funcName) {
+
+    }
+
+    public static void notifyDeleteRemoteUri(String ipAddr, String mObjectId, String funcName) {
+
+    }
 }

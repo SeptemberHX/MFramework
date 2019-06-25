@@ -11,5 +11,5 @@ import java.util.Set;
 public class MClientInfoBean {
     private Map<String, Set<String>> apiMap;
     private Map<String, String> parentIdMap;
-    private MDockerInfoBean dockerInfoBean;
+    private Set<String> mObjectIdSet;
 }

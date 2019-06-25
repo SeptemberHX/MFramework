@@ -3,6 +3,7 @@ package com.septemberhx.server.core;
 
 import com.septemberhx.common.utils.MUrlUtils;
 import com.septemberhx.server.base.MServiceInstance;
+import com.septemberhx.server.utils.MServerUtils;
 
 import java.net.URI;
 import java.util.HashMap;
@@ -46,5 +47,38 @@ public class MServerSkeleton {
             }
         }
         return uri;
+    }
+
+    public void setRemoteUri(String instanceId, String mObjectId, String funcName) {
+        if (!this.remoteInstanceIdMap.containsKey(mObjectId)
+                || !this.remoteInstanceIdMap.get(mObjectId).containsKey(funcName)) {
+            this.addNewRemoteUri(instanceId, mObjectId, funcName);
+        } else if (instanceId == null) {
+            this.deleteRemoteUri(mObjectId, funcName);
+        } else {
+            this.replaceRemoteUri(instanceId, mObjectId, funcName);
+        }
+    }
+
+    private void addNewRemoteUri(String instanceId, String mObjectId, String funcName) {
+        if (!this.remoteInstanceIdMap.containsKey(mObjectId)) {
+            this.remoteInstanceIdMap.put(mObjectId, new HashMap<>());
+        }
+
+        this.remoteInstanceIdMap.get(mObjectId).put(funcName, instanceId);
+        Optional<MServiceInstance> instanceOp = this.currModel.getInstanceByMObjectId(mObjectId);
+        instanceOp.ifPresent(
+                mServiceInstance -> MServerUtils.notifyAddNewRemoteUri(mServiceInstance.getIp(), mObjectId, funcName));
+    }
+
+    private void replaceRemoteUri(String instanceId, String mObjectId, String funcName) {
+        this.remoteInstanceIdMap.get(mObjectId).put(funcName, instanceId);
+    }
+
+    private void deleteRemoteUri(String mObjectId, String funcName) {
+        this.remoteInstanceIdMap.get(mObjectId).remove(funcName);
+        Optional<MServiceInstance> instanceOp = this.currModel.getInstanceByMObjectId(mObjectId);
+        instanceOp.ifPresent(
+                mServiceInstance -> MServerUtils.notifyDeleteRemoteUri(mServiceInstance.getIp(), mObjectId, funcName));
     }
 }

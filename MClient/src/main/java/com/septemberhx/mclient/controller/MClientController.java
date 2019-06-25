@@ -6,10 +6,12 @@ import com.septemberhx.common.bean.MClientInfoBean;
 import com.septemberhx.common.bean.MInstanceRestInfoBean;
 import com.septemberhx.mclient.core.MClientSkeleton;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.PostConstruct;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -23,6 +25,7 @@ import java.util.Map;
 @RequestMapping("/mclient")
 public class MClientController {
 
+    @Qualifier("eurekaApplicationInfoManager")
     @Autowired
     private ApplicationInfoManager aim;
 
@@ -48,6 +51,7 @@ public class MClientController {
         MClientInfoBean infoBean = new MClientInfoBean();
         infoBean.setApiMap(MClientSkeleton.getInstance().getObjectId2ApiSet());
         infoBean.setParentIdMap(MClientSkeleton.getInstance().getParentIdMap());
+        infoBean.setMObjectIdSet(new HashSet<>(MClientSkeleton.getInstance().getMObjectIdList()));
         return infoBean;
     }
 

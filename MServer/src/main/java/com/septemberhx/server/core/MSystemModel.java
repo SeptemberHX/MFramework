@@ -22,11 +22,16 @@ public class MSystemModel {
                 instanceInfo.getDockerInfo().getHostIp(),
                 instanceInfo.getIp(),
                 instanceInfo.getPort(),
-                instanceIp
+                instanceIp,
+                instanceInfo.getMObjectIdMap()
         ));
     }
 
     public Optional<MServiceInstance> getInstanceById(String instanceId) {
         return this.mSIManager.getById(instanceId);
+    }
+
+    public Optional<MServiceInstance> getInstanceByMObjectId(String mObjectId) {
+        return this.mSIManager.getInstanceByMObjectId(mObjectId);
     }
 }

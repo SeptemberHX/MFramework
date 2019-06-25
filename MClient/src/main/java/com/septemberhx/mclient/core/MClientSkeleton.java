@@ -75,6 +75,11 @@ public class MClientSkeleton {
     }
 
     public void addRestInfo(MInstanceRestInfoBean infoBean) {
+        if (infoBean.getRestAddress() == null) {
+            this.removeRestInfo(infoBean);
+            return;
+        }
+
         if (!this.restInfoMap.containsKey(infoBean.getObjectId())) {
             this.restInfoMap.put(infoBean.getObjectId(), new HashMap<>());
         }

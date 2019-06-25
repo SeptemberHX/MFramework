@@ -7,5 +7,5 @@ import lombok.Setter;
 @Setter
 public abstract class MBaseObject {
 
-    private String id;
+    protected String id;
 }

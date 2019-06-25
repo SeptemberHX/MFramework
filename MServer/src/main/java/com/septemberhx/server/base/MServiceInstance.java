@@ -4,6 +4,7 @@ import com.septemberhx.common.base.MBaseObject;
 import lombok.Getter;
 import lombok.Setter;
 import java.util.Map;
+import java.util.Set;
 
 
 @Getter
@@ -14,14 +15,15 @@ public class MServiceInstance extends MBaseObject {
     private String nodeId;
     private String ip;
     private int port;
-    private String instanceId;
+    private Set<String> mObjectIdSet;
 
-    public MServiceInstance(Map<String, String> parentIdMap, String nodeId, String ip, int port, String instanceId) {
+    public MServiceInstance(Map<String, String> parentIdMap, String nodeId, String ip, int port, String instanceId, Set<String> mObjectIdSet) {
         this.parentIdMap = parentIdMap;
         this.nodeId = nodeId;
         this.ip = ip;
         this.port = port;
-        this.instanceId = instanceId;
+        this.id = instanceId;
+        this.mObjectIdSet = mObjectIdSet;
     }
 
     @Override

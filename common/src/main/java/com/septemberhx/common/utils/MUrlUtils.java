@@ -49,4 +49,8 @@ public class MUrlUtils {
         logger.debug(uri);
         return uri;
     }
+
+    public static URI getMClusterSetRestInfoUri(String instanceIpAddr, int port) {
+        return MUrlUtils.getRemoteUri(instanceIpAddr, port, MClusterConfig.MCLUSTER_SET_REST_INFO);
+    }
 }

@@ -3,36 +3,25 @@ package com.septemberhx.agent.utils;
 import com.septemberhx.agent.middleware.MDockerManager;
 import com.septemberhx.agent.middleware.MDockerManagerK8SImpl;
 import com.septemberhx.common.base.MClusterConfig;
-import com.septemberhx.common.bean.MClientInfoBean;
-import com.septemberhx.common.bean.MDockerInfoBean;
+import com.septemberhx.common.bean.MInstanceRestInfoBean;
+import com.septemberhx.common.utils.MUrlUtils;
+import com.septemberhx.common.utils.RequestUtils;
 import io.kubernetes.client.models.*;
 import io.kubernetes.client.util.Yaml;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.net.URI;
 import java.util.HashMap;
 
 
 public class MClientUtils {
 
-    private static final String MCLIENTPORT = "8081";
-    private static RestTemplate restTemplate = new RestTemplate();
-
     private static MDockerManager dockerManager = new MDockerManagerK8SImpl();
 
-    public static MClientInfoBean getMClientInfo(String serverIp) {
-        MClientInfoBean result = null;
-        MDockerInfoBean dockerInfoBean = null;
-        try {
-            result = restTemplate.getForObject("http://" + serverIp + ":" + MCLIENTPORT +  "/mclient/info",
-                    MClientInfoBean.class);
-            dockerInfoBean = dockerManager.getDockerInfoByIpAddr(serverIp);
-            result.setDockerInfoBean(dockerInfoBean);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return result;
+    public static void sendRestInfo(URI uri, MInstanceRestInfoBean infoBean) {
+        RequestUtils.sendRequest(uri, infoBean, Object.class, RequestMethod.GET);
     }
 
     public static void deleteInstanceById(String instanceId) {
