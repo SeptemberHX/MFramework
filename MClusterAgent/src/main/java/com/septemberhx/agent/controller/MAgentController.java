@@ -6,7 +6,6 @@ import com.septemberhx.agent.middleware.MServiceManagerEurekaImpl;
 import com.septemberhx.agent.utils.MClientUtils;
 import com.septemberhx.common.bean.MInstanceInfoBean;
 import com.septemberhx.common.bean.MInstanceInfoResponse;
-import com.septemberhx.common.bean.MInstanceRestInfoBean;
 import com.septemberhx.common.bean.MSetRestInfoRequest;
 import com.septemberhx.common.utils.MUrlUtils;
 import org.springframework.beans.factory.annotation.Autowired;

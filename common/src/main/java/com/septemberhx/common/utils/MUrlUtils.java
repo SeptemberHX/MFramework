@@ -33,6 +33,10 @@ public class MUrlUtils {
         return MUrlUtils.getRemoteUri(instanceIpAddr, port, MClusterConfig.MCLUSTERAGENT_FETCH_CLIENT_INFO);
     }
 
+    public static URI getMClientRequestRemoteUri(String clusterAgentIpAddr, int port) {
+        return MUrlUtils.getRemoteUri(clusterAgentIpAddr, port, MClusterConfig.MCLUSTERAGENT_REQUEST_REMOTE_URI);
+    }
+
     public static URI getRemoteUri(String ipAddr, int port, String path) {
         URI uri = null;
         try {

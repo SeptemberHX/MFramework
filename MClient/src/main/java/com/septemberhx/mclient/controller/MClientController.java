@@ -1,6 +1,7 @@
 package com.septemberhx.mclient.controller;
 
 import com.netflix.appinfo.ApplicationInfoManager;
+import com.netflix.discovery.EurekaClient;
 import com.septemberhx.common.base.MClusterConfig;
 import com.septemberhx.common.bean.MClientInfoBean;
 import com.septemberhx.common.bean.MInstanceRestInfoBean;
@@ -9,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 import javax.annotation.PostConstruct;
 import java.util.HashSet;
@@ -35,6 +37,13 @@ public class MClientController {
         return MClientSkeleton.getInstance().getMObjectIdList();
     }
 
+    @Qualifier("eurekaClient")
+    @Autowired
+    private EurekaClient discoveryClient;
+
+    @Autowired
+    private RequestMappingHandlerMapping handlerMapping;
+
     /**
      * Do something for MClient App:
      *   * Register new metadata so we can identify whether it is a MClient app or not
@@ -43,6 +52,8 @@ public class MClientController {
     public void init() {
         Map<String, String> map = aim.getInfo().getMetadata();
         map.put(MClusterConfig.MCLUSTER_SERVICE_METADATA_NAME, MClusterConfig.MCLUSTER_SERVICE_METADATA_VALUE);
+        MClientSkeleton.getInstance().setDiscoveryClient(this.discoveryClient);
+        MClientSkeleton.getInstance().setRequestMappingHandlerMapping(this.handlerMapping);
     }
 
     @ResponseBody

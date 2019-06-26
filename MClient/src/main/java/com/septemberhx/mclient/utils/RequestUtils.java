@@ -2,10 +2,14 @@ package com.septemberhx.mclient.utils;
 
 import org.apache.log4j.Logger;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.DefaultParameterNameDiscoverer;
+import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
 import java.security.InvalidParameterException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @Author: septemberhx
@@ -13,6 +17,7 @@ import java.security.InvalidParameterException;
  * @Description: TODO
  * @Version 0.1
  */
+@Component
 public class RequestUtils {
 
     public static Logger logger = Logger.getLogger(RequestUtils.class);
@@ -34,5 +39,13 @@ public class RequestUtils {
             }
         }
         return resultJsonStr;
+    }
+
+    public static String methodParamToJsonString(List<String> names, List<Object> values) {
+        JSONObject resultJson = new JSONObject();
+        for (int i = 0; i < names.size(); ++i) {
+            resultJson.put(names.get(i), values.get(i));
+        }
+        return resultJson.toString(4);
     }
 }

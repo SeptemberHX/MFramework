@@ -4,8 +4,7 @@ import com.septemberhx.agent.middleware.MDockerManager;
 import com.septemberhx.agent.middleware.MDockerManagerK8SImpl;
 import com.septemberhx.common.base.MClusterConfig;
 import com.septemberhx.common.bean.MInstanceRestInfoBean;
-import com.septemberhx.common.utils.MUrlUtils;
-import com.septemberhx.common.utils.RequestUtils;
+import com.septemberhx.common.utils.MRequestUtils;
 import io.kubernetes.client.models.*;
 import io.kubernetes.client.util.Yaml;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -21,7 +20,7 @@ public class MClientUtils {
     private static MDockerManager dockerManager = new MDockerManagerK8SImpl();
 
     public static void sendRestInfo(URI uri, MInstanceRestInfoBean infoBean) {
-        RequestUtils.sendRequest(uri, infoBean, Object.class, RequestMethod.POST);
+        MRequestUtils.sendRequest(uri, infoBean, Object.class, RequestMethod.POST);
     }
 
     public static void deleteInstanceById(String instanceId) {

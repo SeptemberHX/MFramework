@@ -62,8 +62,8 @@ public class MApiTypeProcessor extends AbstractProcessor {
     private Name getNameFromString(String s) { return names.fromString(s); }
 
     private void makeProxyMethodDecl(JCTree.JCMethodDecl jcMethodDecl) {
-        JCTree.JCExpression[] parameterTypes = new JCTree.JCExpression[jcMethodDecl.getParameters().length() + 2];
-        JCTree.JCExpression[] parameters = new JCTree.JCExpression[jcMethodDecl.getParameters().length() + 2];
+        JCTree.JCExpression[] parameterTypes = new JCTree.JCExpression[jcMethodDecl.getParameters().length() * 2 + 2];
+        JCTree.JCExpression[] parameters = new JCTree.JCExpression[jcMethodDecl.getParameters().length() * 2 + 2];
         parameterTypes[0] = memberAccess("java.lang.String");
         parameterTypes[1] = memberAccess("java.lang.String");
         parameters[0] = treeMaker.Ident(getNameFromString("id"));
@@ -74,6 +74,9 @@ public class MApiTypeProcessor extends AbstractProcessor {
         for (JCTree.JCVariableDecl paramDecl : jcMethodDecl.getParameters()) {
             messager.printMessage(Diagnostic.Kind.NOTE, paramDecl.vartype.type.toString() + " " + paramDecl.getName() + " has been processed");
             System.out.println(paramDecl.vartype.type.toString() + " " + paramDecl.getName() + " has been processed");
+            parameterTypes[i++] = memberAccess("java.lang.String");
+            parameters[j++] = treeMaker.Literal(paramDecl.name.toString());
+
             parameterTypes[i++] = memberAccess(paramDecl.vartype.type.toString());
             parameters[j++] = treeMaker.Ident(getNameFromString(paramDecl.name.toString()));
         }

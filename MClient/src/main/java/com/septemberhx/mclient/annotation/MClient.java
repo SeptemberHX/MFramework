@@ -10,6 +10,5 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Import(MClientAutoConfiguration.class)
-@EnableFeignClients
 public @interface MClient {
 }

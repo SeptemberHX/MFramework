@@ -18,6 +18,7 @@ public class MClusterConfig {
     private String mBuilderUrl;
 
     public final static String MCLUSTER_FETCH_INSTANCE_INFO = "/magent/instanceInfoList";
+    public final static String MCLUSTERAGENT_REQUEST_REMOTE_URI = "/magent/remoteuri";
     public final static String MCLUSTER_SET_REST_INFO = "/mclient/setRestInfo";
 
     public final static String MCLUSTERAGENT_FETCH_CLIENT_INFO = "/mclient/info";

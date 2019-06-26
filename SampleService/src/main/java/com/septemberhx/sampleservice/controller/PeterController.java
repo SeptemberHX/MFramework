@@ -4,17 +4,20 @@ import com.septemberhx.mclient.annotation.MApiFunction;
 import com.septemberhx.mclient.annotation.MApiType;
 import com.septemberhx.mclient.annotation.MFunctionType;
 import com.septemberhx.mclient.base.MObject;
+import com.septemberhx.sampleservice.client.MClusterAgentClient;
 import com.septemberhx.sampleservice.utils.MCalcUtils;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
+@RequestMapping("/sample")
 public class PeterController extends MObject {
 
     @MFunctionType
     MCalcUtils mCalcUtils;
+
+    @Autowired
+    MClusterAgentClient agentClient;
 
     @ResponseBody
     @MApiType
@@ -27,8 +30,18 @@ public class PeterController extends MObject {
     @ResponseBody
     @MApiType
     @MApiFunction
+    @RequestMapping(path = "/hello", method = RequestMethod.GET)
+    public String hello(@RequestParam("name") String name, @RequestParam("age") Integer age) {
+        return "Hello " + name + ", age " + age;
+    }
+
+
+    @ResponseBody
+    @MApiType
+    @MApiFunction
     @RequestMapping(path = "/peterson", method = RequestMethod.GET)
     public String peterson() {
+        agentClient.getRemoteUri("test", "test");
         return this.mCalcUtils.upper("peterson");
     }
 }

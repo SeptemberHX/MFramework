@@ -1,12 +1,23 @@
 package com.septemberhx.mclient.core;
 
+import com.netflix.appinfo.InstanceInfo;
+import com.netflix.discovery.EurekaClient;
+import com.netflix.discovery.shared.Application;
 import com.septemberhx.common.bean.MInstanceRestInfoBean;
+import com.septemberhx.common.utils.MRequestUtils;
+import com.septemberhx.common.utils.MUrlUtils;
+import com.septemberhx.mclient.annotation.MClient;
 import com.septemberhx.mclient.base.MObject;
-import com.septemberhx.mclient.service.MClusterAgentClient;
+import com.septemberhx.mclient.utils.RequestUtils;
 import lombok.Getter;
+import lombok.Setter;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 import java.net.URI;
 import java.util.*;
@@ -16,7 +27,7 @@ import java.util.*;
  * @Date: 2019-06-12
  * @Version 0.1
  */
-@Component
+@Service
 public class MClientSkeleton {
 
     private static volatile MClientSkeleton instance;
@@ -27,12 +38,14 @@ public class MClientSkeleton {
     @Getter
     private Map<String, Set<String>> objectId2ApiSet;
 
-    @Autowired
-    private MClusterAgentClient mClusterAgentClient;
-
     private Map<String, Map<String, MInstanceRestInfoBean>> restInfoMap;
     private org.apache.log4j.Logger logger = Logger.getLogger(this.getClass());
 
+    @Setter
+    private EurekaClient discoveryClient;
+
+    @Setter
+    private RequestMappingHandlerMapping requestMappingHandlerMapping;
 
     private MClientSkeleton() {
         this.mObjectMap = new HashMap<>();
@@ -135,8 +148,31 @@ public class MClientSkeleton {
      * @param args: the arguments
      * @return Object
      */
-    private static Object restRequest(String mObjectId, String functionName, Object... args) {
-        URI uri = MClientSkeleton.getInstance().mClusterAgentClient.getRemoteUri(mObjectId, functionName);
+    public static Object restRequest(String mObjectId, String functionName, Object... args) {
+        List<String> paramNameList = new ArrayList<>(args.length / 2);
+        List<Object> paramValueList = new ArrayList<>(args.length / 2);
+        for (int i = 0; i < args.length; i += 2) {
+            paramNameList.add((String)args[i]);
+            paramValueList.add(args[i+1]);
+        }
+        System.out.println(RequestUtils.methodParamToJsonString(paramNameList, paramValueList));
+
+        if (MClientSkeleton.getInstance().discoveryClient != null) {
+            Application clusterAgent = MClientSkeleton.getInstance().discoveryClient.getApplication("MClusterAgent");
+            if (clusterAgent != null) {
+                List<InstanceInfo> clusterAgentInstances = clusterAgent.getInstances();
+                if (clusterAgentInstances.size() > 0) {
+                    URI requestUri = MUrlUtils.getMClientRequestRemoteUri(clusterAgentInstances.get(0).getIPAddr(), clusterAgentInstances.get(0).getPort());
+
+                    Map<RequestMappingInfo, HandlerMethod> mapping = MClientSkeleton.getInstance().requestMappingHandlerMapping.getHandlerMethods();
+                    for (RequestMappingInfo mappingInfo : mapping.keySet()) {
+                        if (mapping.get(mappingInfo).getMethod().getName().equals(functionName)) {
+                            System.out.println(mappingInfo.getPatternsCondition().toString());
+                        }
+                    }
+                }
+            }
+        }
         return null;
     }
 
@@ -160,7 +196,8 @@ public class MClientSkeleton {
      * @return boolean
      */
     private boolean checkIfHasRestInfo(String mObjectId, String functionName) {
-        return this.restInfoMap.containsKey(mObjectId) && this.restInfoMap.get(mObjectId).containsKey(functionName);
+//        return this.restInfoMap.containsKey(mObjectId) && this.restInfoMap.get(mObjectId).containsKey(functionName);
+        return true;
     }
 
     public void registerObjectAndApi(String mObjectId, String apiName) {

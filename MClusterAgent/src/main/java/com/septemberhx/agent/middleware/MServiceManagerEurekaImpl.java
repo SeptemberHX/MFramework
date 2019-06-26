@@ -7,7 +7,7 @@ import com.septemberhx.common.base.MClusterConfig;
 import com.septemberhx.common.bean.MClientInfoBean;
 import com.septemberhx.common.bean.MInstanceInfoBean;
 import com.septemberhx.common.utils.MUrlUtils;
-import com.septemberhx.common.utils.RequestUtils;
+import com.septemberhx.common.utils.MRequestUtils;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -92,7 +92,7 @@ public class MServiceManagerEurekaImpl implements MServiceManager {
         if (!this.dockerManager.checkIfDockerRunning(instanceInfo.getIPAddr())) {
             return instanceInfoBean;
         }
-        MClientInfoBean response = RequestUtils.sendRequest(
+        MClientInfoBean response = MRequestUtils.sendRequest(
                 MUrlUtils.getMClusterAgentFetchClientInfoUri(instanceInfo.getIPAddr(), instanceInfo.getPort()),
                 null,
                 MClientInfoBean.class,

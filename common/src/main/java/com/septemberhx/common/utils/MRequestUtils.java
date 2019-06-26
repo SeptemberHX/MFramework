@@ -6,9 +6,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 
-public class RequestUtils {
+public class MRequestUtils {
 
     private static RestTemplate restTemplate = new RestTemplate();
 
@@ -18,10 +17,10 @@ public class RequestUtils {
         try {
             switch (method) {
                 case GET:
-                    entity = RequestUtils.restTemplate.getForEntity(uri, returnClass);
+                    entity = MRequestUtils.restTemplate.getForEntity(uri, returnClass);
                     break;
                 case POST:
-                    entity = RequestUtils.restTemplate.postForEntity(uri, paramObj, returnClass);
+                    entity = MRequestUtils.restTemplate.postForEntity(uri, paramObj, returnClass);
                     break;
                 default:
                     break;
