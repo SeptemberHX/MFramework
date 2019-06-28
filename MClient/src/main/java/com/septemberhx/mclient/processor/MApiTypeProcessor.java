@@ -62,15 +62,21 @@ public class MApiTypeProcessor extends AbstractProcessor {
     private Name getNameFromString(String s) { return names.fromString(s); }
 
     private void makeProxyMethodDecl(JCTree.JCMethodDecl jcMethodDecl) {
-        JCTree.JCExpression[] parameterTypes = new JCTree.JCExpression[jcMethodDecl.getParameters().length() * 2 + 2];
-        JCTree.JCExpression[] parameters = new JCTree.JCExpression[jcMethodDecl.getParameters().length() * 2 + 2];
+        JCTree.JCExpression[] parameterTypes = new JCTree.JCExpression[jcMethodDecl.getParameters().length() * 2 + 3];
+        JCTree.JCExpression[] parameters = new JCTree.JCExpression[jcMethodDecl.getParameters().length() * 2 + 3];
+        // mObjectId
         parameterTypes[0] = memberAccess("java.lang.String");
+        // functionName
         parameterTypes[1] = memberAccess("java.lang.String");
+        // return type
+        parameterTypes[2] = memberAccess("java.lang.String");
+
         parameters[0] = treeMaker.Ident(getNameFromString("id"));
         parameters[1] = treeMaker.Literal(jcMethodDecl.name.toString());
+        parameters[2] = treeMaker.Literal(jcMethodDecl.restype.type.toString());
 
-        int i = 2;
-        int j = 2;
+        int i = 3;
+        int j = 3;
         for (JCTree.JCVariableDecl paramDecl : jcMethodDecl.getParameters()) {
             messager.printMessage(Diagnostic.Kind.NOTE, paramDecl.vartype.type.toString() + " " + paramDecl.getName() + " has been processed");
             System.out.println(paramDecl.vartype.type.toString() + " " + paramDecl.getName() + " has been processed");

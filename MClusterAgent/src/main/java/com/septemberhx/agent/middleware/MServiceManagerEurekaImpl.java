@@ -8,8 +8,8 @@ import com.septemberhx.common.bean.MClientInfoBean;
 import com.septemberhx.common.bean.MInstanceInfoBean;
 import com.septemberhx.common.utils.MUrlUtils;
 import com.septemberhx.common.utils.MRequestUtils;
-import lombok.Getter;
-import lombok.Setter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.util.ArrayList;
@@ -18,10 +18,10 @@ import java.util.Optional;
 import java.util.Set;
 
 
+@Component
 public class MServiceManagerEurekaImpl implements MServiceManager {
 
-    @Getter
-    @Setter
+    @Autowired
     private EurekaClient discoveryClient;
     private MDockerManager dockerManager;
 

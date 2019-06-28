@@ -58,7 +58,7 @@ public class MObjectProxy implements MethodInterceptor {
                 argNamesAndValues[i] = paramNameList.get(i);
                 argNamesAndValues[i+1] = args[i];
             }
-            result = MClientSkeleton.restRequest(this.target.getId(), method.getName(), argNamesAndValues);
+            result = MClientSkeleton.restRequest(this.target.getId(), method.getName(), method.getReturnType().toString(), argNamesAndValues);
         } else {
             result = methodProxy.invoke(target, args);
         }

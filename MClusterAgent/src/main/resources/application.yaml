@@ -11,3 +11,7 @@ eureka:
 spring:
   application:
     name: MClusterAgent
+mclientagent:
+  server:
+    ip: 192.168.1.102
+    port: 9001

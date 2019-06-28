@@ -1,13 +1,11 @@
 package com.septemberhx.server.controller;
 
-import com.septemberhx.common.bean.MInstanceInfoBean;
-import com.septemberhx.common.bean.MInstanceInfoResponse;
-import com.septemberhx.common.bean.MInstanceRestInfoBean;
-import com.septemberhx.common.bean.MSetRestInfoRequest;
+import com.septemberhx.common.bean.*;
 import com.septemberhx.server.core.MServerSkeleton;
 import com.septemberhx.server.core.MSnapshot;
 import com.septemberhx.server.core.MSystemModel;
 import com.septemberhx.server.utils.MServerUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,19 +35,14 @@ public class MServerController {
     }
 
     @ResponseBody
-    @RequestMapping(path = "/remoteuri", method = RequestMethod.GET)
-    public URI getRemoteUri(@RequestParam("objectId") String mObjectId, @RequestParam("functionName") String funcName) {
-        return MServerSkeleton.getInstance().getRemoteUri(mObjectId, funcName);
+    @RequestMapping(path = "/remoteuri", method = RequestMethod.POST)
+    public URI getRemoteUri(@RequestBody MGetRemoteUriRequest remoteUriRequest) {
+        return MServerSkeleton.getInstance().getRemoteUri(remoteUriRequest);
     }
 
     @ResponseBody
     @RequestMapping(path = "/setRemoteUri", method = RequestMethod.POST)
     public void setRemoteUri(@RequestBody MSetRestInfoRequest restInfoRequest) {
-        MServerSkeleton.getInstance().setRemoteUri(
-                restInfoRequest.getInstanceId(),
-                restInfoRequest.getRestInfoBean().getObjectId(),
-                restInfoRequest.getRestInfoBean().getFunctionName(),
-                restInfoRequest.getRestInfoBean().getRestAddress()
-        );
+        MServerSkeleton.getInstance().setRemoteUri(restInfoRequest);
     }
 }

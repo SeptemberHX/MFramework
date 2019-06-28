@@ -16,7 +16,7 @@ public class MServiceInstanceManager extends MObjectManager<MServiceInstance> {
                 break;
             }
         }
-        return Optional.of(result);
+        return Optional.ofNullable(result);
     }
 
 }
