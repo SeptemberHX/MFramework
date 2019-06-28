@@ -16,13 +16,18 @@ public class MSystemModel {
         this.mSNManager = new MServerNodeManager();
     }
 
-    public void loadInstanceInfo(MInstanceInfoBean instanceInfo, String instanceIp) {
+    public void loadInstanceInfo(MInstanceInfoBean instanceInfo) {
+        String nodeId = null;
+        if (instanceInfo.getDockerInfo() != null) {
+            nodeId = instanceInfo.getDockerInfo().getHostIp();
+        }
+
         this.mSIManager.add(new MServiceInstance(
                 instanceInfo.getParentIdMap(),
-                instanceInfo.getDockerInfo().getHostIp(),
+                nodeId,
                 instanceInfo.getIp(),
                 instanceInfo.getPort(),
-                instanceIp,
+                instanceInfo.getId(),
                 instanceInfo.getMObjectIdMap()
         ));
     }

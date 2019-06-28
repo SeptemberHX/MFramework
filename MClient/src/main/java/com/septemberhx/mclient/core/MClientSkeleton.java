@@ -4,17 +4,13 @@ import com.netflix.appinfo.InstanceInfo;
 import com.netflix.discovery.EurekaClient;
 import com.netflix.discovery.shared.Application;
 import com.septemberhx.common.bean.MInstanceRestInfoBean;
-import com.septemberhx.common.utils.MRequestUtils;
 import com.septemberhx.common.utils.MUrlUtils;
-import com.septemberhx.mclient.annotation.MClient;
 import com.septemberhx.mclient.base.MObject;
 import com.septemberhx.mclient.utils.RequestUtils;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
@@ -196,8 +192,7 @@ public class MClientSkeleton {
      * @return boolean
      */
     private boolean checkIfHasRestInfo(String mObjectId, String functionName) {
-//        return this.restInfoMap.containsKey(mObjectId) && this.restInfoMap.get(mObjectId).containsKey(functionName);
-        return true;
+        return this.restInfoMap.containsKey(mObjectId) && this.restInfoMap.get(mObjectId).containsKey(functionName);
     }
 
     public void registerObjectAndApi(String mObjectId, String apiName) {

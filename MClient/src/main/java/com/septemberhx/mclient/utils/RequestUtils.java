@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import java.lang.reflect.Method;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -22,23 +23,14 @@ public class RequestUtils {
 
     public static Logger logger = Logger.getLogger(RequestUtils.class);
 
-    public static String methodParamToJsonString(Method method, Object[] args) {
-        String resultJsonStr = "";
+    public static List<String> getMethodParamNames(Method method) {
         DefaultParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
-
         String[] names = parameterNameDiscoverer.getParameterNames(method);
+        List<String> nameList = new ArrayList<>();
         if (names != null) {
-            if (names.length != args.length) {
-                throw new InvalidParameterException("args' size don't match");
-            } else {
-                JSONObject resultJson = new JSONObject();
-                for (int i = 0; i < names.length; ++i) {
-                    resultJson.put(names[i], args[i]);
-                }
-                resultJsonStr = resultJson.toString(4);
-            }
+            nameList.addAll(Arrays.asList(names));
         }
-        return resultJsonStr;
+        return nameList;
     }
 
     public static String methodParamToJsonString(List<String> names, List<Object> values) {

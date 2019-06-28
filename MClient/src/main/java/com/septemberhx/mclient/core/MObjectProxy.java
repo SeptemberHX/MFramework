@@ -2,12 +2,14 @@ package com.septemberhx.mclient.core;
 
 import com.septemberhx.mclient.annotation.MApiFunction;
 import com.septemberhx.mclient.base.MObject;
+import com.septemberhx.mclient.utils.RequestUtils;
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.MethodProxy;
 import org.apache.log4j.Logger;
 
 import java.lang.reflect.Method;
+import java.util.List;
 
 
 /**
@@ -50,7 +52,13 @@ public class MObjectProxy implements MethodInterceptor {
 
         Object result = null;
         if (MClientSkeleton.isRestNeeded(this.target.getId(), method.getName())) {
-            result = MClientSkeleton.restRequest(this.target.getId(), method.getName(), args);
+            List<String> paramNameList = RequestUtils.getMethodParamNames(method);
+            Object[] argNamesAndValues = new Object[args.length * 2];
+            for (int i = 0; i < args.length; ++i) {
+                argNamesAndValues[i] = paramNameList.get(i);
+                argNamesAndValues[i+1] = args[i];
+            }
+            result = MClientSkeleton.restRequest(this.target.getId(), method.getName(), argNamesAndValues);
         } else {
             result = methodProxy.invoke(target, args);
         }
