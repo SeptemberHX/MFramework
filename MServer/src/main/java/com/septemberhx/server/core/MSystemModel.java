@@ -22,14 +22,20 @@ public class MSystemModel {
             nodeId = instanceInfo.getDockerInfo().getHostIp();
         }
 
-        this.mSIManager.add(new MServiceInstance(
-                instanceInfo.getParentIdMap(),
-                nodeId,
-                instanceInfo.getIp(),
-                instanceInfo.getPort(),
-                instanceInfo.getId(),
-                instanceInfo.getMObjectIdMap()
-        ));
+        // check if the instance is alive. The mobjectIdMap will not be null if alive
+        if (instanceInfo.getMObjectIdMap() != null) {
+            this.mSIManager.update(new MServiceInstance(
+                    instanceInfo.getParentIdMap(),
+                    nodeId,
+                    instanceInfo.getIp(),
+                    instanceInfo.getPort(),
+                    instanceInfo.getId(),
+                    instanceInfo.getMObjectIdMap()
+            ));
+        } else if (this.mSIManager.containsById(instanceInfo.getId())){
+            // remove the useless info when the instance is dead
+            this.mSIManager.remove(instanceInfo.getId());
+        }
     }
 
     public Optional<MServiceInstance> getInstanceById(String instanceId) {

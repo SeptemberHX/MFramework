@@ -39,7 +39,7 @@ public class MClientSkeleton {
     private Map<String, Set<String>> objectId2ApiSet;
 
     private Map<String, Map<String, MInstanceRestInfoBean>> restInfoMap;
-    private org.apache.log4j.Logger logger = Logger.getLogger(this.getClass());
+    private static org.apache.log4j.Logger logger = Logger.getLogger(MClientSkeleton.class);
 
     @Setter
     private EurekaClient discoveryClient;
@@ -164,6 +164,7 @@ public class MClientSkeleton {
                 if (clusterAgentInstances.size() > 0) {
                     // request MClusterAgent for remote uri
                     URI requestUri = MUrlUtils.getMClientRequestRemoteUri(clusterAgentInstances.get(0).getIPAddr(), clusterAgentInstances.get(0).getPort());
+                    logger.debug(requestUri);
                     if (requestUri != null) {
                         String rawPatterns = null;
                         Map<RequestMappingInfo, HandlerMethod> mapping = MClientSkeleton.getInstance().requestMappingHandlerMapping.getHandlerMethods();
@@ -178,6 +179,7 @@ public class MClientSkeleton {
                         getRemoteUriRequest.setObjectId(mObjectId);
                         getRemoteUriRequest.setRawPatterns(rawPatterns);
                         URI remoteUri = MRequestUtils.sendRequest(requestUri, getRemoteUriRequest, URI.class, RequestMethod.POST);
+                        logger.debug(remoteUri);
                         if (remoteUri != null) {
                             // redirect to remote uri with parameters in json style
                             try {
@@ -213,8 +215,7 @@ public class MClientSkeleton {
      * @return boolean
      */
     private boolean checkIfHasRestInfo(String mObjectId, String functionName) {
-//        return this.restInfoMap.containsKey(mObjectId) && this.restInfoMap.get(mObjectId).containsKey(functionName);
-        return true;
+        return this.restInfoMap.containsKey(mObjectId) && this.restInfoMap.get(mObjectId).containsKey(functionName);
     }
 
     public void registerObjectAndApi(String mObjectId, String apiName) {

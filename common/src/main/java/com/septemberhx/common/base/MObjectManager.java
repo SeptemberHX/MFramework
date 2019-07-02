@@ -16,12 +16,20 @@ public class MObjectManager<T extends MBaseObject> {
         this.objectMap = new HashMap<>();
     }
 
-    public void add(T obj) {
+    public void update(T obj) {
         if (this.objectMap.containsKey(obj.getId())) {
             logger.warn("Object " + obj.getId() + " has already been added in Manager");
         }
 
         this.objectMap.put(obj.getId(), obj);
+    }
+
+    public void remove(String objectId) {
+        if (!this.objectMap.containsKey(objectId)) {
+            logger.warn("Object " + objectId + " is not in the object map");
+        } else {
+            this.objectMap.remove(objectId);
+        }
     }
 
     public Optional<T> getById(String id) {

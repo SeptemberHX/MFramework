@@ -53,8 +53,7 @@ public class MAgentController {
     @RequestMapping(path = "/remoteuri", method = RequestMethod.POST)
     public URI getRemoteUri(@RequestBody MGetRemoteUriRequest remoteUriRequest) {
         URI serverRemoteUri = MUrlUtils.getMServerRemoteUri(this.serverIpAddr, this.serverPort);
-        URI resultUri = MRequestUtils.sendRequest(serverRemoteUri, remoteUriRequest, URI.class, RequestMethod.POST);
-        return resultUri;
+        return MRequestUtils.sendRequest(serverRemoteUri, remoteUriRequest, URI.class, RequestMethod.POST);
     }
 
     @ResponseBody
