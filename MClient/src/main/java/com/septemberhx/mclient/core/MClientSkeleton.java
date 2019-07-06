@@ -141,6 +141,10 @@ public class MClientSkeleton {
         return MClientSkeleton.getInstance().checkIfHasRestInfo(mObjectId, functionName);
     }
 
+    public static boolean checkIfContinue(String mObjectId, String functionName) {
+        return true;
+    }
+
     /**
      * It will be used by MApiType annotation
      * @param mObjectId: the id of MObject
