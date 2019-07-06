@@ -1,4 +1,4 @@
-package com.septemberhx.sampleservice;
+package com.septemberhx.sampleservice1;
 
 import com.septemberhx.mclient.annotation.MClient;
 import org.springframework.boot.SpringApplication;
@@ -8,8 +8,8 @@ import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 @SpringBootApplication
 @MClient
 @EnableEurekaClient
-public class SampleServiceMain {
+public class SampleService1Main {
     public static void main(String[] args) {
-        SpringApplication.run(SampleServiceMain.class, args);
+        SpringApplication.run(SampleService1Main.class, args);
     }
 }

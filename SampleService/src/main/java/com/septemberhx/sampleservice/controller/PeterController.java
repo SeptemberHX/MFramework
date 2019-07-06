@@ -4,9 +4,7 @@ import com.septemberhx.mclient.annotation.MApiFunction;
 import com.septemberhx.mclient.annotation.MApiType;
 import com.septemberhx.mclient.annotation.MFunctionType;
 import com.septemberhx.mclient.base.MObject;
-import com.septemberhx.sampleservice.client.MClusterAgentClient;
 import com.septemberhx.sampleservice.utils.MCalcUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -15,9 +13,6 @@ public class PeterController extends MObject {
 
     @MFunctionType
     MCalcUtils mCalcUtils;
-
-    @Autowired
-    MClusterAgentClient agentClient;
 
     @ResponseBody
     @MApiType
@@ -41,7 +36,6 @@ public class PeterController extends MObject {
     @MApiFunction
     @RequestMapping(path = "/peterson", method = RequestMethod.GET)
     public String peterson() {
-        agentClient.getRemoteUri("test", "test");
         return this.mCalcUtils.upper("peterson");
     }
 }

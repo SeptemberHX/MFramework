@@ -7,7 +7,6 @@ import com.septemberhx.common.bean.MInstanceRestInfoBean;
 import com.septemberhx.common.utils.MRequestUtils;
 import io.kubernetes.client.models.*;
 import io.kubernetes.client.util.Yaml;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMethod;
 

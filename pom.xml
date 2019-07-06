@@ -13,6 +13,8 @@
         <module>common</module>
         <module>MClusterAgent</module>
         <module>SampleService</module>
+        <module>SampleService1</module>
+        <module>SampleService2</module>
     </modules>
     <packaging>pom</packaging>
 
