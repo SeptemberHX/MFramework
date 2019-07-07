@@ -9,7 +9,6 @@ import com.septemberhx.server.base.MServiceInstance;
 import com.septemberhx.server.utils.MServerUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.net.URI;
@@ -111,4 +110,6 @@ public class MServerSkeleton {
         instanceOp.ifPresent(
                 mServiceInstance -> MServerUtils.notifyDeleteRemoteUri(mServiceInstance.getId(), mObjectId, funcName));
     }
+
+    // End -----------------------------------------------------
 }

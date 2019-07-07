@@ -29,16 +29,25 @@ public class MClientUtils {
         dockerManager.deleteInstanceById(instanceId);
     }
 
-    public static V1Deployment buildDeployment(String serviceName, String serviceInstanceId, String nodeId) {
+    public static V1Deployment buildDeployment(String serviceName, String serviceInstanceId, String nodeId, String image) {
         String deploymentName = serviceName + "-" + serviceInstanceId;
 
+        // read pod configure file supplied by users
         V1Pod pod = readPodYaml(serviceName);
+        // fill the container image
         pod.getMetadata().getLabels().put("app", deploymentName);
+        for (V1Container container : pod.getSpec().getContainers()) {
+            if (container.getName().equals(serviceName)) {
+                container.setImage(image);
+            }
+        }
+        // fill the node selector
         if (pod.getSpec().getNodeSelector() == null) {
             pod.getSpec().setNodeSelector(new HashMap<>());
         }
         pod.getSpec().getNodeSelector().put("node", nodeId);
 
+        // build deployment configure file
         V1PodTemplateSpec podTemplateSpec = new V1PodTemplateSpec();
         podTemplateSpec.setSpec(pod.getSpec());
         podTemplateSpec.setMetadata(pod.getMetadata());
@@ -55,6 +64,7 @@ public class MClientUtils {
                     .withTemplate(podTemplateSpec)
                     .endSpec()
                     .build();
+        // save the configure file
         try {
             FileWriter writer = new FileWriter("./test.yaml");
             Yaml.dump(deployment, writer);

@@ -3,6 +3,7 @@ package com.septemberhx.mclient.controller;
 import com.netflix.appinfo.ApplicationInfoManager;
 import com.netflix.discovery.EurekaClient;
 import com.septemberhx.common.base.MClusterConfig;
+import com.septemberhx.common.bean.MApiContinueRequest;
 import com.septemberhx.common.bean.MClientInfoBean;
 import com.septemberhx.common.bean.MInstanceRestInfoBean;
 import com.septemberhx.mclient.core.MClientSkeleton;
@@ -69,6 +70,11 @@ public class MClientController {
     @RequestMapping(path = "/setRestInfo", method = RequestMethod.POST)
     public void setRestInfo(@RequestBody MInstanceRestInfoBean restInfoBean) {
         MClientSkeleton.getInstance().addRestInfo(restInfoBean);
+    }
+
+    @RequestMapping(path = "/setApiContinueStatus", method = RequestMethod.POST)
+    public void setApiContinueStatus(@RequestBody MApiContinueRequest continueStatus) {
+        MClientSkeleton.getInstance().setApiContinueStatus(continueStatus);
     }
 
     @ResponseBody

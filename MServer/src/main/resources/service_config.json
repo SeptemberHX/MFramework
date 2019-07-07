@@ -1,0 +1,39 @@
+{
+  "composition": [
+    {
+      "com.septemberhx.sampleservice2.controller.S2Controller": {
+        "path": "/s1_s2",
+        "functionName": "composition",
+        "parts": [
+          {
+            "class": "com.septemberhx.sampleservice1.controller.S2Controller",
+            "function": "wrapper"
+          },
+          {
+            "class": "com.septemberhx.sampleservice2.controller.S2Controller",
+            "function": "wrapper"
+          }
+        ]
+      }
+    }
+  ],
+  "repo": [
+    {
+      "git": "http://192.168.1.104:12345/mframework.git",
+      "modules": [
+        {
+          "module": "SampleService2",
+          "controllers": [
+            "com.septemberhx.sampleservice2.controller.S2Controller"
+          ]
+        },
+        {
+          "module": "SampleService1",
+          "controllers": [
+            "com.septemberhx.sampleservice1.controller.S2Controller"
+          ]
+        }
+      ]
+    }
+  ]
+}

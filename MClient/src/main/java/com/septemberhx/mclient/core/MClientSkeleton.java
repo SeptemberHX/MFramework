@@ -3,10 +3,12 @@ package com.septemberhx.mclient.core;
 import com.netflix.appinfo.InstanceInfo;
 import com.netflix.discovery.EurekaClient;
 import com.netflix.discovery.shared.Application;
+import com.septemberhx.common.bean.MApiContinueRequest;
 import com.septemberhx.common.bean.MGetRemoteUriRequest;
 import com.septemberhx.common.bean.MInstanceRestInfoBean;
 import com.septemberhx.common.utils.MRequestUtils;
 import com.septemberhx.common.utils.MUrlUtils;
+import com.septemberhx.mclient.annotation.MClient;
 import com.septemberhx.mclient.base.MObject;
 import com.septemberhx.mclient.utils.RequestUtils;
 import lombok.Getter;
@@ -39,6 +41,7 @@ public class MClientSkeleton {
     private Map<String, Set<String>> objectId2ApiSet;
 
     private Map<String, Map<String, MInstanceRestInfoBean>> restInfoMap;
+    private Map<String, Map<String, Boolean>> apiContinueMap;
     private static org.apache.log4j.Logger logger = Logger.getLogger(MClientSkeleton.class);
 
     @Setter
@@ -52,6 +55,7 @@ public class MClientSkeleton {
         this.parentIdMap = new HashMap<>();
         this.objectId2ApiSet = new HashMap<>();
         this.restInfoMap = new HashMap<>();
+        this.apiContinueMap = new HashMap<>();
     }
 
     public static MClientSkeleton getInstance() {
@@ -141,8 +145,16 @@ public class MClientSkeleton {
         return MClientSkeleton.getInstance().checkIfHasRestInfo(mObjectId, functionName);
     }
 
+    public void setApiContinueStatus(MApiContinueRequest request) {
+        if (!this.apiContinueMap.containsKey(request.getObjectId())) {
+            this.apiContinueMap.put(request.getObjectId(), new HashMap<>());
+        }
+        this.apiContinueMap.get(request.getObjectId()).put(request.getFunctionName(), request.getStatus());
+    }
+
     public static boolean checkIfContinue(String mObjectId, String functionName) {
-        return true;
+        if (!MClientSkeleton.getInstance().apiContinueMap.containsKey(mObjectId)) return true;
+        return MClientSkeleton.getInstance().apiContinueMap.get(mObjectId).getOrDefault(functionName, true);
     }
 
     /**

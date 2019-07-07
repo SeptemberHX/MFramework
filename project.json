@@ -1,0 +1,41 @@
+{
+  "projectInfoMap": {
+    "SampleService": {
+      "name": "SampleService",
+      "gitUrl": "http://192.168.1.104:12345/SeptemberHX/mframework.git",
+      "moduleInfoMap": {
+        "SampleService1": {
+          "name": "SampleService1",
+          "apiInfoList": [
+            {
+              "className": "com.septemberhx.sampleservice1.controller.S1Controller",
+              "functionName": "wrapper",
+              "pattern": "/wrapper",
+              "compositionList": [
+                {
+                  "className": "com.septemberhx.sampleservice1.controller.S1Controller",
+                  "functionName": "wrapper"
+                },
+                {
+                  "className": "com.septemberhx.sampleservice2.controller.S2Controller",
+                  "functionName": "wrapper"
+                }
+              ]
+            }
+          ]
+        },
+        "SampleService2": {
+          "name": "SampleService2",
+          "apiInfoList": [
+            {
+              "className": "com.septemberhx.sampleservice2.controller.S2Controller",
+              "functionName": "wrapper",
+              "pattern": "/age",
+              "compositionList": []
+            }
+          ]
+        }
+      }
+    }
+  }
+}

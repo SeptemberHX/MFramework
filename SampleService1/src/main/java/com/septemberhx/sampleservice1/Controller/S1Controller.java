@@ -1,20 +1,28 @@
 package com.septemberhx.sampleservice1.Controller;
 
+import com.septemberhx.mclient.annotation.MApiFunction;
+import com.septemberhx.mclient.annotation.MFunctionType;
+import com.septemberhx.mclient.annotation.MRestApiType;
+import com.septemberhx.mclient.base.MObject;
+import com.septemberhx.mclient.base.MResponse;
 import com.septemberhx.sampleservice2.controller.S2Controller;
-import org.json.JSONObject;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.net.InetAddress;
 
 @RestController
-public class S1Controller {
+public class S1Controller extends MObject {
 
-    S2Controller s2Controller = new S2Controller();
+    @MFunctionType
+    S2Controller s2Controller;
 
     @RequestMapping("/wrapper")
-    public JSONObject wrapper(@RequestParam("rawStr") String rawStr) {
+    @MRestApiType
+    @MApiFunction
+    public MResponse wrapper(@RequestParam("rawStr") String rawStr) {
         String resultStr = rawStr;
         try {
             resultStr += "_" + InetAddress.getLocalHost().getHostAddress();
@@ -22,30 +30,14 @@ public class S1Controller {
             e.printStackTrace();
         }
 
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("result", resultStr);
-        return jsonObject;
+        return new MResponse().set("rawStr", resultStr);
     }
 
-    public JSONObject composition(@RequestParam("rawStr") String rawStr) {
-        JSONObject s1 = this.wrapper(rawStr);
-//        JSONObject s2 = this.s2Controller.wrapper(s1);
-        return s1;
-    }
-
-    // should be auto-generated
-    public JSONObject wrapper(JSONObject parameters) {
-        String rawStr = (String)parameters.get("rawStr");
-
-        String resultStr = rawStr;
-        try {
-            resultStr += "_" + InetAddress.getLocalHost().getHostAddress();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("result", resultStr);
-        return jsonObject;
+    @RequestMapping("/s1_s2")
+    @ResponseBody
+    public MResponse composition(@RequestParam("rawStr") String rawStr) {
+        MResponse s1 = this.wrapper(rawStr);
+        MResponse s2 = this.s2Controller.wrapper(s1);
+        return s2;
     }
 }
