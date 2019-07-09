@@ -30,6 +30,8 @@ public class MClusterConfig {
     public final static String MCLUSTER_SERVICE_METADATA_NAME = "mclient";
     public final static String MCLUSTER_SERVICE_METADATA_VALUE = "true";
 
+    public final static String BUILD_CENTER_BUILD_URI = "/buildcenter/build";
+
     public final static String K8S_NAMESPACE = "kube-test";
 
     private static MClusterConfig ourInstance = new MClusterConfig();

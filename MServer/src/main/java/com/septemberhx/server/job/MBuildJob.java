@@ -1,7 +1,6 @@
 package com.septemberhx.server.job;
 
 import com.septemberhx.common.bean.MBuildInfoRequest;
-import com.septemberhx.server.utils.MServerUtils;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -43,7 +42,7 @@ public class MBuildJob extends MBaseJob {
         buildInfoRequest.setImageName(this.getImageName());
         buildInfoRequest.setImageOwner(OWNER);
         buildInfoRequest.setImageTag(imageTag);
-        buildInfoRequest.setId(MServerUtils.getBuildUniqueId());
+        buildInfoRequest.setId(id);
         return buildInfoRequest;
     }
 }

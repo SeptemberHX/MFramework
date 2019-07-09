@@ -35,7 +35,7 @@ public class MObjectManager<T extends MBaseObject> {
     }
 
     public Optional<T> getById(String id) {
-        return Optional.of(this.objectMap.get(id));
+        return Optional.ofNullable(this.objectMap.get(id));
     }
 
     public boolean containsById(String id) {

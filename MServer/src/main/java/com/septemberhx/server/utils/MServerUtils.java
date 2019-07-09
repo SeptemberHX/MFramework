@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.File;
+import java.net.URI;
 import java.util.UUID;
 
 
@@ -23,7 +24,7 @@ public class MServerUtils {
     private static String MClusterIpAddr;
     private static int MClusterPort;
     private static String buildCenterIpAddr;
-    private static int buildCenterPort;
+    private static Integer buildCenterPort;
 
     @Value("${mserver.mcluster.ip}")
     public void setMClusterIpAddr(String MClusterIpAddr) {
@@ -41,7 +42,7 @@ public class MServerUtils {
     }
 
     @Value("${mserver.buildcenter.port}")
-    public static void setBuildCenterPort(int buildCenterPort) {
+    public void setBuildCenterPort(Integer buildCenterPort) {
         MServerUtils.buildCenterPort = buildCenterPort;
     }
 
@@ -102,5 +103,10 @@ public class MServerUtils {
             e.printStackTrace();
         }
         return pod;
+    }
+
+    public static void sendBuildInfo(MBuildInfoRequest mBuildInfoRequest) {
+        URI buildUri = MUrlUtils.getBuildCenterBuildUri(buildCenterIpAddr, buildCenterPort);
+        MRequestUtils.sendRequest(buildUri, mBuildInfoRequest, null, RequestMethod.POST);
     }
 }

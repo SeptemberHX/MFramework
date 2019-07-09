@@ -49,6 +49,10 @@ public class MUrlUtils {
         return MUrlUtils.getRemoteUri(serverIpAddr, serverPort, MClusterConfig.MSERVER_LOAD_INSTANCEINFO);
     }
 
+    public static URI getBuildCenterBuildUri(String buildCenterIpAddr, int buildCenterPort) {
+        return MUrlUtils.getRemoteUri(buildCenterIpAddr, buildCenterPort, MClusterConfig.BUILD_CENTER_BUILD_URI);
+    }
+
     public static URI getRemoteUri(String ipAddr, int port, String path) {
         URI uri = null;
         try {

@@ -2,6 +2,7 @@ package com.septemberhx.server.job;
 
 import com.septemberhx.server.core.MJobManager;
 import com.septemberhx.server.core.MServerSkeleton;
+import com.septemberhx.server.utils.MServerUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -14,9 +15,12 @@ public class MJobExecutor {
     public static void doJob(MBaseJob job) {
         if (job == null) return;
         logger.info("Execute job " + job.getId());
+        System.out.println("Execute job " + job.getId());
         switch (job.getType()) {
             case BUILD:
                 MBuildJob buildJob = (MBuildJob) job;
+                MServerUtils.sendBuildInfo(buildJob.toBuildInfoRequest());
+                logger.info("Build job info send");
                 break;
             case DEPLOY:
                 break;
