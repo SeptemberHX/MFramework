@@ -1,10 +1,11 @@
 package com.septemberhx.agent.middleware;
 
 import com.septemberhx.common.bean.MDockerInfoBean;
+import io.kubernetes.client.models.V1Pod;
 
 public interface MDockerManager {
     public MDockerInfoBean getDockerInfoByIpAddr(String ipAddr);
     public void deleteInstanceById(String instanceId);
-    public void deployInstanceOnNode(String serviceName, String serviceInstanceId, String nodeId);
+    public V1Pod deployInstanceOnNode(String nodeId, V1Pod pod);
     public boolean checkIfDockerRunning(String ipAddr);
 }

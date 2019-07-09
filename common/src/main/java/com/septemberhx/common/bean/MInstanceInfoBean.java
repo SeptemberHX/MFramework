@@ -18,7 +18,7 @@ import java.util.Set;
 @Getter
 @Setter
 @ToString
-public class MInstanceInfoBean implements Serializable {
+public class MInstanceInfoBean {
     private String id;
     private String ip;
     private int port;

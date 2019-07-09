@@ -3,9 +3,10 @@ kind: Pod
 metadata:
   labels:
     app: sampleservice
+  generateName: sampleservice-
 spec:
   containers:
     - name: sampleservice
-      image: 192.168.1.104:5000/septemberhx/lab2sampleservice:v1.1.1
+      image: 192.168.1.104:5000/septemberhx/lab2sampleservice:v1.1.16
       ports:
         - containerPort: 8801

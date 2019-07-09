@@ -12,4 +12,13 @@ public class MClientInfoBean {
     private Map<String, Set<String>> apiMap;
     private Map<String, String> parentIdMap;
     private Set<String> mObjectIdSet;
+
+    @Override
+    public String toString() {
+        return "MClientInfoBean{" +
+                "apiMap=" + apiMap +
+                ", parentIdMap=" + parentIdMap +
+                ", mObjectIdSet=" + mObjectIdSet +
+                '}';
+    }
 }

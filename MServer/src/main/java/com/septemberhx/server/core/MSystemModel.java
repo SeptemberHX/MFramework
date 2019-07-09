@@ -3,6 +3,7 @@ package com.septemberhx.server.core;
 import com.septemberhx.common.bean.MInstanceInfoBean;
 import com.septemberhx.server.base.MServiceInstance;
 
+import java.util.List;
 import java.util.Optional;
 
 
@@ -36,6 +37,10 @@ public class MSystemModel {
             // remove the useless info when the instance is dead
             this.mSIManager.remove(instanceInfo.getId());
         }
+    }
+
+    public List<MServiceInstance> getAllServiceInstance() {
+        return this.mSIManager.getAllValues();
     }
 
     public Optional<MServiceInstance> getInstanceById(String instanceId) {

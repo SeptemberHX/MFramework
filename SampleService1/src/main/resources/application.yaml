@@ -10,4 +10,4 @@ eureka:
       enabled: true
 spring:
   application:
-    name: SampleService2
+    name: SampleService1

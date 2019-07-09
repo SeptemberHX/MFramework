@@ -24,10 +24,13 @@ public class MClusterConfig {
 
     public final static String MCLUSTERAGENT_FETCH_CLIENT_INFO = "/mclient/info";
     public final static String MSERVER_GET_REMOTE_URI = "/mserver/remoteuri";
+    public final static String MSERVER_LOAD_INSTANCEINFO = "/mserver/loadInstanceInfo";
     public final static String MCLUSTER_DOCKER_NAMESPACE = "kube-test";
 
     public final static String MCLUSTER_SERVICE_METADATA_NAME = "mclient";
     public final static String MCLUSTER_SERVICE_METADATA_VALUE = "true";
+
+    public final static String K8S_NAMESPACE = "kube-test";
 
     private static MClusterConfig ourInstance = new MClusterConfig();
 

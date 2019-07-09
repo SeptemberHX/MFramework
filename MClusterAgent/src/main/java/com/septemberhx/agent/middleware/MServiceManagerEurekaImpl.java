@@ -5,6 +5,7 @@ import com.netflix.discovery.EurekaClient;
 import com.netflix.discovery.shared.Application;
 import com.septemberhx.common.base.MClusterConfig;
 import com.septemberhx.common.bean.MClientInfoBean;
+import com.septemberhx.common.bean.MDeployPodRequest;
 import com.septemberhx.common.bean.MInstanceInfoBean;
 import com.septemberhx.common.utils.MUrlUtils;
 import com.septemberhx.common.utils.MRequestUtils;
@@ -23,10 +24,8 @@ public class MServiceManagerEurekaImpl implements MServiceManager {
 
     @Autowired
     private EurekaClient discoveryClient;
-    private MDockerManager dockerManager;
 
     public MServiceManagerEurekaImpl() {
-        this.dockerManager = new MDockerManagerK8SImpl();
     }
 
     @Override
@@ -45,68 +44,43 @@ public class MServiceManagerEurekaImpl implements MServiceManager {
     }
 
     @Override
-    public List<MInstanceInfoBean> getInstanceInfoList() {
-        List<MInstanceInfoBean> resultList = new ArrayList<>();
+    public List<InstanceInfo> getInstanceInfoList() {
+        List<InstanceInfo> resultList = new ArrayList<>();
 
         for (Application application : this.discoveryClient.getApplications().getRegisteredApplications()) {
-            for (InstanceInfo instanceInfo : application.getInstances()) {
-                // when the application is not supported by our framework, just jump over it.
-                MInstanceInfoBean instanceInfoBean = this.transformInstance(instanceInfo);
-                if (instanceInfoBean != null) {
-                    resultList.add(instanceInfoBean);
-                }
-            }
+            // when the application is not supported by our framework, just jump over it.
+            //                MInstanceInfoBean instanceInfoBean = this.transformInstance(instanceInfo);
+            //                if (instanceInfoBean != null) {
+            //                    resultList.add(instanceInfoBean);
+            //                }
+            resultList.addAll(application.getInstances());
         }
 
         return resultList;
     }
 
     @Override
-    public MInstanceInfoBean getInstanceInfoById(String instanceId) {
+    public InstanceInfo getInstanceInfoById(String instanceId) {
         List<InstanceInfo> instanceInfos = this.discoveryClient.getInstancesById(instanceId);
         if (instanceInfos.size() > 0) {
-            return this.transformInstance(instanceInfos.get(0));
+            return instanceInfos.get(0);
         } else {
             return null;
         }
     }
 
-    /**
-     * collect necessary information so we can build a MInstanceInfoBean from InstanceInfo
-     * @param instanceInfo
-     * @return
-     */
-    private MInstanceInfoBean transformInstance(InstanceInfo instanceInfo) {
-        MInstanceInfoBean instanceInfoBean = new MInstanceInfoBean();
-
-        if (!instanceInfo.getMetadata().containsKey(MClusterConfig.MCLUSTER_SERVICE_METADATA_NAME)
-                || !instanceInfo.getMetadata().get(MClusterConfig.MCLUSTER_SERVICE_METADATA_NAME).equals(
-                MClusterConfig.MCLUSTER_SERVICE_METADATA_VALUE)) {
-            return null;
+    @Override
+    public InstanceInfo getInstanceInfoByIpAndPort(String ipAddr) {
+        System.out.println("App size = " + this.discoveryClient.getApplications().getRegisteredApplications().size());
+        for (Application application : this.discoveryClient.getApplications().getRegisteredApplications()) {
+            System.out.println(application.getName());
+            for (InstanceInfo instanceInfo : application.getInstances()) {
+                System.out.println(instanceInfo.getAppName() + "|" + instanceInfo.getIPAddr() + ":" + instanceInfo.getPort());
+                if (instanceInfo.getIPAddr().equals(ipAddr)) {
+                    return instanceInfo;
+                }
+            }
         }
-
-        instanceInfoBean.setId(instanceInfo.getId());
-        instanceInfoBean.setIp(instanceInfo.getIPAddr());
-        instanceInfoBean.setPort(instanceInfo.getPort());
-
-        if (!this.dockerManager.checkIfDockerRunning(instanceInfo.getIPAddr())) {
-            return instanceInfoBean;
-        }
-        MClientInfoBean response = MRequestUtils.sendRequest(
-                MUrlUtils.getMClusterAgentFetchClientInfoUri(instanceInfo.getIPAddr(), instanceInfo.getPort()),
-                null,
-                MClientInfoBean.class,
-                RequestMethod.GET
-        );
-
-        if (response == null) {
-            return instanceInfoBean;
-        }
-
-        instanceInfoBean.setParentIdMap(response.getParentIdMap());
-        instanceInfoBean.setApiMap(response.getApiMap());
-        instanceInfoBean.setMObjectIdMap(response.getMObjectIdSet());
-        instanceInfoBean.setDockerInfo(dockerManager.getDockerInfoByIpAddr(instanceInfo.getIPAddr()));
-        return instanceInfoBean;
+        return null;
     }
 }

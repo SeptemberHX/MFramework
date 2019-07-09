@@ -3,9 +3,7 @@ package com.septemberhx.common.base;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public class MObjectManager<T extends MBaseObject> {
 
@@ -30,6 +28,10 @@ public class MObjectManager<T extends MBaseObject> {
         } else {
             this.objectMap.remove(objectId);
         }
+    }
+
+    public List<T> getAllValues() {
+        return new ArrayList<>(objectMap.values());
     }
 
     public Optional<T> getById(String id) {

@@ -1,5 +1,8 @@
 package com.septemberhx.common.utils;
 
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -20,7 +23,10 @@ public class MRequestUtils {
                     entity = MRequestUtils.restTemplate.getForEntity(uri, returnClass);
                     break;
                 case POST:
-                    entity = MRequestUtils.restTemplate.postForEntity(uri, paramObj, returnClass);
+                    HttpHeaders headers = new HttpHeaders();
+                    headers.setContentType(MediaType.APPLICATION_JSON);
+                    HttpEntity<T> param = new HttpEntity<T>((T)paramObj, headers);
+                    entity = MRequestUtils.restTemplate.postForEntity(uri, param, returnClass);
                     break;
                 default:
                     break;

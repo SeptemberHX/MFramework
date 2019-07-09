@@ -45,6 +45,10 @@ public class MUrlUtils {
         return MUrlUtils.getRemoteUri(serverIpAddr, serverPort, MClusterConfig.MSERVER_GET_REMOTE_URI);
     }
 
+    public static URI getMServerLoadInstanceInfoUri(String serverIpAddr, int serverPort) {
+        return MUrlUtils.getRemoteUri(serverIpAddr, serverPort, MClusterConfig.MSERVER_LOAD_INSTANCEINFO);
+    }
+
     public static URI getRemoteUri(String ipAddr, int port, String path) {
         URI uri = null;
         try {

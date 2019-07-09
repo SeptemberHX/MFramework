@@ -1,6 +1,7 @@
 package com.septemberhx.server.controller;
 
 import com.septemberhx.common.bean.*;
+import com.septemberhx.server.base.MServiceInstance;
 import com.septemberhx.server.core.MServerSkeleton;
 import com.septemberhx.server.core.MSnapshot;
 import com.septemberhx.server.core.MSystemModel;
@@ -11,6 +12,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 @EnableAutoConfiguration
@@ -19,9 +22,17 @@ public class MServerController {
 
     @ResponseBody
     @RequestMapping(path = "/loadInstanceInfo", method = RequestMethod.POST)
-    public void loadInstanceInfo(MInstanceInfoBean instanceInfo, HttpServletRequest request) {
+    public void loadInstanceInfo(@RequestBody MInstanceInfoBean instanceInfo) {
+        System.out.println(instanceInfo);
+
         MSystemModel systemModel = MSnapshot.getInstance().getSystemModel();
         systemModel.loadInstanceInfo(instanceInfo);
+    }
+
+    @ResponseBody
+    @RequestMapping(path = "/allInstance", method = RequestMethod.GET)
+    public List<MServiceInstance> getAllServiceInstance() {
+        return MSnapshot.getInstance().getSystemModel().getAllServiceInstance();
     }
 
     @ResponseBody
@@ -29,9 +40,11 @@ public class MServerController {
     public MInstanceInfoResponse getInstanceInfos() {
         MInstanceInfoResponse response = MServerUtils.fetchAllInstanceInfo();
         for (MInstanceInfoBean infoBean : response.getInfoBeanList()) {
-            MServerSkeleton.getInstance().updateInstanceInfo(infoBean);
+            if (infoBean != null) {
+                MServerSkeleton.getInstance().updateInstanceInfo(infoBean);
+            }
         }
-        return MServerUtils.fetchAllInstanceInfo();
+        return response;
     }
 
     @ResponseBody
