@@ -1,14 +1,20 @@
 package com.septemberhx.server.utils;
 
+import com.septemberhx.common.bean.MBuildInfoRequest;
 import com.septemberhx.common.bean.MInstanceInfoResponse;
 import com.septemberhx.common.bean.MInstanceRestInfoBean;
 import com.septemberhx.common.bean.MSetRestInfoRequest;
 import com.septemberhx.common.utils.MUrlUtils;
 import com.septemberhx.common.utils.MRequestUtils;
+import io.kubernetes.client.models.V1Pod;
+import io.kubernetes.client.util.Yaml;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.client.RestTemplate;
+
+import java.io.File;
+import java.util.UUID;
 
 
 @Component
@@ -16,6 +22,8 @@ public class MServerUtils {
 
     private static String MClusterIpAddr;
     private static int MClusterPort;
+    private static String buildCenterIpAddr;
+    private static int buildCenterPort;
 
     @Value("${mserver.mcluster.ip}")
     public void setMClusterIpAddr(String MClusterIpAddr) {
@@ -25,6 +33,20 @@ public class MServerUtils {
     @Value("${mserver.mcluster.port}")
     public void setMClusterPort(Integer MClusterPort) {
         MServerUtils.MClusterPort = MClusterPort;
+    }
+
+    @Value("${mserver.buildcenter.ip}")
+    public void setBuildCenterIpAddr(String buildCenterIpAddr) {
+        MServerUtils.buildCenterIpAddr = buildCenterIpAddr;
+    }
+
+    @Value("${mserver.buildcenter.port}")
+    public static void setBuildCenterPort(int buildCenterPort) {
+        MServerUtils.buildCenterPort = buildCenterPort;
+    }
+
+    private static void buildImage(String gitUrl, String branch, String projectName, String moduleName, String imageVersion) {
+
     }
 
     private static RestTemplate restTemplate = new RestTemplate();
@@ -63,5 +85,22 @@ public class MServerUtils {
         MRequestUtils.sendRequest(
                 MUrlUtils.getMClientAgentSetRestInfoUri(MClusterIpAddr, MClusterPort),
                 restInfoRequest, null, RequestMethod.POST);
+    }
+
+    public static String getBuildUniqueId() {
+        return "Build_" + UUID.randomUUID().toString();
+    }
+
+    public static V1Pod readPodYaml(String serviceName) {
+        V1Pod pod = null;
+        try {
+            Object podYamlObj = Yaml.load(new File("./yaml/" + serviceName + ".yaml"));
+            if (podYamlObj.getClass().getSimpleName().equals("V1Pod")) {
+                pod = (V1Pod) podYamlObj;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return pod;
     }
 }

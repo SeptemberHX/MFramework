@@ -9,10 +9,12 @@ import lombok.ToString;
 @ToString
 public class MBuildInfoRequest {
     private String projectName;
+    private String moduleName;
     private String gitUrl;
     private String gitTag;
     private String imageName;
     private String imageTag;
     private String imageOwner;
     private String id;
+    private String branch;
 }

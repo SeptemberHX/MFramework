@@ -7,6 +7,7 @@ import com.septemberhx.common.bean.MSetRestInfoRequest;
 import com.septemberhx.common.utils.MUrlUtils;
 import com.septemberhx.server.base.MServiceInstance;
 import com.septemberhx.server.utils.MServerUtils;
+import lombok.Getter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
@@ -23,6 +24,9 @@ public class MServerSkeleton {
     private static volatile MServerSkeleton instance;
     private Map<String, Map<String, String>> remoteInstanceIdMap;
     private MSystemModel currModel;
+
+    @Getter
+    private MJobManager jobManager = new MJobManager();
 
     private MServerSkeleton() {
         this.remoteInstanceIdMap = new HashMap<>();

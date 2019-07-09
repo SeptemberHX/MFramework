@@ -106,7 +106,10 @@ public class MClientUtils {
     public List<MInstanceInfoBean> getInstanceInfoList() {
         List<MInstanceInfoBean> result = new ArrayList<>();
         for (InstanceInfo info : this.clusterMiddleware.getInstanceInfoList()) {
-            result.add(this.transformInstance(info, 0));
+            MInstanceInfoBean infoBean = this.transformInstance(info, 0);
+            if (infoBean != null) {
+                result.add(infoBean);
+            }
         }
         return result;
     }
