@@ -8,3 +8,5 @@ mserver:
   buildcenter:
     ip: 192.168.1.102
     port: 54321
+  deploy:
+    dir: /home/hexiang/workspace/idea/MFramework/yaml

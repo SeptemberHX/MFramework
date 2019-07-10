@@ -1,39 +1,38 @@
 package com.septemberhx.server.utils;
 
-import com.septemberhx.common.bean.MBuildInfoRequest;
-import com.septemberhx.common.bean.MInstanceInfoResponse;
-import com.septemberhx.common.bean.MInstanceRestInfoBean;
-import com.septemberhx.common.bean.MSetRestInfoRequest;
+import com.septemberhx.common.bean.*;
 import com.septemberhx.common.utils.MUrlUtils;
 import com.septemberhx.common.utils.MRequestUtils;
 import io.kubernetes.client.models.V1Pod;
 import io.kubernetes.client.util.Yaml;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.client.RestTemplate;
 
-import java.io.File;
 import java.net.URI;
-import java.util.UUID;
+import java.nio.file.Paths;
 
 
 @Component
 public class MServerUtils {
 
-    private static String MClusterIpAddr;
-    private static int MClusterPort;
+    private static String mClusterIpAddr;
+    private static Integer mClusterPort;
     private static String buildCenterIpAddr;
     private static Integer buildCenterPort;
+    private static String deployConfigDir;
+    private static Logger logger = LogManager.getLogger(MServerUtils.class);
 
     @Value("${mserver.mcluster.ip}")
     public void setMClusterIpAddr(String MClusterIpAddr) {
-        MServerUtils.MClusterIpAddr = MClusterIpAddr;
+        MServerUtils.mClusterIpAddr = MClusterIpAddr;
     }
 
     @Value("${mserver.mcluster.port}")
     public void setMClusterPort(Integer MClusterPort) {
-        MServerUtils.MClusterPort = MClusterPort;
+        MServerUtils.mClusterPort = MClusterPort;
     }
 
     @Value("${mserver.buildcenter.ip}")
@@ -46,11 +45,10 @@ public class MServerUtils {
         MServerUtils.buildCenterPort = buildCenterPort;
     }
 
-    private static void buildImage(String gitUrl, String branch, String projectName, String moduleName, String imageVersion) {
-
+    @Value("${mserver.deploy.dir}")
+    public void setDeployConfigDir(String deployConfigDir) {
+        MServerUtils.deployConfigDir = deployConfigDir;
     }
-
-    private static RestTemplate restTemplate = new RestTemplate();
 
     public static MInstanceInfoResponse fetchAllInstanceInfo() {
         return MRequestUtils.sendRequest(
@@ -84,23 +82,17 @@ public class MServerUtils {
 
     private static void sendSetRestInfoRequest(MSetRestInfoRequest restInfoRequest) {
         MRequestUtils.sendRequest(
-                MUrlUtils.getMClientAgentSetRestInfoUri(MClusterIpAddr, MClusterPort),
+                MUrlUtils.getMClientAgentSetRestInfoUri(mClusterIpAddr, mClusterPort),
                 restInfoRequest, null, RequestMethod.POST);
-    }
-
-    public static String getBuildUniqueId() {
-        return "Build_" + UUID.randomUUID().toString();
     }
 
     public static V1Pod readPodYaml(String serviceName) {
         V1Pod pod = null;
         try {
-            Object podYamlObj = Yaml.load(new File("./yaml/" + serviceName + ".yaml"));
-            if (podYamlObj.getClass().getSimpleName().equals("V1Pod")) {
-                pod = (V1Pod) podYamlObj;
-            }
+            pod = Yaml.loadAs(Paths.get(deployConfigDir, serviceName + ".yaml").toFile(), V1Pod.class);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.warn("Exception happened when read pod yaml");
+            logger.warn(e);
         }
         return pod;
     }
@@ -108,5 +100,12 @@ public class MServerUtils {
     public static void sendBuildInfo(MBuildInfoRequest mBuildInfoRequest) {
         URI buildUri = MUrlUtils.getBuildCenterBuildUri(buildCenterIpAddr, buildCenterPort);
         MRequestUtils.sendRequest(buildUri, mBuildInfoRequest, null, RequestMethod.POST);
+        logger.info(mBuildInfoRequest);
+    }
+
+    public static void sendDeployInfo(MDeployPodRequest mDeployPodRequest) {
+        URI deployUri = MUrlUtils.getMClientAgentDeployUri(mClusterIpAddr, mClusterPort);
+        MRequestUtils.sendRequest(deployUri, mDeployPodRequest, null, RequestMethod.POST);
+        logger.info(mDeployPodRequest);
     }
 }

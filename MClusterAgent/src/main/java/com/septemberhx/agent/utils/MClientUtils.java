@@ -10,7 +10,10 @@ import com.septemberhx.common.utils.MRequestUtils;
 import com.septemberhx.common.utils.MUrlUtils;
 import io.kubernetes.client.models.*;
 import io.kubernetes.client.util.Yaml;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMethod;
 
@@ -29,13 +32,15 @@ public class MClientUtils {
     @Autowired
     private MServiceManager clusterMiddleware;
 
-    private static MDockerManager dockerManager = new MDockerManagerK8SImpl();
-    private static MClientUtils instance = null;
-    private static Map<String, MDeployPodRequest> podDuringDeploying = new HashMap<>();  // deployed but not running
+    @Value("${mclientagent.server.ip}")
+    private String serverIpAddr;
 
-    public MClientUtils() {
-//        instance = this;
-    }
+    @Value("${mclientagent.server.port}")
+    private Integer serverPort;
+
+    private static MDockerManager dockerManager = new MDockerManagerK8SImpl();
+    private Map<String, MDeployPodRequest> podDuringDeploying = new HashMap<>();  // deployed but not running
+    private static Logger logger = LogManager.getLogger(MClientUtils.class);
 
     public static void sendRestInfo(URI uri, MInstanceRestInfoBean infoBean) {
         MRequestUtils.sendRequest(uri, infoBean, Object.class, RequestMethod.POST);
@@ -200,8 +205,25 @@ public class MClientUtils {
         try {
             V1Pod pod = dockerManager.deployInstanceOnNode(mDeployPodRequest.getNodeId(), mDeployPodRequest.getPodBody());
             podDuringDeploying.put(pod.getMetadata().getName(), mDeployPodRequest);
+            logger.info("Job " + mDeployPodRequest.getId() + " dispatched");
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public boolean notifyDeployJobFinished(MInstanceInfoBean infoBean) {
+        if (infoBean.getDockerInfo() == null) return false;
+        String instanceId = infoBean.getDockerInfo().getInstanceId();
+        if (!this.podDuringDeploying.containsKey(instanceId)) return false;
+
+        String jobId = podDuringDeploying.get(infoBean.getDockerInfo().getInstanceId()).getId();
+        URI jobNotifyUri = MUrlUtils.getMServerNotifyJobUri(serverIpAddr, serverPort);
+        Map<String, String> paraMap = new HashMap<>();
+        paraMap.put("jobId", jobId);
+        MRequestUtils.sendRequest(jobNotifyUri, paraMap, null, RequestMethod.GET);
+
+        logger.info("Job " + jobId + " finished and notified");
+        this.podDuringDeploying.remove(instanceId);
+        return true;
     }
 }

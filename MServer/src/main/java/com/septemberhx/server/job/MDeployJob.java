@@ -1,5 +1,6 @@
 package com.septemberhx.server.job;
 
+import com.septemberhx.common.bean.MDeployPodRequest;
 import io.kubernetes.client.models.V1Pod;
 import lombok.Getter;
 import lombok.Setter;
@@ -18,5 +19,12 @@ public class MDeployJob extends MBaseJob {
     public MDeployJob() {
         type = MJobType.DEPLOY;
         this.id = type.toString() + "_" + UUID.randomUUID().toString();
+    }
+
+    public MDeployPodRequest toMDeployPodRequest() {
+        if (pod.getSpec().getContainers().size() > 0) {
+            pod.getSpec().getContainers().get(0).setImage(imageName);
+        }
+        return new MDeployPodRequest(id, nodeId, pod);
     }
 }

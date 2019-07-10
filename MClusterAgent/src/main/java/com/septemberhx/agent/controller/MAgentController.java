@@ -79,7 +79,6 @@ public class MAgentController {
         URI serverLoadUri = MUrlUtils.getMServerLoadInstanceInfoUri(this.serverIpAddr, this.serverPort);
         System.out.println(infoBean.toString());
         MRequestUtils.sendRequest(serverLoadUri, infoBean, null, RequestMethod.POST);
-
-        // todo: check if need to notify server that the instance is created by /deploy request
+        this.clientUtils.notifyDeployJobFinished(infoBean);
     }
 }

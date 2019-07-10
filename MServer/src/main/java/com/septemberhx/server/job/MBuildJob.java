@@ -30,7 +30,7 @@ public class MBuildJob extends MBaseJob {
     }
 
     public String getImageFullName() {
-        return OWNER + "/" + this.getImageName();
+        return OWNER + "/" + this.getImageName() + ":" + this.getImageTag();
     }
 
     public MBuildInfoRequest toBuildInfoRequest() {

@@ -23,6 +23,9 @@ public class MJobExecutor {
                 logger.info("Build job info send");
                 break;
             case DEPLOY:
+                MDeployJob deployJob = (MDeployJob) job;
+                MServerUtils.sendDeployInfo(deployJob.toMDeployPodRequest());
+                logger.info("Deploy job info send");
                 break;
             case NOTIFY:
                 break;

@@ -77,8 +77,8 @@ public class MServerController {
         buildJob.setGitUrl("git@192.168.1.104:SeptemberHX/mframework.git");
         buildJob.setBranch("master");
         buildJob.setProjectName("MFramework");
-        buildJob.setModuleName("sampleservice2");
-        buildJob.setImageTag("v1.0.2");
+        buildJob.setModuleName("SampleService2");
+        buildJob.setImageTag("v1.0.3");
         buildJob.setGitTag(null);
         testJob.addSubJob(buildJob);
 

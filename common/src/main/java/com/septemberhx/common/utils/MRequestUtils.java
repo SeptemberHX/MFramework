@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
+import java.util.Map;
 
 public class MRequestUtils {
 
@@ -20,6 +21,10 @@ public class MRequestUtils {
         try {
             switch (method) {
                 case GET:
+                    if (paramObj != null) {
+                        Map<String, String> paraMap = (Map) paramObj;
+                        uri = MUrlUtils.getRemoteUriWithQueries(uri, paraMap);
+                    }
                     entity = MRequestUtils.restTemplate.getForEntity(uri, returnClass);
                     break;
                 case POST:
