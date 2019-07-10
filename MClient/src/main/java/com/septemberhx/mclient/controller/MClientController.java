@@ -4,6 +4,7 @@ import com.netflix.appinfo.ApplicationInfoManager;
 import com.netflix.discovery.EurekaClient;
 import com.septemberhx.common.base.MClusterConfig;
 import com.septemberhx.common.bean.MApiContinueRequest;
+import com.septemberhx.common.bean.MApiSplitBean;
 import com.septemberhx.common.bean.MClientInfoBean;
 import com.septemberhx.common.bean.MInstanceRestInfoBean;
 import com.septemberhx.mclient.core.MClientSkeleton;
@@ -74,7 +75,9 @@ public class MClientController {
 
     @RequestMapping(path = "/setApiContinueStatus", method = RequestMethod.POST)
     public void setApiContinueStatus(@RequestBody MApiContinueRequest continueStatus) {
-        MClientSkeleton.getInstance().setApiContinueStatus(continueStatus);
+        for (MApiSplitBean splitBean : continueStatus.getSplitBeans()) {
+            MClientSkeleton.getInstance().setApiContinueStatus(splitBean);
+        }
     }
 
     @ResponseBody

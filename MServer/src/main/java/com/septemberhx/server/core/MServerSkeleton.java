@@ -28,9 +28,13 @@ public class MServerSkeleton {
     @Getter
     private MJobManager jobManager = new MJobManager();
 
+    @Getter
+    private MRepoManager repoManager;
+
     private MServerSkeleton() {
         this.remoteInstanceIdMap = new HashMap<>();
         this.currModel = new MSystemModel();
+        this.repoManager = MRepoManager.loadFromFile("./project.json");
     }
 
     public static MServerSkeleton getInstance() {
@@ -46,6 +50,10 @@ public class MServerSkeleton {
 
     public void updateInstanceInfo(MInstanceInfoBean infoBean) {
         this.currModel.loadInstanceInfo(infoBean);
+    }
+
+    public Optional<MServiceInstance> getInstanceInfo(String instanceId) {
+        return this.currModel.getInstanceById(instanceId);
     }
 
     // Remote Uri stuffs below ---------------------------------

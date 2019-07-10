@@ -29,6 +29,10 @@ public class MRepoManager {
         return result;
     }
 
+    public MApiInfo getApiInfo(MClassFunctionPair classFunctionPair) {
+        return this.getApiInfoByClassNameAndFunctionName(classFunctionPair.getClassName(), classFunctionPair.getFunctionName());
+    }
+
     public void addProject(MProjectInfo projectInfo) {
         this.projectInfoMap.put(projectInfo.getName(), projectInfo);
     }
@@ -56,11 +60,11 @@ public class MRepoManager {
         return result;
     }
 
-    public List<MClassFunctionPair> breakApiChains(MApiInfo apiInfo, String breakClassName, String breakFunctionName) {
+    public List<MClassFunctionPair> breakApiChains(MApiInfo apiInfo, MClassFunctionPair classFunctionPair) {
         List<MClassFunctionPair> resultList = new ArrayList<>();
         boolean ifMeetBreakPoint = false;
         for (MClassFunctionPair pair : apiInfo.getCompositionList()) {
-            if (pair.getClassName().equals(breakClassName) && pair.getFunctionName().equals(breakFunctionName)) {
+            if (pair.getClassName().equals(classFunctionPair.getClassName()) && pair.getFunctionName().equals(classFunctionPair.getFunctionName())) {
                 ifMeetBreakPoint = true;
             }
 
@@ -91,9 +95,9 @@ public class MRepoManager {
         repoManager.saveToFile("./project.json");
     }
 
-    public static void main(String[] args) {
-        MRepoManager repoManager = MRepoManager.loadFromFile("./project.json");
-        MApiInfo apiInfo = repoManager.getApiInfoByClassNameAndFunctionName("com.septemberhx.sampleservice1.controller.S1Controller", "wrapper");
-        System.out.println(repoManager.breakApiChains(apiInfo, "com.septemberhx.sampleservice2.controller.S2Controller", "wrapper"));
-    }
+//    public static void main(String[] args) {
+//        MRepoManager repoManager = MRepoManager.loadFromFile("./project.json");
+//        MApiInfo apiInfo = repoManager.getApiInfoByClassNameAndFunctionName("com.septemberhx.sampleservice1.controller.S1Controller", "wrapper");
+//        System.out.println(repoManager.breakApiChains(apiInfo, "com.septemberhx.sampleservice2.controller.S2Controller", "wrapper"));
+//    }
 }

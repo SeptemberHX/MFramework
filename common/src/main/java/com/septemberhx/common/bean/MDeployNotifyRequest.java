@@ -16,10 +16,12 @@ public class MDeployNotifyRequest {
 
     private String id;
     private DeployStatus status;
+    private String instanceId;
 
-    public MDeployNotifyRequest(String id, DeployStatus status) {
+    public MDeployNotifyRequest(String id, String instanceId) {
         this.id = id;
-        this.status = status;
+        this.status = DeployStatus.SUCCESS;
+        this.instanceId = instanceId;
     }
 
     public MDeployNotifyRequest() {

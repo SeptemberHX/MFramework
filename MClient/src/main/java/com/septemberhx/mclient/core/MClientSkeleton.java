@@ -4,6 +4,7 @@ import com.netflix.appinfo.InstanceInfo;
 import com.netflix.discovery.EurekaClient;
 import com.netflix.discovery.shared.Application;
 import com.septemberhx.common.bean.MApiContinueRequest;
+import com.septemberhx.common.bean.MApiSplitBean;
 import com.septemberhx.common.bean.MGetRemoteUriRequest;
 import com.septemberhx.common.bean.MInstanceRestInfoBean;
 import com.septemberhx.common.utils.MRequestUtils;
@@ -145,11 +146,11 @@ public class MClientSkeleton {
         return MClientSkeleton.getInstance().checkIfHasRestInfo(mObjectId, functionName);
     }
 
-    public void setApiContinueStatus(MApiContinueRequest request) {
-        if (!this.apiContinueMap.containsKey(request.getObjectId())) {
-            this.apiContinueMap.put(request.getObjectId(), new HashMap<>());
+    public void setApiContinueStatus(MApiSplitBean apiSplitBean) {
+        if (!this.apiContinueMap.containsKey(apiSplitBean.getObjectId())) {
+            this.apiContinueMap.put(apiSplitBean.getObjectId(), new HashMap<>());
         }
-        this.apiContinueMap.get(request.getObjectId()).put(request.getFunctionName(), request.getStatus());
+        this.apiContinueMap.get(apiSplitBean.getObjectId()).put(apiSplitBean.getFunctionName(), apiSplitBean.getStatus());
     }
 
     public static boolean checkIfContinue(String mObjectId, String functionName) {

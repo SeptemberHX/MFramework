@@ -108,4 +108,10 @@ public class MServerUtils {
         MRequestUtils.sendRequest(deployUri, mDeployPodRequest, null, RequestMethod.POST);
         logger.info(mDeployPodRequest);
     }
+
+    public static void sendSetApiCSInfo(MS2CSetApiCStatus ms2CSetApiCStatus) {
+        URI setUri = MUrlUtils.getMClusterAgentSetApiCStatus(mClusterIpAddr, mClusterPort);
+        MRequestUtils.sendRequest(setUri, ms2CSetApiCStatus, null, RequestMethod.POST);
+        logger.info(ms2CSetApiCStatus);
+    }
 }

@@ -81,4 +81,10 @@ public class MAgentController {
         MRequestUtils.sendRequest(serverLoadUri, infoBean, null, RequestMethod.POST);
         this.clientUtils.notifyDeployJobFinished(infoBean);
     }
+
+    @RequestMapping(path = "/setApiContinueStatus", method = RequestMethod.POST)
+    public void setApiContinueStatus(@RequestBody MS2CSetApiCStatus ms2CSetApiCStatus) {
+        MInstanceInfoBean infoBean = this.clientUtils.getInstanceInfoById(ms2CSetApiCStatus.getInstanceId());
+        MRequestUtils.sendRequest(MUrlUtils.getMClientSetApiCStatus(infoBean.getIp(), infoBean.getPort()), ms2CSetApiCStatus.getApiContinueRequest(), null, RequestMethod.POST);
+    }
 }

@@ -5,10 +5,7 @@ import com.septemberhx.server.base.MServiceInstance;
 import com.septemberhx.server.core.MServerSkeleton;
 import com.septemberhx.server.core.MSnapshot;
 import com.septemberhx.server.core.MSystemModel;
-import com.septemberhx.server.job.MBuildJob;
-import com.septemberhx.server.job.MDeployJob;
-import com.septemberhx.server.job.MJobExecutor;
-import com.septemberhx.server.job.MSplitJob;
+import com.septemberhx.server.job.*;
 import com.septemberhx.server.utils.MServerUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -68,9 +65,15 @@ public class MServerController {
         MJobExecutor.nextJob(buildJobId);
     }
 
-    @RequestMapping(path = "/test", method = RequestMethod.GET)
-    public void test() {
-        MSplitJob testJob = new MSplitJob();
+    @RequestMapping(path = "/notifyDeployJob", method = RequestMethod.POST)
+    public void deployJobNotify(@RequestBody MDeployNotifyRequest deployNotifyRequest) {
+        MJobExecutor.concludeWork(deployNotifyRequest.getId(), new MDeployJobResult(deployNotifyRequest));
+        MJobExecutor.nextJob(deployNotifyRequest.getId());
+    }
+
+    @RequestMapping(path = "/test", method = RequestMethod.POST)
+    public void test(@RequestBody MSplitJob testJob) {
+//        MSplitJob testJob = new MSplitJob();
 
         // sub job 1: build sampleservice2
         MBuildJob buildJob = new MBuildJob();
@@ -78,16 +81,18 @@ public class MServerController {
         buildJob.setBranch("master");
         buildJob.setProjectName("MFramework");
         buildJob.setModuleName("SampleService2");
-        buildJob.setImageTag("v1.0.3");
+        buildJob.setImageTag("v1.0.4");
         buildJob.setGitTag(null);
-        testJob.addSubJob(buildJob);
+//        testJob.addSubJob(buildJob);
 
         // sub job 2: deploy sampleservice2
         MDeployJob deployJob = new MDeployJob();
         deployJob.setImageName(buildJob.getImageFullName());
         deployJob.setNodeId("ices-104");
         deployJob.setPod(MServerUtils.readPodYaml("sampleservice2"));
-        testJob.addSubJob(deployJob);
+//        testJob.addSubJob(deployJob);
+
+        testJob.addSubJob(new MNotifyJob());
 
         MServerSkeleton.getInstance().getJobManager().addJob(testJob);
         MJobExecutor.doJob(testJob);

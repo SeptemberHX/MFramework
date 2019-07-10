@@ -15,4 +15,7 @@ public class MClassFunctionPair {
         this.className = className;
         this.functionName = functionName;
     }
+
+    public MClassFunctionPair() {
+    }
 }

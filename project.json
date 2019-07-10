@@ -8,12 +8,12 @@
           "name": "SampleService1",
           "apiInfoList": [
             {
-              "className": "com.septemberhx.sampleservice1.controller.S1Controller",
+              "className": "com.septemberhx.sampleservice1.Controller.S1Controller",
               "functionName": "wrapper",
               "pattern": "/wrapper",
               "compositionList": [
                 {
-                  "className": "com.septemberhx.sampleservice1.controller.S1Controller",
+                  "className": "com.septemberhx.sampleservice1.Controller.S1Controller",
                   "functionName": "wrapper"
                 },
                 {

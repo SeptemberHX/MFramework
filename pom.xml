@@ -22,8 +22,7 @@
     <properties>
         <compiler.target>1.8</compiler.target>
         <compiler.source>1.8</compiler.source>
-        <springboot.version>2.1.1.RELEASE</springboot.version>
-        <springcloud.version>2.1.0.RELEASE</springcloud.version>
+        <springboot.version>2.1.6.RELEASE</springboot.version>
+        <springcloud.version>2.1.2.RELEASE</springcloud.version>
     </properties>
-
 </project>

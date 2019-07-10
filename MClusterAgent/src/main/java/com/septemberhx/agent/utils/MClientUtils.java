@@ -144,7 +144,6 @@ public class MClientUtils {
      */
     public MInstanceInfoBean transformInstance(InstanceInfo instanceInfo, int backwardPort) {
         MInstanceInfoBean instanceInfoBean = new MInstanceInfoBean();
-        System.out.println(instanceInfo.getMetadata());
 
         if (!instanceInfo.getMetadata().containsKey(MClusterConfig.MCLUSTER_SERVICE_METADATA_NAME)
                 || !instanceInfo.getMetadata().get(MClusterConfig.MCLUSTER_SERVICE_METADATA_NAME).equals(
@@ -217,10 +216,8 @@ public class MClientUtils {
         if (!this.podDuringDeploying.containsKey(instanceId)) return false;
 
         String jobId = podDuringDeploying.get(infoBean.getDockerInfo().getInstanceId()).getId();
-        URI jobNotifyUri = MUrlUtils.getMServerNotifyJobUri(serverIpAddr, serverPort);
-        Map<String, String> paraMap = new HashMap<>();
-        paraMap.put("jobId", jobId);
-        MRequestUtils.sendRequest(jobNotifyUri, paraMap, null, RequestMethod.GET);
+        MDeployNotifyRequest deployNotifyRequest = new MDeployNotifyRequest(jobId, instanceId);
+        MRequestUtils.sendRequest(MUrlUtils.getMServerDeployNotifyJobUri(serverIpAddr, serverPort), deployNotifyRequest, null, RequestMethod.POST);
 
         logger.info("Job " + jobId + " finished and notified");
         this.podDuringDeploying.remove(instanceId);

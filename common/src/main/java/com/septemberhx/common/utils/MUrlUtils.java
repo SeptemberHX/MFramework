@@ -67,6 +67,18 @@ public class MUrlUtils {
         return MUrlUtils.getRemoteUri(serverIpAddr, serverPort, MClusterConfig.MSERVER_JOB_NOTIFY_URI);
     }
 
+    public static URI getMServerDeployNotifyJobUri(String serverIpAddr, int serverPort) {
+        return MUrlUtils.getRemoteUri(serverIpAddr, serverPort, MClusterConfig.MSERVER_DEPLOY_JOB_NOTIFY_URI);
+    }
+
+    public static URI getMClientSetApiCStatus(String instanceIpAddr, int port) {
+        return MUrlUtils.getRemoteUri(instanceIpAddr, port, MClusterConfig.MCLIENT_SET_APICS_URI);
+    }
+
+    public static URI getMClusterAgentSetApiCStatus(String clusterAgentIpAddr, int port) {
+        return MUrlUtils.getRemoteUri(clusterAgentIpAddr, port, MClusterConfig.MCLUSTERAGENT_SET_APICS_URI);
+    }
+
     public static URI getRemoteUri(String ipAddr, int port, String path) {
         URI uri = null;
         try {
