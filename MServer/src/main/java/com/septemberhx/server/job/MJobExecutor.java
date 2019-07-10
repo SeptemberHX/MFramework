@@ -112,12 +112,17 @@ public class MJobExecutor {
         finishedJobOp.ifPresent(finishedJob -> {
             logger.info("Execute job " + finishedJob.getId() + " finished");
             finishedJob.setCompleted(true);
+
+            if (jobResult == null) return;
+
             Optional<MBaseJob> parentJobOp = jobManager.getById(finishedJob.getParentId());
             parentJobOp.ifPresent(parentJob -> {
                 switch (parentJob.getType()) {
                     case SPLIT:
-                        MDeployJobResult deployJobResult = (MDeployJobResult) jobResult;
-                        jobManager.addResult(parentJob.getId(), deployJobResult.getInstanceId());
+                        if (jobResult.getType() == MJobType.DEPLOY) {
+                            MDeployJobResult deployJobResult = (MDeployJobResult) jobResult;
+                            jobManager.addResult(parentJob.getId(), deployJobResult.getInstanceId());
+                        }
                         break;
                     default:
                         break;

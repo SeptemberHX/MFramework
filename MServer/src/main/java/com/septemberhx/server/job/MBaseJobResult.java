@@ -9,4 +9,5 @@ import lombok.ToString;
 @ToString
 public class MBaseJobResult {
     protected String jobId;
+    protected MJobType type;
 }

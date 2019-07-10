@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    app: sampleservice3
+  generateName: sampleservice3-
+spec:
+  containers:
+    - name: sampleservice3
+      image: 192.168.1.104:5000/septemberhx/sampleservice2:v1.1.16
+      ports:
+        - containerPort: 8802

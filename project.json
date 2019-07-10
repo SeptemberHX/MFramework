@@ -8,16 +8,16 @@
           "name": "SampleService1",
           "apiInfoList": [
             {
-              "className": "com.septemberhx.sampleservice1.Controller.S1Controller",
+              "className": "com.septemberhx.sampleservice1.controller.S1Controller",
               "functionName": "wrapper",
               "pattern": "/wrapper",
               "compositionList": [
                 {
-                  "className": "com.septemberhx.sampleservice1.Controller.S1Controller",
+                  "className": "com.septemberhx.sampleservice1.controller.S1Controller",
                   "functionName": "wrapper"
                 },
                 {
-                  "className": "com.septemberhx.sampleservice2.controller.S2Controller",
+                  "className": "com.septemberhx.sampleservice3.controller.OtherController",
                   "functionName": "wrapper"
                 }
               ]
@@ -29,6 +29,17 @@
           "apiInfoList": [
             {
               "className": "com.septemberhx.sampleservice2.controller.S2Controller",
+              "functionName": "wrapper",
+              "pattern": "/age",
+              "compositionList": []
+            }
+          ]
+        },
+        "SampleService3": {
+          "name": "SampleService3",
+          "apiInfoList": [
+            {
+              "className": "com.septemberhx.sampleservice3.controller.OtherController",
               "functionName": "wrapper",
               "pattern": "/age",
               "compositionList": []

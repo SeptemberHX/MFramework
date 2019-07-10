@@ -62,6 +62,7 @@ public class MServerController {
 
     @RequestMapping(path = "/notifyJob", method = RequestMethod.GET)
     public void jobNotify(@RequestParam("jobId") String buildJobId) {
+        MJobExecutor.concludeWork(buildJobId, null);
         MJobExecutor.nextJob(buildJobId);
     }
 
@@ -80,17 +81,17 @@ public class MServerController {
         buildJob.setGitUrl("git@192.168.1.104:SeptemberHX/mframework.git");
         buildJob.setBranch("master");
         buildJob.setProjectName("MFramework");
-        buildJob.setModuleName("SampleService2");
-        buildJob.setImageTag("v1.0.4");
+        buildJob.setModuleName("SampleService3");
+        buildJob.setImageTag("v1.0.5");
         buildJob.setGitTag(null);
-//        testJob.addSubJob(buildJob);
+        testJob.addSubJob(buildJob);
 
         // sub job 2: deploy sampleservice2
         MDeployJob deployJob = new MDeployJob();
         deployJob.setImageName(buildJob.getImageFullName());
         deployJob.setNodeId("ices-104");
-        deployJob.setPod(MServerUtils.readPodYaml("sampleservice2"));
-//        testJob.addSubJob(deployJob);
+        deployJob.setPod(MServerUtils.readPodYaml("sampleservice3"));
+        testJob.addSubJob(deployJob);
 
         testJob.addSubJob(new MNotifyJob());
 

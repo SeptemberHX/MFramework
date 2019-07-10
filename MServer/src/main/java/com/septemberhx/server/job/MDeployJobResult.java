@@ -14,5 +14,6 @@ public class MDeployJobResult extends MBaseJobResult {
     public MDeployJobResult(MDeployNotifyRequest deployNotifyRequest) {
         this.jobId = deployNotifyRequest.getId();
         this.instanceId = deployNotifyRequest.getInstanceId();
+        this.type = MJobType.DEPLOY;
     }
 }

@@ -16,6 +16,7 @@
         <module>SampleService1</module>
         <module>SampleService2</module>
         <module>MEurekaServer</module>
+        <module>SampleService3</module>
     </modules>
     <packaging>pom</packaging>
 
