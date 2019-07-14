@@ -3,17 +3,14 @@ package com.septemberhx.server.controller;
 import com.septemberhx.common.bean.*;
 import com.septemberhx.server.base.MServiceInstance;
 import com.septemberhx.server.core.MServerSkeleton;
-import com.septemberhx.server.core.MSnapshot;
-import com.septemberhx.server.core.MSystemModel;
 import com.septemberhx.server.job.*;
 import com.septemberhx.server.utils.MServerUtils;
-import org.springframework.beans.factory.annotation.Value;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -21,19 +18,19 @@ import java.util.List;
 @RequestMapping("/mserver")
 public class MServerController {
 
+    private static Logger logger = LogManager.getLogger(MServerController.class);
+
     @ResponseBody
     @RequestMapping(path = "/loadInstanceInfo", method = RequestMethod.POST)
     public void loadInstanceInfo(@RequestBody MInstanceInfoBean instanceInfo) {
-        System.out.println(instanceInfo);
-
-        MSystemModel systemModel = MSnapshot.getInstance().getSystemModel();
-        systemModel.loadInstanceInfo(instanceInfo);
+        logger.info(instanceInfo);
+        MServerSkeleton.getInstance().updateInstanceInfo(instanceInfo);
     }
 
     @ResponseBody
     @RequestMapping(path = "/allInstance", method = RequestMethod.GET)
     public List<MServiceInstance> getAllServiceInstance() {
-        return MSnapshot.getInstance().getSystemModel().getAllServiceInstance();
+        return MServerSkeleton.getInstance().getAllInstanceInfos();
     }
 
     @ResponseBody
@@ -63,13 +60,13 @@ public class MServerController {
     @RequestMapping(path = "/notifyJob", method = RequestMethod.GET)
     public void jobNotify(@RequestParam("jobId") String buildJobId) {
         MJobExecutor.concludeWork(buildJobId, null);
-        MJobExecutor.nextJob(buildJobId);
+        MJobExecutor.doNextJobs(buildJobId);
     }
 
     @RequestMapping(path = "/notifyDeployJob", method = RequestMethod.POST)
     public void deployJobNotify(@RequestBody MDeployNotifyRequest deployNotifyRequest) {
         MJobExecutor.concludeWork(deployNotifyRequest.getId(), new MDeployJobResult(deployNotifyRequest));
-        MJobExecutor.nextJob(deployNotifyRequest.getId());
+        MJobExecutor.doNextJobs(deployNotifyRequest.getId());
     }
 
     @RequestMapping(path = "/test", method = RequestMethod.POST)

@@ -210,7 +210,7 @@ public class MClientUtils {
         }
     }
 
-    public boolean notifyDeployJobFinished(MInstanceInfoBean infoBean) {
+    public synchronized boolean notifyDeployJobFinished(MInstanceInfoBean infoBean) {
         if (infoBean.getDockerInfo() == null) return false;
         String instanceId = infoBean.getDockerInfo().getInstanceId();
         if (!this.podDuringDeploying.containsKey(instanceId)) return false;

@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 
 import java.net.URI;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -54,6 +55,10 @@ public class MServerSkeleton {
 
     public Optional<MServiceInstance> getInstanceInfo(String instanceId) {
         return this.currModel.getInstanceById(instanceId);
+    }
+
+    public List<MServiceInstance> getAllInstanceInfos() {
+        return this.currModel.getAllServiceInstance();
     }
 
     // Remote Uri stuffs below ---------------------------------

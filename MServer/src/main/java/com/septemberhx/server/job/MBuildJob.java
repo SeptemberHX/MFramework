@@ -23,6 +23,7 @@ public class MBuildJob extends MBaseJob {
     public MBuildJob() {
         type = MJobType.BUILD;
         this.id = type.toString() + "_" + UUID.randomUUID().toString();
+        this.priority = BUILD;
     }
 
     public String getImageName() {

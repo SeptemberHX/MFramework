@@ -13,5 +13,6 @@ public class MNotifyJob extends MBaseJob {
     public MNotifyJob() {
         type = MJobType.NOTIFY;
         this.id = type.toString() + "_" + UUID.randomUUID().toString();
+        this.priority = NOTIFY;
     }
 }

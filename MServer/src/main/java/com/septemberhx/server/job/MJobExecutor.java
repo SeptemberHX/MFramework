@@ -8,7 +8,6 @@ import com.septemberhx.server.base.MServiceInstance;
 import com.septemberhx.server.core.MJobManager;
 import com.septemberhx.server.core.MRepoManager;
 import com.septemberhx.server.core.MServerSkeleton;
-import com.septemberhx.server.utils.MServerUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -27,19 +26,24 @@ public class MJobExecutor {
         switch (job.getType()) {
             case BUILD:
                 MBuildJob buildJob = (MBuildJob) job;
-                MServerUtils.sendBuildInfo(buildJob.toBuildInfoRequest());
+//                MServerUtils.sendBuildInfo(buildJob.toBuildInfoRequest());
+                buildJob.markAsDoing();
                 logger.info("Build job info send");
                 break;
             case DEPLOY:
                 MDeployJob deployJob = (MDeployJob) job;
-                MServerUtils.sendDeployInfo(deployJob.toMDeployPodRequest());
+//                MServerUtils.sendDeployInfo(deployJob.toMDeployPodRequest());
+                deployJob.markAsDoing();
                 logger.info("Deploy job info send");
                 break;
             case NOTIFY:
                 doNotifyJob((MNotifyJob) job);
                 break;
             case SPLIT:
-                doJob(job.nextJob());
+                MBaseJob nextJob;
+                while ((nextJob = job.nextJob()) != null) {
+                    MJobExecutor.doJob(nextJob);
+                }
                 break;
             default:
                 break;
@@ -80,8 +84,10 @@ public class MJobExecutor {
                         ms2CSetApiCStatus.setApiContinueRequest(apiContinueRequest);
                         logger.debug(ms2CSetApiCStatus);
 
-                        MServerUtils.sendSetApiCSInfo(ms2CSetApiCStatus);
+//                        MServerUtils.sendSetApiCSInfo(ms2CSetApiCStatus);
                     });
+                    notifyJob.markAsDone();
+                    doNextJobs(notifyJob.getId());
                     break;
                 default:
                     break;
@@ -89,7 +95,7 @@ public class MJobExecutor {
         });
     }
 
-    public static void nextJob(String prevJobId) {
+    public static void doNextJobs(String prevJobId) {
         MJobManager jobManager = MServerSkeleton.getInstance().getJobManager();
         Optional<MBaseJob> prevJob = jobManager.getById(prevJobId);
         prevJob.ifPresent(job -> {
@@ -97,10 +103,12 @@ public class MJobExecutor {
             parentJobOp.ifPresent(parentJob -> {
                 MBaseJob nextJob = parentJob.nextJob();
                 if (nextJob != null) {
-                    MJobExecutor.doJob(nextJob);
+                    while ((nextJob = parentJob.nextJob()) != null) {
+                        MJobExecutor.doJob(nextJob);
+                    }
                 } else {
                     logger.info("Execute job " + parentJob.getId() + " finished");
-                    parentJob.setCompleted(true);
+                    parentJob.markAsDone();
                 }
             });
         });
@@ -111,7 +119,7 @@ public class MJobExecutor {
         Optional<MBaseJob> finishedJobOp = jobManager.getById(finishedJobId);
         finishedJobOp.ifPresent(finishedJob -> {
             logger.info("Execute job " + finishedJob.getId() + " finished");
-            finishedJob.setCompleted(true);
+            finishedJob.markAsDone();
 
             if (jobResult == null) return;
 

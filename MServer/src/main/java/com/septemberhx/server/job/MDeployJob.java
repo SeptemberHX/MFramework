@@ -19,6 +19,7 @@ public class MDeployJob extends MBaseJob {
     public MDeployJob() {
         type = MJobType.DEPLOY;
         this.id = type.toString() + "_" + UUID.randomUUID().toString();
+        this.priority = DEPLOY;
     }
 
     public MDeployPodRequest toMDeployPodRequest() {
