@@ -1,6 +1,6 @@
 package com.septemberhx.server.job;
 
-import com.septemberhx.server.base.MClassFunctionPair;
+import com.septemberhx.common.base.MClassFunctionPair;
 import lombok.Getter;
 import lombok.Setter;
 

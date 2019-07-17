@@ -59,6 +59,10 @@ public class MUrlUtils {
         return MUrlUtils.getRemoteUri(buildCenterIpAddr, buildCenterPort, MClusterConfig.BUILD_CENTER_BUILD_URI);
     }
 
+    public static URI getBuildCenterCBuildUri(String buildCenterIpAddr, int buildCenterPort) {
+        return MUrlUtils.getRemoteUri(buildCenterIpAddr, buildCenterPort, MClusterConfig.BUILD_CENTER_CBUILD_URI);
+    }
+
     public static URI getMClientAgentDeployUri(String clusterAgentIpAddr, int port) {
         return MUrlUtils.getRemoteUri(clusterAgentIpAddr, port, MClusterConfig.MCLUSTERAGENT_DEPLOY_URI);
     }

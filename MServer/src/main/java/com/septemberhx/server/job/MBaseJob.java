@@ -27,6 +27,7 @@ public class MBaseJob extends MBaseObject {
     protected Integer priority;
 
     public static Integer BUILD = 1;
+    public static Integer CBUILD = 1;
     public static Integer DEPLOY = 21;
     public static Integer NOTIFY = 41;
 

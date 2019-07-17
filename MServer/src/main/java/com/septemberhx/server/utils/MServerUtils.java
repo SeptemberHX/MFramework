@@ -97,10 +97,24 @@ public class MServerUtils {
         return pod;
     }
 
+    public static V1Pod getCompositionYaml(String serviceName) {
+        V1Pod pod = readPodYaml("composition");
+        pod.getMetadata().setGenerateName(serviceName + '-');
+        pod.getSpec().getContainers().get(0).setName(serviceName);
+        pod.getMetadata().getLabels().put("app", serviceName);
+        return pod;
+    }
+
     public static void sendBuildInfo(MBuildInfoRequest mBuildInfoRequest) {
         URI buildUri = MUrlUtils.getBuildCenterBuildUri(buildCenterIpAddr, buildCenterPort);
         MRequestUtils.sendRequest(buildUri, mBuildInfoRequest, null, RequestMethod.POST);
         logger.info(mBuildInfoRequest);
+    }
+
+    public static void sendCBuildInfo(MCompositionRequest mCompositionRequest) {
+        URI cBuildUri = MUrlUtils.getBuildCenterCBuildUri(buildCenterIpAddr, buildCenterPort);
+        MRequestUtils.sendRequest(cBuildUri, mCompositionRequest, null, RequestMethod.POST);
+        logger.info(mCompositionRequest);
     }
 
     public static void sendDeployInfo(MDeployPodRequest mDeployPodRequest) {

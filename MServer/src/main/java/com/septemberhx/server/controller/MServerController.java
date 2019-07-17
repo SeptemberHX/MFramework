@@ -59,6 +59,7 @@ public class MServerController {
 
     @RequestMapping(path = "/notifyJob", method = RequestMethod.GET)
     public void jobNotify(@RequestParam("jobId") String buildJobId) {
+        logger.info("Job " + buildJobId + " notify accepted");
         MJobExecutor.concludeWork(buildJobId, null);
         MJobExecutor.doNextJobs(buildJobId);
     }
@@ -94,5 +95,25 @@ public class MServerController {
 
         MServerSkeleton.getInstance().getJobManager().addJob(testJob);
         MJobExecutor.doJob(testJob);
+    }
+
+    @RequestMapping(path = "/test2", method = RequestMethod.POST)
+    public void test2(@RequestBody MCompositionRequest compositionRequest) {
+        MCompositionJob compositionJob = new MCompositionJob();
+        compositionJob.setCompositionRequest(compositionRequest);
+
+        MCBuildJob mcBuildJob = new MCBuildJob();
+        compositionRequest.setId(mcBuildJob.getId());
+        mcBuildJob.setCompositionRequest(compositionRequest);
+        compositionJob.addSubJob(mcBuildJob);
+
+        MDeployJob deployJob = new MDeployJob();
+        deployJob.setImageName(mcBuildJob.getImageFullName());
+        deployJob.setNodeId("ices-104");
+        deployJob.setPod(MServerUtils.getCompositionYaml(compositionRequest.getName()));
+        compositionJob.addSubJob(deployJob);
+        MServerSkeleton.getInstance().getJobManager().addJob(compositionJob);
+
+        MJobExecutor.doJob(compositionJob);
     }
 }

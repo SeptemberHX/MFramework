@@ -1,9 +1,9 @@
 package com.septemberhx.server.base;
 
+import com.septemberhx.common.base.MClassFunctionPair;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import org.javatuples.Pair;
 
 import java.util.ArrayList;
 import java.util.List;

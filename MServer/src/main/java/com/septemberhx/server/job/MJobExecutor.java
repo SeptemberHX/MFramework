@@ -3,11 +3,12 @@ package com.septemberhx.server.job;
 import com.septemberhx.common.bean.MApiContinueRequest;
 import com.septemberhx.common.bean.MApiSplitBean;
 import com.septemberhx.common.bean.MS2CSetApiCStatus;
-import com.septemberhx.server.base.MClassFunctionPair;
+import com.septemberhx.common.base.MClassFunctionPair;
 import com.septemberhx.server.base.MServiceInstance;
 import com.septemberhx.server.core.MJobManager;
 import com.septemberhx.server.core.MRepoManager;
 import com.septemberhx.server.core.MServerSkeleton;
+import com.septemberhx.server.utils.MServerUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -26,13 +27,19 @@ public class MJobExecutor {
         switch (job.getType()) {
             case BUILD:
                 MBuildJob buildJob = (MBuildJob) job;
-//                MServerUtils.sendBuildInfo(buildJob.toBuildInfoRequest());
+                MServerUtils.sendBuildInfo(buildJob.toBuildInfoRequest());
                 buildJob.markAsDoing();
                 logger.info("Build job info send");
                 break;
+            case CBUILD:
+                MCBuildJob mcBuildJob = (MCBuildJob) job;
+                MServerUtils.sendCBuildInfo(mcBuildJob.getCompositionRequest());
+                mcBuildJob.markAsDoing();
+                logger.info("CBuild job info send");
+                break;
             case DEPLOY:
                 MDeployJob deployJob = (MDeployJob) job;
-//                MServerUtils.sendDeployInfo(deployJob.toMDeployPodRequest());
+                MServerUtils.sendDeployInfo(deployJob.toMDeployPodRequest());
                 deployJob.markAsDoing();
                 logger.info("Deploy job info send");
                 break;
@@ -40,6 +47,7 @@ public class MJobExecutor {
                 doNotifyJob((MNotifyJob) job);
                 break;
             case SPLIT:
+            case COMPOSITE:
                 MBaseJob nextJob;
                 while ((nextJob = job.nextJob()) != null) {
                     MJobExecutor.doJob(nextJob);
@@ -84,7 +92,7 @@ public class MJobExecutor {
                         ms2CSetApiCStatus.setApiContinueRequest(apiContinueRequest);
                         logger.debug(ms2CSetApiCStatus);
 
-//                        MServerUtils.sendSetApiCSInfo(ms2CSetApiCStatus);
+                        MServerUtils.sendSetApiCSInfo(ms2CSetApiCStatus);
                     });
                     notifyJob.markAsDone();
                     doNextJobs(notifyJob.getId());
