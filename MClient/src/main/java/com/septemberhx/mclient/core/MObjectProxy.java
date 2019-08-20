@@ -6,7 +6,8 @@ import com.septemberhx.mclient.utils.RequestUtils;
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.MethodProxy;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.lang.reflect.Method;
 import java.util.List;
@@ -20,7 +21,7 @@ import java.util.List;
  */
 public class MObjectProxy implements MethodInterceptor {
 
-    private static Logger logger = Logger.getLogger(MObjectProxy.class);
+    private static Logger logger = LogManager.getLogger(MObjectProxy.class);
 
     private MObject target;
 

@@ -1,13 +1,13 @@
 package com.septemberhx.mclient.utils;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
-import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -21,7 +21,7 @@ import java.util.List;
 @Component
 public class RequestUtils {
 
-    public static Logger logger = Logger.getLogger(RequestUtils.class);
+    public static Logger logger = LogManager.getLogger(RequestUtils.class);
 
     public static List<String> getMethodParamNames(Method method) {
         DefaultParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();

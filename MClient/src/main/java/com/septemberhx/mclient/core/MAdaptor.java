@@ -1,7 +1,8 @@
 package com.septemberhx.mclient.core;
 
 import com.septemberhx.mclient.base.MObject;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -14,7 +15,7 @@ import java.util.Map;
 public class MAdaptor {
 
     private static volatile MAdaptor instance = new MAdaptor();
-    private static Logger logger = Logger.getLogger(MAdaptor.class);
+    private static Logger logger = LogManager.getLogger(MAdaptor.class);
     private Map<String, MObjectProxy> proxyMap;
 
     public static MAdaptor getInstance() {
