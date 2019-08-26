@@ -14,7 +14,12 @@ import org.joda.time.DateTime;
  */
 @Getter
 @Setter
-public abstract class MServiceBaseLog {
+public abstract class MServiceBaseLog implements Comparable<MServiceBaseLog> {
     private DateTime dateTime;  // the date time of the log
     private String objectId;  // the id of the MObject which writes the log
+
+    @Override
+    public int compareTo(MServiceBaseLog o) {
+        return this.getDateTime().compareTo(o.getDateTime());
+    }
 }

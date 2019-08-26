@@ -1,7 +1,11 @@
 package com.septemberhx.server.adaptive;
 
-import com.septemberhx.server.base.MAnalyserInput;
+import com.septemberhx.common.log.MServiceBaseLog;
 import com.septemberhx.server.base.MAnalyserResult;
+import lombok.Getter;
+import org.joda.time.DateTime;
+
+import java.util.List;
 
 
 /**
@@ -10,7 +14,19 @@ import com.septemberhx.server.base.MAnalyserResult;
  */
 public class MAnalyser {
 
-    public MAnalyserResult analyse(MAnalyserInput inputData) {
+    @Getter
+    private long timeWindowInMillis;
+
+    public MAnalyser() {
+        this.timeWindowInMillis = 60 * 1000;
+        System.out.println(DateTime.now().minus(this.timeWindowInMillis));
+    }
+
+    public MAnalyserResult analyse(List<MServiceBaseLog> logList) {
         return new MAnalyserResult();
+    }
+
+    public static void main(String[] args) {
+        MAnalyser a = new MAnalyser();
     }
 }

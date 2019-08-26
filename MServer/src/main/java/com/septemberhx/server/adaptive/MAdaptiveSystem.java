@@ -1,12 +1,15 @@
 package com.septemberhx.server.adaptive;
 
-
+import com.septemberhx.common.log.MServiceBaseLog;
 import com.septemberhx.server.adaptive.algorithm.MAlgorithmInterface;
-import com.septemberhx.server.base.MAnalyserInput;
+import com.septemberhx.server.adaptive.algorithm.MEvolveType;
 import com.septemberhx.server.base.MAnalyserResult;
 import com.septemberhx.server.base.MPlannerResult;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.joda.time.DateTime;
+
+import java.util.List;
 
 /**
  * The main part of the self-adaptive system.
@@ -19,8 +22,6 @@ public class MAdaptiveSystem {
     private MAnalyser analyser;
     private MPlanner planner;
     private MExecutor executor;
-    private MClusterExecutor clusterExecutor;
-    private MBuildExecutor buildExecutor;
     private MAlgorithmInterface algorithm;
     private MSystemState state;
 
@@ -28,34 +29,71 @@ public class MAdaptiveSystem {
         this.monitor = new MMonitor();
         this.analyser = new MAnalyser();
         this.planner = new MPlanner();
-        this.executor = new MExecutor();
-        this.clusterExecutor = new MClusterExecutor();
-        this.buildExecutor = new MBuildExecutor();
+
+        MClusterExecutor clusterExecutor = new MClusterExecutor();
+        MBuildExecutor buildExecutor = new MBuildExecutor();
+        this.executor = new MExecutor(clusterExecutor, buildExecutor);
+
         this.algorithm = new MBaseAlgorithm();
 
         this.turnToMonitor();
     }
 
-    public void doLoopOnce() {
-        // todo: provide the necessary information for the decision maker
-        MAnalyserInput analyserInput = new MAnalyserInput();
+    public void evolve() {
+        // analyze the system to check whether an evolution is needed
+        MAnalyserResult analyserResult = this.analyze();
+        if (analyserResult.getEvolveType() == MEvolveType.NO_NEED) {
+            return;
+        }
 
-        logger.info(analyserInput);
-        MAnalyserResult analyserOutput = this.analyser.analyse(analyserInput);
+        // do the plan until successfully get the plan which meets the requirements defined in the MPlanner
+        MPlannerResult result = this.plan(analyserResult);
+        while (!result.isSuccess()) {
+            // todo: collect the data from the 'result' and pass it to analyzer
+            analyserResult = this.analyze();
+            if (analyserResult.getEvolveType() == MEvolveType.NO_NEED) {
+                logger.warn("Evolve type cannot be NO_NEED in the while loop!");
+            }
+            result = this.plan(analyserResult);
+        }
 
-        logger.info(analyserOutput);
-        MPlannerResult plannerOutput = this.planner.plan(analyserOutput, this.algorithm);
-
-        logger.info(plannerOutput);
-        this.executor.execute(plannerOutput);
+        // execute the evolution plan
+        this.evolve(result);
     }
 
-    public MMonitor turnToMonitor() {
+    /**
+     * Get the logs according to the time window defined in the MAnalyser from MMonitor
+     * @return MAnalyserResult: the result of the analyzing
+     */
+    private MAnalyserResult analyze() {
+        MAnalyser analyser = this.turnToAnalyser();
+        DateTime logEndTime = DateTime.now();
+        DateTime logStartTime = logEndTime.minus(analyser.getTimeWindowInMillis());
+        List<MServiceBaseLog> logList = this.monitor.getLogBetweenDateTime(logStartTime, logEndTime);
+        return analyser.analyse(logList);
+    }
+
+    /**
+     * Calculate for the plan of the evolution given to the analyzing result from MAnalyser
+     * @param analyserResult: the result of analyze()
+     * @return MPlannerResult: the result of the planning
+     */
+    private MPlannerResult plan(MAnalyserResult analyserResult) {
+        MPlanner planner = this.turnToPlanner();
+        return planner.plan(analyserResult, this.algorithm);
+    }
+
+    private void evolve(MPlannerResult result) {
+        MExecutor mainExecutor = this.turnToExecutor();
+        mainExecutor.execute(result);
+    }
+
+    private MMonitor turnToMonitor() {
         this.state = MSystemState.MONITING;
         return this.monitor;
     }
 
-    public MAnalyser turnToAnalyser() {
+    private MAnalyser turnToAnalyser() {
         this.state = MSystemState.ANALYZING;
         return this.analyser;
     }
