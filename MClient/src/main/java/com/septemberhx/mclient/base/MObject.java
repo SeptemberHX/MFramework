@@ -4,7 +4,8 @@ import com.septemberhx.mclient.annotation.MApiFunction;
 import com.septemberhx.mclient.annotation.MFunctionType;
 import com.septemberhx.mclient.core.MClientSkeleton;
 import com.septemberhx.mclient.core.MObjectProxy;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -18,7 +19,7 @@ import java.util.UUID;
  * @Version 0.2
  */
 public abstract class MObject {
-    private Logger logger = Logger.getLogger(this.getClass());
+    private Logger logger = LogManager.getLogger(this.getClass());
     protected String id = null;
     private MObject objectProxy;
 

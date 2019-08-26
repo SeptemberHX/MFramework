@@ -14,7 +14,8 @@ import com.septemberhx.mclient.base.MObject;
 import com.septemberhx.mclient.utils.RequestUtils;
 import lombok.Getter;
 import lombok.Setter;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -43,7 +44,7 @@ public class MClientSkeleton {
 
     private Map<String, Map<String, MInstanceRestInfoBean>> restInfoMap;
     private Map<String, Map<String, Boolean>> apiContinueMap;
-    private static org.apache.log4j.Logger logger = Logger.getLogger(MClientSkeleton.class);
+    private static Logger logger = LogManager.getLogger(MClientSkeleton.class);
 
     @Setter
     private EurekaClient discoveryClient;
