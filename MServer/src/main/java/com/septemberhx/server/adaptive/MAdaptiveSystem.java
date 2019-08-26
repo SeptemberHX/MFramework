@@ -15,16 +15,25 @@ import org.apache.logging.log4j.Logger;
 public class MAdaptiveSystem {
 
     private static Logger logger = LogManager.getLogger(MAdaptiveSystem.class);
+    private MMonitor monitor;
     private MAnalyser analyser;
     private MPlanner planner;
     private MExecutor executor;
+    private MClusterExecutor clusterExecutor;
+    private MBuildExecutor buildExecutor;
     private MAlgorithmInterface algorithm;
+    private MSystemState state;
 
     public MAdaptiveSystem() {
+        this.monitor = new MMonitor();
         this.analyser = new MAnalyser();
         this.planner = new MPlanner();
         this.executor = new MExecutor();
+        this.clusterExecutor = new MClusterExecutor();
+        this.buildExecutor = new MBuildExecutor();
         this.algorithm = new MBaseAlgorithm();
+
+        this.turnToMonitor();
     }
 
     public void doLoopOnce() {
@@ -39,5 +48,25 @@ public class MAdaptiveSystem {
 
         logger.info(plannerOutput);
         this.executor.execute(plannerOutput);
+    }
+
+    public MMonitor turnToMonitor() {
+        this.state = MSystemState.MONITING;
+        return this.monitor;
+    }
+
+    public MAnalyser turnToAnalyser() {
+        this.state = MSystemState.ANALYZING;
+        return this.analyser;
+    }
+
+    public MPlanner turnToPlanner() {
+        this.state = MSystemState.PLANNING;
+        return this.planner;
+    }
+
+    public MExecutor turnToExecutor() {
+        this.state = MSystemState.EXECUTING;
+        return this.executor;
     }
 }
