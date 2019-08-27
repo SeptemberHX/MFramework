@@ -1,6 +1,7 @@
 package com.septemberhx.agent.controller;
 
 import com.netflix.appinfo.InstanceInfo;
+import com.septemberhx.agent.utils.ElasticSearchUtils;
 import com.septemberhx.agent.utils.MClientUtils;
 import com.septemberhx.common.bean.*;
 import com.septemberhx.common.utils.MRequestUtils;
@@ -8,18 +9,8 @@ import com.septemberhx.common.utils.MUrlUtils;
 import org.apache.http.HttpHost;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.elasticsearch.action.get.GetRequest;
-import org.elasticsearch.action.get.GetResponse;
-import org.elasticsearch.action.search.SearchRequest;
-import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
-import org.elasticsearch.index.query.QueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.SearchHits;
-import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -28,7 +19,8 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.net.URI;
-import java.util.Date;
+import java.util.ArrayList;
+import java.util.List;
 
 
 @RestController
@@ -66,23 +58,6 @@ public class MAgentController {
                         new HttpHost(this.elasticsearchIpAddr, this.elasticsearchPort)
                 )
         );
-
-        // get test
-        GetRequest rq = new GetRequest("logstash-2019.06.06", "bK9qLGsBknwcgxnIDMH5");
-        GetResponse getResponse = this.esClient.get(rq, RequestOptions.DEFAULT);
-        logger.debug(getResponse.getField("message"));
-
-        // search test
-        SearchRequest sr = new SearchRequest("logstash-2019.06.06");
-
-        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-        searchSourceBuilder.query(QueryBuilders.rangeQuery("@timestamp").from(new Date(2010)));
-        sr.source(searchSourceBuilder);
-
-        SearchResponse sq = this.esClient.search(sr, RequestOptions.DEFAULT);
-        for (SearchHit hit : sq.getHits()) {
-            logger.info(hit.getId());
-        }
     }
 
     @ResponseBody
@@ -141,5 +116,20 @@ public class MAgentController {
     public void setApiContinueStatus(@RequestBody MS2CSetApiCStatus ms2CSetApiCStatus) {
         MInstanceInfoBean infoBean = this.clientUtils.getInstanceInfoById(ms2CSetApiCStatus.getInstanceId());
         MRequestUtils.sendRequest(MUrlUtils.getMClientSetApiCStatus(infoBean.getIp(), infoBean.getPort()), ms2CSetApiCStatus.getApiContinueRequest(), null, RequestMethod.POST);
+    }
+
+    @RequestMapping(path = "/fetchLogsBetweenTime", method = RequestMethod.POST)
+    public MFetchLogsResponse fetchLogsBetweenTime(@RequestBody MFetchLogsBetweenTimeRequest request) {
+        List<String> logStashIndexList = new ArrayList<>();
+        // todo: get all the indices which are started with logstash-
+
+        MFetchLogsResponse response = new MFetchLogsResponse();
+        response.setLogList(ElasticSearchUtils.getLogsBetween(
+                this.esClient,
+                (String[]) logStashIndexList.toArray(),
+                request.getStartTime(),
+                request.getEndTime()
+        ));
+        return response;
     }
 }
