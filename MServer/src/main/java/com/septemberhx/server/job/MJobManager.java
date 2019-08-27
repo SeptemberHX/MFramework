@@ -1,4 +1,4 @@
-package com.septemberhx.server.core;
+package com.septemberhx.server.job;
 
 import com.septemberhx.common.base.MObjectManager;
 import com.septemberhx.server.job.MBaseJob;

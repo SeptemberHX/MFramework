@@ -6,6 +6,7 @@ import com.septemberhx.common.bean.MInstanceInfoBean;
 import com.septemberhx.common.bean.MSetRestInfoRequest;
 import com.septemberhx.common.utils.MUrlUtils;
 import com.septemberhx.server.base.MServiceInstance;
+import com.septemberhx.server.job.MJobManager;
 import com.septemberhx.server.utils.MServerUtils;
 import lombok.Getter;
 import org.apache.logging.log4j.LogManager;

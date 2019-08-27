@@ -1,6 +1,7 @@
 package com.septemberhx.server.controller;
 
 import com.septemberhx.common.bean.*;
+import com.septemberhx.common.log.MServiceBaseLog;
 import com.septemberhx.server.base.MServiceInstance;
 import com.septemberhx.server.core.MServerSkeleton;
 import com.septemberhx.server.job.*;

@@ -13,7 +13,7 @@ import java.util.List;
 
 /**
  * The main part of the self-adaptive system.
- * It follows the standard system design: analyser, planner and executor
+ * It follows the standard system design: monitor, analyser, planner and executor
  */
 public class MAdaptiveSystem {
 
@@ -39,6 +39,9 @@ public class MAdaptiveSystem {
         this.turnToMonitor();
     }
 
+    /**
+     * The main work flow of the self-adaptive system.
+     */
     public void evolve() {
         // analyze the system to check whether an evolution is needed
         MAnalyserResult analyserResult = this.analyze();
@@ -59,6 +62,17 @@ public class MAdaptiveSystem {
 
         // execute the evolution plan
         this.evolve(result);
+    }
+
+    /**
+     * Accept the service log and decide whether to do the analyse or not
+     * @param serviceLog void
+     */
+    public void acceptServiceLog(MServiceBaseLog serviceLog) {
+        this.monitor.acceptLog(serviceLog);
+
+        // todo: conditions to decide whether to do the analyse
+        this.evolve();
     }
 
     /**
@@ -83,9 +97,20 @@ public class MAdaptiveSystem {
         return planner.plan(analyserResult, this.algorithm);
     }
 
+    /**
+     * Execute the evolution plane
+     * @param result void
+     */
     private void evolve(MPlannerResult result) {
         MExecutor mainExecutor = this.turnToExecutor();
         mainExecutor.execute(result);
+    }
+
+    /**
+     * Start the self-adaptive system. It will collect logs and do the analyse jobs when necessary
+     */
+    public void start() {
+        // todo: get data from elasticsearch
     }
 
     private MMonitor turnToMonitor() {
@@ -98,12 +123,12 @@ public class MAdaptiveSystem {
         return this.analyser;
     }
 
-    public MPlanner turnToPlanner() {
+    private MPlanner turnToPlanner() {
         this.state = MSystemState.PLANNING;
         return this.planner;
     }
 
-    public MExecutor turnToExecutor() {
+    private MExecutor turnToExecutor() {
         this.state = MSystemState.EXECUTING;
         return this.executor;
     }

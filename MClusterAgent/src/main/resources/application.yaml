@@ -16,3 +16,6 @@ mclientagent:
   server:
     ip: 192.168.1.102
     port: 9001
+  elasticsearch:
+    ip: 192.168.1.102
+    port: 4000
