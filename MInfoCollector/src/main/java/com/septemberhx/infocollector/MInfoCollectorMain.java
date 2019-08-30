@@ -19,7 +19,7 @@ public class MInfoCollectorMain {
     }
 
     public static void main(String[] args) {
-        MInfoCollectorMain logCollectorMain = new MInfoCollectorMain();
-        logCollectorMain.start();
+//        MInfoCollectorMain logCollectorMain = new MInfoCollectorMain();
+//        logCollectorMain.start();
     }
 }

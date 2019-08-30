@@ -29,6 +29,7 @@ public class LogFileCollector implements IInfoCollector {
 
     private FileAlterationListenerAdaptor listenerAdaptor = new LogFileAlterationListenerAdaptor();
 
+    @Override
     public void start() {
         // get all the files in the dir and set a Tailer for each log file
         File dirFile = new File(LOG_DIR_PATH);

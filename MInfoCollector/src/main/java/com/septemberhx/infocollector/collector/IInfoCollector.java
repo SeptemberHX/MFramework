@@ -6,4 +6,5 @@ package com.septemberhx.infocollector.collector;
  * @date 2019/8/30
  */
 public interface IInfoCollector {
+    void start();
 }

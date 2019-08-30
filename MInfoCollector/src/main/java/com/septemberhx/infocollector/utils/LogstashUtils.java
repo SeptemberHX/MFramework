@@ -1,4 +1,4 @@
-package com.septemberhx.infocollector.collector;
+package com.septemberhx.infocollector.utils;
 
 import com.septemberhx.common.utils.MRequestUtils;
 import com.septemberhx.common.utils.MUrlUtils;

@@ -1,6 +1,6 @@
 package com.septemberhx.infocollector.collector.LogCollector;
 
-import com.septemberhx.infocollector.collector.LogstashUtils;
+import com.septemberhx.infocollector.utils.LogstashUtils;
 import org.apache.commons.io.input.Tailer;
 import org.apache.commons.io.input.TailerListener;
 import org.json.JSONObject;
