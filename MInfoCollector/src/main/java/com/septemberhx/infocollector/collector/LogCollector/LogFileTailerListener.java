@@ -41,8 +41,10 @@ public class LogFileTailerListener implements TailerListener {
         }
 
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put("info", baseLog.toString());
-        LogstashUtils.sendInfoToLogstash(baseLog.toString());
+        jsonObject.put("mclient", baseLog.toJson());
+
+        System.out.println(jsonObject.toString());
+        LogstashUtils.sendInfoToLogstash(jsonObject.toString());
     }
 
     public void handle(Exception e) {
