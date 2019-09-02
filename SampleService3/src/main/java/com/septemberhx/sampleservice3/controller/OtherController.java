@@ -14,8 +14,8 @@ import java.net.InetAddress;
 public class OtherController extends MObject {
 
     @RequestMapping(value = "/age")
-//    @MRestApiType
-//    @MApiFunction
+    @MRestApiType
+    @MApiFunction
     public MResponse wrapper(@RequestParam("rawStr") String rawStr) {
         String resultStr = rawStr;
         try {

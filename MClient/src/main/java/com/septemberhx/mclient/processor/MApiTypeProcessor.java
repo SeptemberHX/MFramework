@@ -56,6 +56,7 @@ public class MApiTypeProcessor extends AbstractProcessor {
             JCTree.JCClassDecl jcClassDecl = (JCTree.JCClassDecl) elementUtils.getTree((element.getEnclosingElement()));
             JCTree.JCMethodDecl newMethodDecl = makeRestOverloadFunction(jcMethodDecl);
             jcClassDecl.defs = jcClassDecl.defs.prepend(newMethodDecl);
+//            this.addHttpServletRequestToFunctionParameter(jcMethodDecl);
         });
 
         return true;
@@ -71,6 +72,18 @@ public class MApiTypeProcessor extends AbstractProcessor {
     }
 
     private Name getNameFromString(String s) { return names.fromString(s); }
+
+    private void addHttpServletRequestToFunctionParameter(JCTree.JCMethodDecl jcMethodDecl) {
+        JCTree.JCVariableDecl parameterDecl =
+                treeMaker.VarDef(
+                        treeMaker.Modifiers(Flags.PARAMETER),
+                        names.fromString("_request"),
+                        memberAccess("javax.servlet.http.HttpServletRequest"),
+                        null
+                );
+//        jcMethodDecl.params.add(parameterDecl);
+        jcMethodDecl.params = jcMethodDecl.params.append(parameterDecl);
+    }
 
     private JCTree.JCMethodDecl makeRestOverloadFunction(JCTree.JCMethodDecl jcMethodDecl) {
         JCTree.JCModifiers modifiers = treeMaker.Modifiers(Flags.PUBLIC);

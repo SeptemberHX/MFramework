@@ -18,6 +18,7 @@
         <module>MEurekaServer</module>
         <module>SampleService3</module>
         <module>MInfoCollector</module>
+        <module>utils</module>
     </modules>
     <packaging>pom</packaging>
 

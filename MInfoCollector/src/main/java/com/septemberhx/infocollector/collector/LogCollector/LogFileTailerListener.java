@@ -1,5 +1,6 @@
 package com.septemberhx.infocollector.collector.LogCollector;
 
+import com.septemberhx.common.log.MServiceBaseLog;
 import com.septemberhx.infocollector.utils.LogstashUtils;
 import org.apache.commons.io.input.Tailer;
 import org.apache.commons.io.input.TailerListener;
@@ -34,9 +35,14 @@ public class LogFileTailerListener implements TailerListener {
         /*
           todo: use patterns to filter the message and only send logs we care about
          */
+        MServiceBaseLog baseLog = MServiceBaseLog.getLogFromStr(s);
+        if (baseLog == null) {
+            return;
+        }
+
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put("info", s);
-        LogstashUtils.sendInfoToLogstash(jsonObject);
+        jsonObject.put("info", baseLog.toString());
+        LogstashUtils.sendInfoToLogstash(baseLog.toString());
     }
 
     public void handle(Exception e) {

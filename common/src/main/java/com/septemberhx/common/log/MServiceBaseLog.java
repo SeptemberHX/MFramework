@@ -4,6 +4,8 @@ import lombok.Getter;
 import lombok.Setter;
 import org.joda.time.DateTime;
 
+import java.util.Arrays;
+
 /**
  * @author SeptemberHX
  * @date 2019/8/26
@@ -15,11 +17,59 @@ import org.joda.time.DateTime;
 @Getter
 @Setter
 public abstract class MServiceBaseLog implements Comparable<MServiceBaseLog> {
-    private DateTime dateTime;  // the date time of the log
-    private String objectId;  // the id of the MObject which writes the log
+    protected DateTime dateTime;  // the date time of the log
+    protected String objectId;  // the id of the MObject which writes the log
+    protected String methodName;  // the name of the function
+    protected MLogType type;  // the type of the log
 
     @Override
     public int compareTo(MServiceBaseLog o) {
         return this.getDateTime().compareTo(o.getDateTime());
     }
+
+    @Override
+    public String toString() {
+        String baseStr = String.format("%s|%s|%s|%s", dateTime.toString(), type.toString(), objectId, methodName);
+        String uniqueInfo = this.uniqueLogInfo();
+        if (uniqueInfo != null && uniqueInfo.length() != 0) {
+            baseStr += "|" + uniqueInfo;
+        }
+        return baseStr;
+    }
+
+    abstract String uniqueLogInfo();
+
+    private void fillBasePart(String[] strArr) {
+        this.dateTime = DateTime.parse(strArr[0]);
+        this.type = MLogType.valueOf(strArr[1]);
+        this.objectId = strArr[2];
+        this.methodName = strArr[3];
+    }
+
+    public static MServiceBaseLog getLogFromStr(String strLine) {
+        String[] splitArr = strLine.split("\\|");
+        if (splitArr.length < 4) {
+            return null;
+        }
+
+        MServiceBaseLog baseLog = null;
+        switch (MLogType.valueOf(splitArr[1])) {
+            case FUNCTION_CALL:
+                baseLog = new MFunctionCalledLog();
+                break;
+            default:
+                return null;
+        }
+
+        baseLog.fillBasePart(splitArr);
+        if (splitArr.length > 4) {
+            baseLog.parseRemainStrArr(Arrays.copyOfRange(splitArr, 4, splitArr.length - 1));
+        }
+        return baseLog;
+    }
+
+    /*
+      should be override by every sub class
+     */
+    abstract void parseRemainStrArr(String[] strArr);
 }

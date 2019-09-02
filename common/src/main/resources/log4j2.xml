@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="INFO">
+    <Appenders>
+        <Console name="log_console" target="SYSTEM_OUT">
+            <PatternLayout
+                    pattern="%m%n" />
+        </Console>
+        <RollingFile name="RollingFile" fileName="C:\Users\SeptemberHX\Desktop\work\app.log"
+                     filePattern="C:\Users\SeptemberHX\Desktop\work/$${date:yyyy-MM}/app-%d{MM-dd-yyyy}-%i.log.gz">
+            <PatternLayout pattern="%m%n"/>
+            <SizeBasedTriggeringPolicy size="5 MB" />
+        </RollingFile>
+    </Appenders>
+    <Loggers>
+        <Logger name="com.septemberhx.common.utils.MLogUtils" level="INFO">
+<!--            <AppenderRef ref="log_console" />-->
+            <AppenderRef ref="RollingFile" />
+        </Logger>
+    </Loggers>
+</Configuration>
