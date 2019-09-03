@@ -37,7 +37,6 @@ public class MRequestUtils {
                     break;
             }
             result = entity.getBody();
-            System.out.println(result);
         } catch (Exception e) {
             e.printStackTrace();
         }

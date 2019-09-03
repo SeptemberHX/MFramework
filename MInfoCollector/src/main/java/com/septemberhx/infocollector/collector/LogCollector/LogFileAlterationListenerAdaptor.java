@@ -2,6 +2,8 @@ package com.septemberhx.infocollector.collector.LogCollector;
 
 import org.apache.commons.io.input.Tailer;
 import org.apache.commons.io.monitor.FileAlterationListenerAdaptor;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 
@@ -12,16 +14,24 @@ import java.io.File;
  */
 public class LogFileAlterationListenerAdaptor extends FileAlterationListenerAdaptor {
 
+    private String logstashIp;
+    private int logstashPort;
 
+    private Logger logger = LogManager.getLogger(LogFileAlterationListenerAdaptor.class);
+
+    public LogFileAlterationListenerAdaptor(String ip, int port) {
+        this.logstashIp = ip;
+        this.logstashPort = port;
+    }
 
     @Override
     public void onFileCreate(File file) {
-        System.out.println(file.getName() + " created");
-        Tailer.create(file, new LogFileTailerListener());
+        logger.info(file.getName() + " created");
+        Tailer.create(file, new LogFileTailerListener(this.logstashIp, this.logstashPort));
     }
 
     @Override
     public void onFileChange(File file) {
-        System.out.println(file.getName() + " changed");
+        logger.info(file.getName() + " changed");
     }
 }

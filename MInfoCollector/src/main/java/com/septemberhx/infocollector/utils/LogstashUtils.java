@@ -20,23 +20,20 @@ import java.io.IOException;
  */
 public class LogstashUtils {
 
-    private static String LOGSTASH_IP = "192.168.1.102";
-    private static Integer LOGSTASH_PORT = 4040;
-
     /**
      * send the json object to logstash through POST request.
      * @param jsonObjectStr: message you want to send
      */
-    public static void sendInfoToLogstash(String jsonObjectStr) {
+    public static void sendInfoToLogstash(String logstashIp, int logstashPort, String jsonObjectStr) {
         try {
-            send(MUrlUtils.getRemoteUri(LOGSTASH_IP, LOGSTASH_PORT, "").toString(), jsonObjectStr, "utf-8");
+            send(MUrlUtils.getRemoteUri(logstashIp, logstashPort, "").toString(), jsonObjectStr, "utf-8");
         } catch (Exception e) {
             e.printStackTrace();
         }
 
     }
 
-    public static String send(String url, String jsonObjectStr,String encoding) throws IOException {
+    private static void send(String url, String jsonObjectStr, String encoding) throws IOException {
         String body = "";
         CloseableHttpClient client = HttpClients.createDefault();
         HttpPost httpPost = new HttpPost(url);
@@ -55,6 +52,5 @@ public class LogstashUtils {
 
         EntityUtils.consume(entity);
         response.close();
-        return body;
     }
 }

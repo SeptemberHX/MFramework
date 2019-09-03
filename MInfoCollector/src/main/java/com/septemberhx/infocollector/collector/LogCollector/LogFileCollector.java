@@ -8,6 +8,8 @@ import org.apache.commons.io.input.Tailer;
 import org.apache.commons.io.monitor.FileAlterationListenerAdaptor;
 import org.apache.commons.io.monitor.FileAlterationMonitor;
 import org.apache.commons.io.monitor.FileAlterationObserver;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -23,14 +25,31 @@ import java.util.concurrent.TimeUnit;
  */
 public class LogFileCollector implements IInfoCollector {
 
-    private static String LOG_DIR_PATH = "C:\\Users\\SeptemberHX\\Desktop\\work";
+    private static String LOG_DIR_PATH;
+    private static String LOGSTASH_IP;
+    private static Integer LOGSTASH_PORT;
+
     private static long INTERVAL = TimeUnit.SECONDS.toMillis(1);
     private static String LOG_FILE_SUFFIX = ".log";
 
-    private FileAlterationListenerAdaptor listenerAdaptor = new LogFileAlterationListenerAdaptor();
+    private FileAlterationListenerAdaptor listenerAdaptor;
+    private static Logger logger = LogManager.getLogger(LogFileCollector.class);
 
     @Override
     public void start() {
+        this.initParams();
+
+        if (LOG_DIR_PATH == null) {
+            logger.warn("Failed to start MetricsCollector due to the null value of log dir path");
+            return;
+        }
+
+        if (LOGSTASH_IP == null || LOGSTASH_PORT == null) {
+            logger.warn("Failed to start MetricsCollector due to the null value of logstash ip/port");
+            return;
+        }
+        this.listenerAdaptor = new LogFileAlterationListenerAdaptor(LOGSTASH_IP, LOGSTASH_PORT);
+
         // get all the files in the dir and set a Tailer for each log file
         File dirFile = new File(LOG_DIR_PATH);
         if (!dirFile.exists()) {
@@ -42,7 +61,7 @@ public class LogFileCollector implements IInfoCollector {
             }
         };
         for (File file : dirFile.listFiles(fileFilter)) {
-            Tailer.create(file, new LogFileTailerListener());
+            Tailer.create(file, new LogFileTailerListener(LOGSTASH_IP, LOGSTASH_PORT));
         }
 
         // match the dir
@@ -62,5 +81,25 @@ public class LogFileCollector implements IInfoCollector {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void initParams() {
+        LogFileCollector.LOG_DIR_PATH = System.getenv("MCLIENT_LOG_DIR_PATH");
+        logger.info("Set LOG_DIR_PATH = " + LogFileCollector.LOG_DIR_PATH);
+
+        LogFileCollector.LOGSTASH_IP = System.getenv("MCLIENT_LOGSTASH_IP");
+        logger.info("Set LOGSTASH_IP = " + LogFileCollector.LOGSTASH_IP);
+
+        try {
+            LogFileCollector.LOGSTASH_PORT = Integer.valueOf(System.getenv("MCLIENT_LOGSTASH_PORT"));
+        } catch (Exception e) {
+            ;
+        }
+        logger.info("Set LOGSTASH_PORT = " + LogFileCollector.LOGSTASH_PORT);
+
+//        LOG_DIR_PATH = "C:\\Users\\SeptemberHX\\Desktop\\work";
+//        LOGSTASH_IP = "192.168.1.102";
+//        LOGSTASH_PORT = 4040;
     }
 }

@@ -7,4 +7,5 @@ package com.septemberhx.infocollector.collector;
  */
 public interface IInfoCollector {
     void start();
+    void initParams();
 }

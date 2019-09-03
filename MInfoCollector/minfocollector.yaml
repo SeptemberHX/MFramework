@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: minfo-collector-service
+  namespace: kube-test
+  labels:
+    app: minfo-collector-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: minfo-collector-service
+  template:
+    metadata:
+      labels:
+        app: minfo-collector-service
+    spec:
+      containers:
+        - name: minfo-collector-service
+          image: 192.168.1.104:5000/septemberhx/minfo-collector-service:v1.0.4
+          env:
+            - name: MCLIENT_LOG_DIR_PATH
+              value: "/var/log/mclient"
+            - name: MCLIENT_LOGSTASH_IP
+              value: "192.168.1.102"
+            - name: MCLIENT_LOGSTASH_PORT
+              value: "4040"
+            - name: MCLIENT_CADVISOR_IP
+              value: "192.168.1.102"
+            - name: MCLIENT_CADVISOR_PORT
+              value: "4042"
+          volumeMounts:
+            - mountPath: /var/log/mclient
+              name: log-volume
+      volumes:
+        - name: log-volume
+          hostPath:
+            path: /data/hexiang/test-dir/log
+      nodeSelector:
+        node: "ices-102"

@@ -2,6 +2,8 @@ package com.septemberhx.infocollector.collector.MetricsCollector;
 
 import com.septemberhx.infocollector.utils.CAdvisorUtils;
 import com.septemberhx.infocollector.collector.IInfoCollector;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 
 import java.util.concurrent.Executors;
@@ -20,14 +22,21 @@ import java.util.concurrent.TimeUnit;
  */
 public class MetricsCollector implements IInfoCollector {
 
-    private static String cAdvisorIpAddr = "192.168.1.102";
-    private static Integer cAdvisorPort = 4042;
+    private static String cAdvisorIpAddr;
+    private static Integer cAdvisorPort;
     private static long INTERVAL = TimeUnit.SECONDS.toMillis(5);
 
     private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
+    private static Logger logger = LogManager.getLogger(MetricsCollector.class);
 
     @Override
     public void start() {
+        this.initParams();
+        if (cAdvisorPort == null || cAdvisorIpAddr == null) {
+            logger.warn("Failed to start MetricsCollector due to the null value of cAdvisor ip/port");
+            return;
+        }
+
         executorService.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
@@ -38,7 +47,22 @@ public class MetricsCollector implements IInfoCollector {
 
     private void dealWithMetrics(JSONObject object) {
         // todo: reconstruct
-        System.out.println(object);
+//        System.out.println(object);
+    }
+
+    @Override
+    public void initParams() {
+        MetricsCollector.cAdvisorIpAddr = System.getenv("MCLIENT_CADVISOR_IP");
+        logger.info("Set cAdvisorIpAddr = " + MetricsCollector.cAdvisorIpAddr);
+
+        if (System.getenv().containsKey("MCLIENT_CADVISOR_PORT")) {
+            try {
+                MetricsCollector.cAdvisorPort = Integer.valueOf(System.getenv("MCLIENT_CADVISOR_PORT"));
+            } catch (Exception e) {
+                ;
+            }
+        }
+        logger.info("Set cAdvisorPort = " + MetricsCollector.cAdvisorPort);
     }
 
     public static void main(String[] args) {

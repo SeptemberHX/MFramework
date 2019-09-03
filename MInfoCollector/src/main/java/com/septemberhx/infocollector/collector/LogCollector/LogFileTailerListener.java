@@ -4,6 +4,8 @@ import com.septemberhx.common.log.MServiceBaseLog;
 import com.septemberhx.infocollector.utils.LogstashUtils;
 import org.apache.commons.io.input.Tailer;
 import org.apache.commons.io.input.TailerListener;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 
 /**
@@ -14,13 +16,23 @@ import org.json.JSONObject;
 public class LogFileTailerListener implements TailerListener {
 
     private Tailer tailer;
+    private String logstashIp;
+    private int logstashPort;
+
+    private Logger logger = LogManager.getLogger(LogFileTailerListener.class);
+
+    public LogFileTailerListener(String logstashIp, int logstashPort) {
+        this.logstashPort = logstashPort;
+        this.logstashIp = logstashIp;
+    }
 
     public void init(Tailer tailer) {
         this.tailer = tailer;
     }
 
     public void fileNotFound() {
-        System.out.println(tailer.getFile().getName() + " lost!");
+        logger.warn(tailer.getFile().getName() + " lost!");
+        this.tailer.stop();
     }
 
     public void fileRotated() {
@@ -28,15 +40,10 @@ public class LogFileTailerListener implements TailerListener {
     }
 
     public void handle(String s) {
-        /*
-          todo: the time of the latest log should be recorded in each log file,
-            so the old messages won't be send to logstash again after restart MInfoCollector
-         */
-        /*
-          todo: use patterns to filter the message and only send logs we care about
-         */
+        logger.debug("Tailer handles: " + s);
         MServiceBaseLog baseLog = MServiceBaseLog.getLogFromStr(s);
         if (baseLog == null) {
+            logger.debug("Failed to parse: " + s + ", ignored");
             return;
         }
 
@@ -44,7 +51,7 @@ public class LogFileTailerListener implements TailerListener {
         jsonObject.put("mclient", baseLog.toJson());
 
         System.out.println(jsonObject.toString());
-        LogstashUtils.sendInfoToLogstash(jsonObject.toString());
+        LogstashUtils.sendInfoToLogstash(logstashIp, logstashPort, jsonObject.toString());
     }
 
     public void handle(Exception e) {

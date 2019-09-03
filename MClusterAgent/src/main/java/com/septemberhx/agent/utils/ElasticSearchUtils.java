@@ -116,7 +116,7 @@ public class ElasticSearchUtils {
         indices.add("logstash-*");
         String[] indexArr = new String[1];
         indexArr[0] = "logstash-*";
-        ElasticSearchUtils.getLogsBetween(esClient, indexArr, DateTime.now().minusHours(5), DateTime.now());
+        ElasticSearchUtils.getLogsBetween(esClient, indexArr, DateTime.now().minusHours(5).minusMinutes(20), DateTime.now());
         try {
             esClient.close();
         } catch (Exception e) {
