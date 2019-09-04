@@ -17,14 +17,14 @@ spec:
     spec:
       containers:
         - name: minfo-collector-service
-          image: 192.168.1.104:5000/septemberhx/minfo-collector-service:v1.0.4
+          image: 192.168.1.104:5000/septemberhx/minfo-collector-service:v1.0.5
           env:
             - name: MCLIENT_LOG_DIR_PATH
               value: "/var/log/mclient"
             - name: MCLIENT_LOGSTASH_IP
               value: "192.168.1.102"
             - name: MCLIENT_LOGSTASH_PORT
-              value: "4040"
+              value: "32001"
             - name: MCLIENT_CADVISOR_IP
               value: "192.168.1.102"
             - name: MCLIENT_CADVISOR_PORT

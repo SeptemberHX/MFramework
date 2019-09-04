@@ -1,4 +1,4 @@
-package com.septemberhx.server.adaptive;
+package com.septemberhx.server.adaptive.executor;
 
 import com.septemberhx.server.base.MPlannerResult;
 import lombok.Getter;

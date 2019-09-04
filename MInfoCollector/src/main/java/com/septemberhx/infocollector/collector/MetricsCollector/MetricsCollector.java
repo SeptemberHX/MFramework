@@ -63,6 +63,9 @@ public class MetricsCollector implements IInfoCollector {
             }
         }
         logger.info("Set cAdvisorPort = " + MetricsCollector.cAdvisorPort);
+
+//        MetricsCollector.cAdvisorIpAddr = "192.168.1.102";
+//        MetricsCollector.cAdvisorPort = 4042;
     }
 
     public static void main(String[] args) {

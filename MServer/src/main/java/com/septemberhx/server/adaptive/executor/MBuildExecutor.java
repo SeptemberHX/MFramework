@@ -1,4 +1,4 @@
-package com.septemberhx.server.adaptive;
+package com.septemberhx.server.adaptive.executor;
 
 import com.septemberhx.server.job.MBuildJob;
 import com.septemberhx.server.job.MJobExecutor;
