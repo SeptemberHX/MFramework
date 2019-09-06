@@ -7,6 +7,7 @@ import com.septemberhx.common.bean.MApiContinueRequest;
 import com.septemberhx.common.bean.MApiSplitBean;
 import com.septemberhx.common.bean.MGetRemoteUriRequest;
 import com.septemberhx.common.bean.MInstanceRestInfoBean;
+import com.septemberhx.common.log.MFunctionCallEndLog;
 import com.septemberhx.common.log.MFunctionCalledLog;
 import com.septemberhx.common.log.MServiceBaseLog;
 import com.septemberhx.common.utils.MLogUtils;
@@ -166,6 +167,14 @@ public class MClientSkeleton {
 
     public static void logFunctionCall(String mObjectId, String functionName, HttpServletRequest request) {
         MServiceBaseLog serviceBaseLog = new MFunctionCalledLog();
+        serviceBaseLog.setDateTime(DateTime.now());
+        serviceBaseLog.setMethodName(functionName);
+        serviceBaseLog.setObjectId(mObjectId);
+        MLogUtils.log(serviceBaseLog);
+    }
+
+    public static void logFunctionCallEnd(String mObjectId, String functionName, HttpServletRequest request) {
+        MServiceBaseLog serviceBaseLog = new MFunctionCallEndLog();
         serviceBaseLog.setDateTime(DateTime.now());
         serviceBaseLog.setMethodName(functionName);
         serviceBaseLog.setObjectId(mObjectId);

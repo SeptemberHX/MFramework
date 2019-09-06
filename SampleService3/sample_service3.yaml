@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sample-service3
+  namespace: kube-test
+  labels:
+    app: sample-service3
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sample-service3
+  template:
+    metadata:
+      labels:
+        app: sample-service3
+    spec:
+      containers:
+        - name: sample-service3
+          image: 192.168.1.104:5000/septemberhx/sampleservice3:v1.0.6
+          ports:
+            - containerPort: 8802
+          volumeMounts:
+            - mountPath: /var/log/mclient
+              name: log-volume
+      volumes:
+        - name: log-volume
+          hostPath:
+            path: /data/hexiang/test-dir/log
+      nodeSelector:
+        node: "ices-102"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sample-service3
+  namespace: kube-test
+  labels:
+    app: sample-service3
+spec:
+  type: NodePort
+  ports:
+    - port: 8802
+      targetPort: 8802
+      protocol: TCP
+  selector:
+    app: sample-service3

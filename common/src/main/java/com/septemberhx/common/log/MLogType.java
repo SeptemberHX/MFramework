@@ -7,4 +7,5 @@ package com.septemberhx.common.log;
  */
 public enum MLogType {
     FUNCTION_CALL,
+    FUNCTION_CALL_END,
 }
