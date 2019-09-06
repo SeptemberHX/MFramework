@@ -4,6 +4,7 @@ import com.google.auto.service.AutoService;
 import com.septemberhx.mclient.annotation.MRestApiType;
 import com.sun.tools.javac.api.JavacTrees;
 import com.sun.tools.javac.code.Flags;
+import com.sun.tools.javac.code.TypeTag;
 import com.sun.tools.javac.model.JavacElements;
 import com.sun.tools.javac.processing.JavacProcessingEnvironment;
 import com.sun.tools.javac.tree.JCTree;
@@ -54,9 +55,15 @@ public class MApiTypeProcessor extends AbstractProcessor {
             System.out.println("Deal with MRestApiType...");
             JCTree.JCMethodDecl jcMethodDecl = (JCTree.JCMethodDecl) elementUtils.getTree(element);
             JCTree.JCClassDecl jcClassDecl = (JCTree.JCClassDecl) elementUtils.getTree((element.getEnclosingElement()));
+
             JCTree.JCMethodDecl newMethodDecl = makeRestOverloadFunction(jcMethodDecl);
             jcClassDecl.defs = jcClassDecl.defs.prepend(newMethodDecl);
-//            this.addHttpServletRequestToFunctionParameter(jcMethodDecl);
+
+            this.addHttpServletRequestToFunctionParameter(jcMethodDecl);
+            this.addLogOutputToFunction(jcMethodDecl);
+
+            JCTree.JCMethodDecl newMethodDecl1 = makeOverloadFunctionWithoutRequester(jcMethodDecl);
+            jcClassDecl.defs = jcClassDecl.defs.prepend(newMethodDecl1);
         });
 
         return true;
@@ -74,6 +81,12 @@ public class MApiTypeProcessor extends AbstractProcessor {
     private Name getNameFromString(String s) { return names.fromString(s); }
 
     private void addHttpServletRequestToFunctionParameter(JCTree.JCMethodDecl jcMethodDecl) {
+        for (JCTree.JCVariableDecl variableDecl : jcMethodDecl.params) {
+            if (variableDecl.vartype.toString().equals("javax.servlet.http.HttpServletRequest")) {
+                return;
+            }
+        }
+
         JCTree.JCVariableDecl parameterDecl =
                 treeMaker.VarDef(
                         treeMaker.Modifiers(Flags.PARAMETER),
@@ -85,8 +98,83 @@ public class MApiTypeProcessor extends AbstractProcessor {
         jcMethodDecl.params = jcMethodDecl.params.append(parameterDecl);
     }
 
+    private void addLogOutputToFunction(JCTree.JCMethodDecl jcMethodDecl) {
+        JCTree.JCExpressionStatement callLogOutput = treeMaker.Exec(treeMaker.Apply(
+                List.of(memberAccess("java.lang.String"), memberAccess("java.lang.String"), memberAccess("javax.servlet.http.HttpServletRequest")),
+                memberAccess("com.septemberhx.mclient.core.MClientSkeleton.logFunctionCall"),
+                List.of(treeMaker.Ident(getNameFromString("id")), treeMaker.Literal(jcMethodDecl.name.toString()), treeMaker.Literal(TypeTag.BOT, null))
+        ));
+
+        jcMethodDecl.body = treeMaker.Block(0, List.of(
+                callLogOutput,
+                jcMethodDecl.body
+        ));
+    }
+
+    /**
+     * This function will try to build a overload function which has no HttpServeletRequest parameter
+     * @param jcMethodDecl: raw function decl
+     * @return JCMethodDecl
+     */
+    private JCTree.JCMethodDecl makeOverloadFunctionWithoutRequester(JCTree.JCMethodDecl jcMethodDecl) {
+        JCTree.JCModifiers modifiers = treeMaker.Modifiers(Flags.PUBLIC);
+        JCTree.JCExpression[] parameterTypes = new JCTree.JCExpression[jcMethodDecl.getParameters().length()];
+        JCTree.JCExpression[] parameters = new JCTree.JCExpression[jcMethodDecl.getParameters().length()];
+
+        JCTree.JCVariableDecl[] paramCopyArr = new JCTree.JCVariableDecl[jcMethodDecl.getParameters().length() - 1];
+        int i = 0;
+        int metRequest = 0;
+        for (JCTree.JCVariableDecl variableDecl : jcMethodDecl.params) {
+            parameterTypes[i] = variableDecl.vartype;
+            if (variableDecl.vartype.toString().equals("javax.servlet.http.HttpServletRequest")) {
+                parameters[i] = treeMaker.Literal(TypeTag.BOT, null);
+                metRequest = 1;
+            } else {
+                parameters[i] = treeMaker.Ident(variableDecl.name);
+                paramCopyArr[i - metRequest] = variableDecl;
+            }
+            ++i;
+        }
+
+        JCTree.JCExpression funcCall = treeMaker.Apply(
+                List.from(parameterTypes),
+                treeMaker.Select(
+                        treeMaker.Ident(names.fromString("this")),
+                        jcMethodDecl.getName()
+                ),
+                List.from(parameters)
+        );
+        JCTree.JCMethodDecl resultMethodDecl = treeMaker.MethodDef(
+                modifiers,
+                jcMethodDecl.name,
+                jcMethodDecl.restype,
+                List.<JCTree.JCTypeParameter>nil(),
+                List.<JCTree.JCVariableDecl>from(paramCopyArr),
+                List.<JCTree.JCExpression>nil(),
+                treeMaker.Block(0, List.of(
+                        treeMaker.Return(funcCall)
+                    )
+                ),
+                null
+        );
+        return resultMethodDecl;
+    }
+
     private JCTree.JCMethodDecl makeRestOverloadFunction(JCTree.JCMethodDecl jcMethodDecl) {
         JCTree.JCModifiers modifiers = treeMaker.Modifiers(Flags.PUBLIC);
+
+        // prepare the parameters in the new-generated function
+        JCTree.JCVariableDecl parameterDecl =
+                treeMaker.VarDef(
+                        treeMaker.Modifiers(Flags.PARAMETER),
+                        names.fromString("jsonParameters"),
+                        memberAccess("com.septemberhx.mclient.base.MResponse"),
+                        null
+                );
+
+        // attention: the requester parameter should be added after making the parameters of the new function
+        //            and before building the function body to make sure the requester will appear in the body
+//        this.addHttpServletRequestToFunctionParameter(jcMethodDecl);
 
         JCTree.JCExpression[] parameterTypes = new JCTree.JCExpression[jcMethodDecl.getParameters().length()];
         JCTree.JCExpression[] parameters = new JCTree.JCExpression[jcMethodDecl.getParameters().length()];
@@ -126,15 +214,6 @@ public class MApiTypeProcessor extends AbstractProcessor {
                 )
             );
         }
-
-        // prepare the parameters in the new-generated function
-        JCTree.JCVariableDecl parameterDecl =
-                treeMaker.VarDef(
-                        treeMaker.Modifiers(Flags.PARAMETER),
-                        names.fromString("jsonParameters"),
-                        memberAccess("com.septemberhx.mclient.base.MResponse"),
-                        null
-                );
 
         // call raw function with parameters in jsonParameters
         JCTree.JCExpression funcCall = treeMaker.Apply(

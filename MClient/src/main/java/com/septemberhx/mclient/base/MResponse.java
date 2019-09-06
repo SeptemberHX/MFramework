@@ -15,7 +15,7 @@ public class MResponse {
     private Map<String, Object> valueMap = new HashMap<>();
 
     public Object get(String key) {
-        return this.valueMap.get(key);
+        return this.valueMap.getOrDefault(key, null);
     }
 
     public MResponse set(String key, Object value) {

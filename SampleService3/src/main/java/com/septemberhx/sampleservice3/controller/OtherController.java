@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
 import java.net.InetAddress;
 
 @RestController
@@ -17,6 +18,8 @@ public class OtherController extends MObject {
     @MRestApiType
     @MApiFunction
     public MResponse wrapper(@RequestParam("rawStr") String rawStr) {
+        String a = null;
+
         String resultStr = rawStr;
         try {
             resultStr += "_" + InetAddress.getLocalHost().getHostAddress();

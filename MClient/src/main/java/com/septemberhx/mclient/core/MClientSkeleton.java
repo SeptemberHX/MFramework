@@ -7,6 +7,9 @@ import com.septemberhx.common.bean.MApiContinueRequest;
 import com.septemberhx.common.bean.MApiSplitBean;
 import com.septemberhx.common.bean.MGetRemoteUriRequest;
 import com.septemberhx.common.bean.MInstanceRestInfoBean;
+import com.septemberhx.common.log.MFunctionCalledLog;
+import com.septemberhx.common.log.MServiceBaseLog;
+import com.septemberhx.common.utils.MLogUtils;
 import com.septemberhx.common.utils.MRequestUtils;
 import com.septemberhx.common.utils.MUrlUtils;
 import com.septemberhx.mclient.annotation.MClient;
@@ -16,6 +19,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.joda.time.DateTime;
 import org.json.JSONObject;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -23,6 +27,7 @@ import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
+import javax.servlet.http.HttpServletRequest;
 import java.net.URI;
 import java.util.*;
 
@@ -157,6 +162,14 @@ public class MClientSkeleton {
     public static boolean checkIfContinue(String mObjectId, String functionName) {
         if (!MClientSkeleton.getInstance().apiContinueMap.containsKey(mObjectId)) return true;
         return MClientSkeleton.getInstance().apiContinueMap.get(mObjectId).getOrDefault(functionName, true);
+    }
+
+    public static void logFunctionCall(String mObjectId, String functionName, HttpServletRequest request) {
+        MServiceBaseLog serviceBaseLog = new MFunctionCalledLog();
+        serviceBaseLog.setDateTime(DateTime.now());
+        serviceBaseLog.setMethodName(functionName);
+        serviceBaseLog.setObjectId(mObjectId);
+        MLogUtils.log(serviceBaseLog);
     }
 
     /**
