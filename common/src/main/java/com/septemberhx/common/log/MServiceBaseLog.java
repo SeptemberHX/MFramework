@@ -58,6 +58,9 @@ public abstract class MServiceBaseLog implements Comparable<MServiceBaseLog> {
             case FUNCTION_CALL:
                 baseLog = new MFunctionCalledLog();
                 break;
+            case FUNCTION_CALL_END:
+                baseLog = new MFunctionCallEndLog();
+                break;
             default:
                 return null;
         }

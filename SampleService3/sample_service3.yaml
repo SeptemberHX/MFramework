@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: sample-service3
-          image: 192.168.1.104:5000/septemberhx/sampleservice3:v1.0.6
+          image: 192.168.1.104:5000/septemberhx/sampleservice3:v1.0.7
           ports:
             - containerPort: 8802
           volumeMounts:

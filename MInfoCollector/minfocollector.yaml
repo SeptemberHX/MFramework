@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: minfo-collector-service
-          image: 192.168.1.104:5000/septemberhx/minfo-collector-service:v1.0.5
+          image: 192.168.1.104:5000/septemberhx/minfo-collector-service:v1.0.7
           env:
             - name: MCLIENT_LOG_DIR_PATH
               value: "/var/log/mclient"
