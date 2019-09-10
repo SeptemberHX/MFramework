@@ -24,6 +24,7 @@ public class MClusterConfig {
     public final static String MCLUSTERAGENT_SET_REST_INFO = "/magent/setRestInfo";
     public final static String MCLUSTERAGENT_DEPLOY_URI = "/magent/deploy";
     public final static String MCLUSTERAGENT_SET_APICS_URI = "/magent/setApiContinueStatus";
+    public final static String MCLUSTERAGENT_FETCH_LOGS = "/magent/fetchLogsBetweenTime";
 
     public final static String MCLUSTERAGENT_FETCH_CLIENT_INFO = "/mclient/info";
     public final static String MSERVER_GET_REMOTE_URI = "/mserver/remoteuri";

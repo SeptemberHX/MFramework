@@ -1,18 +1,21 @@
 package com.septemberhx.server.utils;
 
 import com.septemberhx.common.bean.*;
+import com.septemberhx.common.log.MServiceBaseLog;
 import com.septemberhx.common.utils.MUrlUtils;
 import com.septemberhx.common.utils.MRequestUtils;
 import io.kubernetes.client.models.V1Pod;
 import io.kubernetes.client.util.Yaml;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.net.URI;
 import java.nio.file.Paths;
+import java.util.List;
 
 
 @Component
@@ -56,6 +59,18 @@ public class MServerUtils {
                 null,
                 MInstanceInfoResponse.class,
                 RequestMethod.GET);
+    }
+
+    public static List<MServiceBaseLog> fetchClusterLogsByDatetime(DateTime startTime, DateTime endTime) {
+        MFetchLogsBetweenTimeRequest request = new MFetchLogsBetweenTimeRequest();
+        request.setStartTime(startTime);
+        request.setEndTime(endTime);
+        return MRequestUtils.sendRequest(
+                MUrlUtils.getMClusterAgentFetchLogsByTime(mClusterIpAddr, mClusterPort),
+                request,
+                MFetchLogsResponse.class,
+                RequestMethod.POST
+        ).getLogList();
     }
 
     public static void notifyAddNewRemoteUri(String instanceId, String mObjectId, String funcName) {

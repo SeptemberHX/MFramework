@@ -120,13 +120,10 @@ public class MAgentController {
 
     @RequestMapping(path = "/fetchLogsBetweenTime", method = RequestMethod.POST)
     public MFetchLogsResponse fetchLogsBetweenTime(@RequestBody MFetchLogsBetweenTimeRequest request) {
-        List<String> logStashIndexList = new ArrayList<>();
-        // todo: get all the indices which are started with logstash-
-
         MFetchLogsResponse response = new MFetchLogsResponse();
         response.setLogList(ElasticSearchUtils.getLogsBetween(
                 this.esClient,
-                (String[]) logStashIndexList.toArray(),
+                new String[]{"logstash-*"},
                 request.getStartTime(),
                 request.getEndTime()
         ));
