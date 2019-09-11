@@ -1,5 +1,6 @@
 package com.septemberhx.agent.utils;
 
+import com.septemberhx.common.log.MBaseLog;
 import com.septemberhx.common.log.MServiceBaseLog;
 import org.apache.http.HttpHost;
 import org.apache.logging.log4j.LogManager;
@@ -42,8 +43,8 @@ public class ElasticSearchUtils {
      * @param endTime: The end of the time range
      * @return List: Service logs
      */
-    public static List<MServiceBaseLog> getLogsBetween(RestHighLevelClient client, String[] indices, DateTime startTime, DateTime endTime) {
-        List<MServiceBaseLog> logList = new ArrayList<>();
+    public static List<MBaseLog> getLogsBetween(RestHighLevelClient client, String[] indices, DateTime startTime, DateTime endTime) {
+        List<MBaseLog> logList = new ArrayList<>();
         SearchRequest sr = new SearchRequest(indices);
         final Scroll scroll = new Scroll(TimeValue.timeValueSeconds(1L));
         sr.scroll(scroll);
@@ -65,8 +66,8 @@ public class ElasticSearchUtils {
                 for (SearchHit hit : searchHits) {
                     logger.info(hit.getIndex() + "|" + hit.getSourceAsMap().getOrDefault("mclient", null));
                     try {
-                        MServiceBaseLog baseLog =
-                                MServiceBaseLog.getLogFromMap((Map<String, Object>) hit.getSourceAsMap().get("mclient"));
+                        MBaseLog baseLog =
+                                MBaseLog.getLogFromMap((Map<String, Object>) hit.getSourceAsMap().get("mclient"));
                         if (baseLog != null) {
                             logList.add(baseLog);
 //                            logger.info(baseLog.toString());

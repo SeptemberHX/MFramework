@@ -22,8 +22,8 @@ public class MMonitor {
      * @param serviceLog
      */
     public void acceptLog(MServiceBaseLog serviceLog) {
-        if (this.latestLogDateTime == null || this.latestLogDateTime.isBefore(serviceLog.getDateTime())) {
-            this.latestLogDateTime = serviceLog.getDateTime();
+        if (this.latestLogDateTime == null || this.latestLogDateTime.isBefore(serviceLog.getLogDateTime())) {
+            this.latestLogDateTime = serviceLog.getLogDateTime();
         }
         this.logList.add(serviceLog);
     }
@@ -31,8 +31,8 @@ public class MMonitor {
     public List<MServiceBaseLog> getLogBetweenDateTime(DateTime startTime, DateTime endTime) {
         List<MServiceBaseLog> resultLogList = new ArrayList<>();
         for (MServiceBaseLog log : this.logList) {
-            if (log.getDateTime().isEqual(startTime) || log.getDateTime().isAfter(startTime)
-                    && log.getDateTime().isBefore(endTime)) {
+            if (log.getLogDateTime().isEqual(startTime) || log.getLogDateTime().isAfter(startTime)
+                    && log.getLogDateTime().isBefore(endTime)) {
                 resultLogList.add(log);
             }
         }

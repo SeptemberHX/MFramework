@@ -1,5 +1,6 @@
 package com.septemberhx.infocollector.collector.LogCollector;
 
+import com.septemberhx.common.log.MBaseLog;
 import com.septemberhx.common.log.MServiceBaseLog;
 import com.septemberhx.infocollector.utils.LogstashUtils;
 import org.apache.commons.io.input.Tailer;
@@ -41,7 +42,7 @@ public class LogFileTailerListener implements TailerListener {
 
     public void handle(String s) {
         logger.debug("Tailer handles: " + s);
-        MServiceBaseLog baseLog = MServiceBaseLog.getLogFromStr(s);
+        MBaseLog baseLog = MBaseLog.getLogFromStr(s);
         if (baseLog == null) {
             logger.debug("Failed to parse: " + s + ", ignored");
             return;

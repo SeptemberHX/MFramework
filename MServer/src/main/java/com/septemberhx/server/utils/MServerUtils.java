@@ -1,6 +1,7 @@
 package com.septemberhx.server.utils;
 
 import com.septemberhx.common.bean.*;
+import com.septemberhx.common.log.MBaseLog;
 import com.septemberhx.common.log.MServiceBaseLog;
 import com.septemberhx.common.utils.MUrlUtils;
 import com.septemberhx.common.utils.MRequestUtils;
@@ -61,7 +62,7 @@ public class MServerUtils {
                 RequestMethod.GET);
     }
 
-    public static List<MServiceBaseLog> fetchClusterLogsByDatetime(DateTime startTime, DateTime endTime) {
+    public static List<MBaseLog> fetchClusterLogsByDatetime(DateTime startTime, DateTime endTime) {
         MFetchLogsBetweenTimeRequest request = new MFetchLogsBetweenTimeRequest();
         request.setStartTime(startTime);
         request.setEndTime(endTime);

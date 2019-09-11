@@ -3,17 +3,16 @@ package com.septemberhx.mclient.core;
 import com.netflix.appinfo.InstanceInfo;
 import com.netflix.discovery.EurekaClient;
 import com.netflix.discovery.shared.Application;
-import com.septemberhx.common.bean.MApiContinueRequest;
 import com.septemberhx.common.bean.MApiSplitBean;
 import com.septemberhx.common.bean.MGetRemoteUriRequest;
 import com.septemberhx.common.bean.MInstanceRestInfoBean;
+import com.septemberhx.common.log.MBaseLog;
 import com.septemberhx.common.log.MFunctionCallEndLog;
 import com.septemberhx.common.log.MFunctionCalledLog;
 import com.septemberhx.common.log.MServiceBaseLog;
 import com.septemberhx.common.utils.MLogUtils;
 import com.septemberhx.common.utils.MRequestUtils;
 import com.septemberhx.common.utils.MUrlUtils;
-import com.septemberhx.mclient.annotation.MClient;
 import com.septemberhx.mclient.base.MObject;
 import com.septemberhx.mclient.utils.RequestUtils;
 import lombok.Getter;
@@ -166,18 +165,18 @@ public class MClientSkeleton {
     }
 
     public static void logFunctionCall(String mObjectId, String functionName, HttpServletRequest request) {
-        MServiceBaseLog serviceBaseLog = new MFunctionCalledLog();
-        serviceBaseLog.setDateTime(DateTime.now());
-        serviceBaseLog.setMethodName(functionName);
-        serviceBaseLog.setObjectId(mObjectId);
+        MFunctionCalledLog serviceBaseLog = new MFunctionCalledLog();
+        serviceBaseLog.setLogDateTime(DateTime.now());
+        serviceBaseLog.setLogMethodName(functionName);
+        serviceBaseLog.setLogObjectId(mObjectId);
         MLogUtils.log(serviceBaseLog);
     }
 
     public static void logFunctionCallEnd(String mObjectId, String functionName, HttpServletRequest request) {
-        MServiceBaseLog serviceBaseLog = new MFunctionCallEndLog();
-        serviceBaseLog.setDateTime(DateTime.now());
-        serviceBaseLog.setMethodName(functionName);
-        serviceBaseLog.setObjectId(mObjectId);
+        MFunctionCallEndLog serviceBaseLog = new MFunctionCallEndLog();
+        serviceBaseLog.setLogDateTime(DateTime.now());
+        serviceBaseLog.setLogMethodName(functionName);
+        serviceBaseLog.setLogObjectId(mObjectId);
         MLogUtils.log(serviceBaseLog);
     }
 
