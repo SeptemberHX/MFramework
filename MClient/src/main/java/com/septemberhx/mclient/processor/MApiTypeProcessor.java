@@ -136,9 +136,14 @@ public class MApiTypeProcessor extends AbstractProcessor {
         JCTree.JCExpression[] parameterTypes = new JCTree.JCExpression[jcMethodDecl.getParameters().length()];
         JCTree.JCExpression[] parameters = new JCTree.JCExpression[jcMethodDecl.getParameters().length()];
         int i = 0;
+        String requestObjectName = null;
         for (JCTree.JCVariableDecl variableDecl : jcMethodDecl.params) {
             parameterTypes[i] = variableDecl.vartype;
             parameters[i] = treeMaker.Ident(variableDecl.name);
+            if (variableDecl.vartype.toString().equals("javax.servlet.http.HttpServletRequest") ||
+                variableDecl.vartype.toString().equals("HttpServletRequest")) {
+                requestObjectName = variableDecl.name.toString();
+            }
             ++i;
         }
 
@@ -166,12 +171,12 @@ public class MApiTypeProcessor extends AbstractProcessor {
         JCTree.JCExpressionStatement callLogOutput = treeMaker.Exec(treeMaker.Apply(
                 List.of(memberAccess("java.lang.String"), memberAccess("java.lang.String"), memberAccess("javax.servlet.http.HttpServletRequest")),
                 memberAccess("com.septemberhx.mclient.core.MClientSkeleton.logFunctionCall"),
-                List.of(treeMaker.Ident(getNameFromString("id")), treeMaker.Literal(jcMethodDecl.name.toString()), treeMaker.Literal(TypeTag.BOT, null))
+                List.of(treeMaker.Ident(getNameFromString("id")), treeMaker.Literal(jcMethodDecl.name.toString()), treeMaker.Ident(names.fromString(requestObjectName)))
         ));
         JCTree.JCExpressionStatement callEndLogOutput = treeMaker.Exec(treeMaker.Apply(
                 List.of(memberAccess("java.lang.String"), memberAccess("java.lang.String"), memberAccess("javax.servlet.http.HttpServletRequest")),
                 memberAccess("com.septemberhx.mclient.core.MClientSkeleton.logFunctionCallEnd"),
-                List.of(treeMaker.Ident(getNameFromString("id")), treeMaker.Literal(jcMethodDecl.name.toString()), treeMaker.Literal(TypeTag.BOT, null))
+                List.of(treeMaker.Ident(getNameFromString("id")), treeMaker.Literal(jcMethodDecl.name.toString()), treeMaker.Ident(names.fromString(requestObjectName)))
         ));
         jcMethodDecl.body = treeMaker.Block(0, List.of(
                 callLogOutput,

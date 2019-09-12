@@ -76,6 +76,8 @@ public class MLogUtils {
         testLog.setLogObjectId("123-321-123-231");
         testLog.setLogMethodName("test");
         testLog.setLogUserId("user-123-321-123-321");
+        testLog.setLogFromIpAddr("127.0.0.1");
+        testLog.setLogFromPort(2222);
 
         String str = MLogUtils.convertLogObjectToString(testLog);
         System.out.println(str);
@@ -83,6 +85,8 @@ public class MLogUtils {
 
         MBaseLog log = MLogUtils.getLogObjectFromString(str);
         System.out.println(log);
+
+        System.out.println(log instanceof MMetricsBaseLog);
 
 //        MMetricsBaseLog mMetricsBaseLog = new MMetricsBaseLog();
 //        mMetricsBaseLog.setLogDateTime(DateTime.now());

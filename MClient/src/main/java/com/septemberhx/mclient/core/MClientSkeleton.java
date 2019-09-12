@@ -169,6 +169,9 @@ public class MClientSkeleton {
         serviceBaseLog.setLogDateTime(DateTime.now());
         serviceBaseLog.setLogMethodName(functionName);
         serviceBaseLog.setLogObjectId(mObjectId);
+        serviceBaseLog.setLogFromIpAddr(request.getRemoteAddr());
+        serviceBaseLog.setLogFromPort(request.getRemotePort());
+        serviceBaseLog.setLogUserId(request.getHeader("userId"));
         MLogUtils.log(serviceBaseLog);
     }
 
@@ -177,6 +180,9 @@ public class MClientSkeleton {
         serviceBaseLog.setLogDateTime(DateTime.now());
         serviceBaseLog.setLogMethodName(functionName);
         serviceBaseLog.setLogObjectId(mObjectId);
+        serviceBaseLog.setLogFromIpAddr(request.getRemoteAddr());
+        serviceBaseLog.setLogFromPort(request.getRemotePort());
+        serviceBaseLog.setLogUserId(request.getHeader("userId"));
         MLogUtils.log(serviceBaseLog);
     }
 
