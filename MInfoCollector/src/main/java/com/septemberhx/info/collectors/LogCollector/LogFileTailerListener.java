@@ -1,7 +1,7 @@
 package com.septemberhx.info.collectors.LogCollector;
 
 import com.septemberhx.common.log.MBaseLog;
-import com.septemberhx.info.utils.LogstashUtils;
+import com.septemberhx.common.utils.LogstashUtils;
 import org.apache.commons.io.input.Tailer;
 import org.apache.commons.io.input.TailerListener;
 import org.apache.logging.log4j.LogManager;
@@ -46,12 +46,7 @@ public class LogFileTailerListener implements TailerListener {
             logger.debug("Failed to parse: " + s + ", ignored");
             return;
         }
-
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("mclient", baseLog.toJson());
-
-        System.out.println(jsonObject.toString());
-        LogstashUtils.sendInfoToLogstash(logstashIp, logstashPort, jsonObject.toString());
+        LogstashUtils.sendInfoToLogstash(logstashIp, logstashPort, MBaseLog.convertLog2JsonObejct(baseLog).toString());
     }
 
     public void handle(Exception e) {

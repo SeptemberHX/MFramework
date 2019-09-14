@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mmetrics-collector-service
+  namespace: kube-test
+  labels:
+    app: mmetrics-collector-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mmetrics-collector-service
+  template:
+    metadata:
+      labels:
+        app: mmetrics-collector-service
+    spec:
+      containers:
+        - name: mmetrics-collector-service
+          image: 192.168.1.104:5000/septemberhx/mmetrics-collector-service:v1.0.0
+          env:
+            - name: LOGSTASH_IP
+              value: "192.168.1.102"
+            - name: LOGSTASH_PORT
+              value: "32001"
+            - name: K8S_CLIENT_IP
+              value: "192.168.1.102"
+            - name: K8S_CLIENT_PORT
+              value: "8082"

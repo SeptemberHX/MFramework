@@ -1,8 +1,10 @@
 package com.septemberhx.info.collectors;
 
 import com.septemberhx.common.base.IInfoCollector;
+import com.septemberhx.common.log.MBaseLog;
 import com.septemberhx.common.log.MDockerMetricsLog;
 import com.septemberhx.common.log.MNodeMetricsLog;
+import com.septemberhx.common.utils.LogstashUtils;
 import com.septemberhx.info.beans.node.MNodeMetrics;
 import com.septemberhx.info.beans.pod.MPodMetrics;
 import com.septemberhx.info.beans.pod.Usage;
@@ -24,9 +26,10 @@ import java.util.concurrent.TimeUnit;
  */
 public class MDockerMetricsCollector implements IInfoCollector {
 
+    private String logstashIp;
+    private Integer logstashPort;
 
-
-    private static Long INTERVAL = TimeUnit.SECONDS.toMillis(30);
+    private static Long INTERVAL = TimeUnit.SECONDS.toMillis(60);
     private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
     private static Logger logger = LogManager.getLogger(MDockerMetricsCollector.class);
 
@@ -36,6 +39,11 @@ public class MDockerMetricsCollector implements IInfoCollector {
         this.initParams();
         if (K8sMetricUtils.K8S_CLIENT_PORT == null || K8sMetricUtils.K8S_CLIENT_IP == null) {
             logger.warn("Failed to start MetricsCollector due to the null value of cAdvisor ip/port");
+            return;
+        }
+
+        if (this.logstashPort == null || this.logstashIp == null) {
+            logger.warn("Failed to start MetricsCollector due to the null value of logstash ip/port");
             return;
         }
 
@@ -67,7 +75,7 @@ public class MDockerMetricsCollector implements IInfoCollector {
             dockerMetricsLog.setLogCpuUsage(cpuUsage);
             dockerMetricsLog.setLogRamUsage(ramUsage);
             dockerMetricsLogList.add(dockerMetricsLog);
-            System.out.println(dockerMetricsLog);
+            LogstashUtils.sendInfoToLogstash(this.logstashIp, this.logstashPort, MBaseLog.convertLog2JsonObejct(dockerMetricsLog).toString());
         }
     }
 
@@ -83,7 +91,7 @@ public class MDockerMetricsCollector implements IInfoCollector {
             nodeMetricsLog.setLogCpuUsage(cpuUsage);
             nodeMetricsLog.setLogRamUsage(ramUsage);
             nodeMetricsLogList.add(nodeMetricsLog);
-            System.out.println(nodeMetricsLog);
+            LogstashUtils.sendInfoToLogstash(this.logstashIp, this.logstashPort, MBaseLog.convertLog2JsonObejct(nodeMetricsLog).toString());
         }
     }
 
@@ -101,7 +109,22 @@ public class MDockerMetricsCollector implements IInfoCollector {
         }
         logger.info("Set K8S_CLIENT_PORT = " + K8sMetricUtils.K8S_CLIENT_PORT);
 
+        this.logstashIp = System.getenv("LOGSTASH_IP");
+        logger.info("Set LOGSTASH_IP = " + this.logstashIp);
+
+        if (System.getenv().containsKey("LOGSTASH_PORT")) {
+            try {
+                this.logstashPort = Integer.valueOf(System.getenv("LOGSTASH_PORT"));
+            } catch (Exception e) {
+                ;
+            }
+        }
+        logger.info("Set LOGSTASH_PORT = " + this.logstashPort);
+
         K8sMetricUtils.K8S_CLIENT_IP = "192.168.1.102";
         K8sMetricUtils.K8S_CLIENT_PORT = 8082;
+
+        this.logstashIp = "192.168.1.102";
+        this.logstashPort = 32001;
     }
 }

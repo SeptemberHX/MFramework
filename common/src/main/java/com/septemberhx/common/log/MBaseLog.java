@@ -60,7 +60,7 @@ public abstract class MBaseLog implements Comparable<MBaseLog> {
      * @param logMap: the log info map
      */
     protected void fillInfo(Map<String, Object> logMap) {
-        this.logDateTime = DateTime.parse((String) logMap.get("logDateTime"));
+        this.logDateTime = DateTime.parse((String) logMap.get("logDateTimeInMills"));
         this.logType = MLogType.valueOf((String) logMap.get("logType"));
     }
 
@@ -113,7 +113,7 @@ public abstract class MBaseLog implements Comparable<MBaseLog> {
      */
     public JSONObject toJson() {
         Map<String, Object> jsonMap = new HashMap<>();
-        jsonMap.put("logDateTime", logDateTime);
+        jsonMap.put("logDateTimeInMills", logDateTime.getMillis());
         jsonMap.put("logType", logType);
         return new JSONObject(jsonMap);
     }

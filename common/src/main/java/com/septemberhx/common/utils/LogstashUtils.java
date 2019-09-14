@@ -1,4 +1,4 @@
-package com.septemberhx.info.utils;
+package com.septemberhx.common.utils;
 
 import com.septemberhx.common.utils.MUrlUtils;
 import org.apache.http.HttpEntity;
