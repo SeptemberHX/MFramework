@@ -19,6 +19,7 @@
         <module>SampleService3</module>
         <module>MInfoCollector</module>
         <module>utils</module>
+        <module>MContainerMetricsCollector</module>
     </modules>
     <packaging>pom</packaging>
 

@@ -97,5 +97,13 @@ public class MLogUtils {
 //        MLogUtils.log(mMetricsBaseLog);
 //
 //        System.out.println(MLogUtils.getLogObjectFromString(mMetricsBaseLog.toString()));
+
+        MNodeMetricsLog nodeMetricsLog = new MNodeMetricsLog();
+        nodeMetricsLog.setLogHostname("localhost");
+        nodeMetricsLog.setLogCpuUsage(123L);
+        nodeMetricsLog.setLogRamUsage(321L);
+        nodeMetricsLog.setLogDateTime(DateTime.now());
+        System.out.println(nodeMetricsLog);
+        System.out.println(MLogUtils.getLogObjectFromString(nodeMetricsLog.toString()));;
     }
 }

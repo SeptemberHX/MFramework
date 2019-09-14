@@ -1,6 +1,6 @@
-package com.septemberhx.infocollector.collector.LogCollector;
+package com.septemberhx.info.collectors.LogCollector;
 
-import com.septemberhx.infocollector.collector.IInfoCollector;
+import com.septemberhx.common.base.IInfoCollector;
 import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.commons.io.filefilter.HiddenFileFilter;
 import org.apache.commons.io.filefilter.IOFileFilter;

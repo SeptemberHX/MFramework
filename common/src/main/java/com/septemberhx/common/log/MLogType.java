@@ -9,5 +9,6 @@ public enum MLogType {
     FUNCTION_CALL,
     FUNCTION_CALL_END,
 
-    METRICS_LOG
+    NODE_METRICS_LOG,
+    CONTAINER_METRICS_LOG,
 }

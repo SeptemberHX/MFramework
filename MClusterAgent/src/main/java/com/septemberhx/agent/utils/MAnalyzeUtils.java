@@ -36,10 +36,10 @@ public class MAnalyzeUtils {
     public static Map<String, List<MMetricsBaseLog>> rebuildMetricsLogs(List<MMetricsBaseLog> metricsBaseLogs) {
         Map<String, List<MMetricsBaseLog>> ipAddr2MetricsLogList = new HashMap<>();
         for (MMetricsBaseLog log : metricsBaseLogs) {
-            if (!ipAddr2MetricsLogList.containsKey(log.getLogIpAddr())) {
-                ipAddr2MetricsLogList.put(log.getLogIpAddr(), new ArrayList<>());
+            if (!ipAddr2MetricsLogList.containsKey(log.getLogHostname())) {
+                ipAddr2MetricsLogList.put(log.getLogHostname(), new ArrayList<>());
             }
-            ipAddr2MetricsLogList.get(log.getLogIpAddr()).add(log);
+            ipAddr2MetricsLogList.get(log.getLogHostname()).add(log);
         }
         for (String ipAddr : ipAddr2MetricsLogList.keySet()) {
             Collections.sort(ipAddr2MetricsLogList.get(ipAddr));

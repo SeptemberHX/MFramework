@@ -1,4 +1,4 @@
-package com.septemberhx.infocollector.collector;
+package com.septemberhx.common.base;
 
 /**
  * @author SeptemberHX

@@ -1,8 +1,8 @@
-package com.septemberhx.infocollector;
+package com.septemberhx.info;
 
-import com.septemberhx.infocollector.collector.IInfoCollector;
-import com.septemberhx.infocollector.collector.LogCollector.LogFileCollector;
-import com.septemberhx.infocollector.collector.MetricsCollector.MetricsCollector;
+import com.septemberhx.common.base.IInfoCollector;
+import com.septemberhx.info.collectors.LogCollector.LogFileCollector;
+import com.septemberhx.info.collectors.MetricsCollector.MetricsCollector;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +18,7 @@ public class MInfoCollectorMain {
     public MInfoCollectorMain() {
         this.collectorList = new ArrayList<>();
         this.collectorList.add(new LogFileCollector());
-        this.collectorList.add(new MetricsCollector());
+//        this.collectorList.add(new MetricsCollector());
     }
 
     public void start() {

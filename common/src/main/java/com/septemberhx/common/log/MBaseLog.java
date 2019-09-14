@@ -30,6 +30,12 @@ public abstract class MBaseLog implements Comparable<MBaseLog> {
         return this.uniqueLogInfo();
     }
 
+    public static JSONObject convertLog2JsonObejct(MBaseLog baseLog) {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("mclient", baseLog.toJson());
+        return jsonObject;
+    }
+
     /**
      * Please override this functions for subclass
      * @return
@@ -64,21 +70,7 @@ public abstract class MBaseLog implements Comparable<MBaseLog> {
             return null;
         }
 
-        MBaseLog baseLog = null;
-        switch (MLogType.valueOf(splitArr[1])) {
-            case METRICS_LOG:
-                baseLog = new MMetricsBaseLog();
-                break;
-            case FUNCTION_CALL:
-                baseLog = new MFunctionCalledLog();
-                break;
-            case FUNCTION_CALL_END:
-                baseLog = new MFunctionCallEndLog();
-                break;
-            default:
-                return null;
-        }
-
+        MBaseLog baseLog = getPlainBaseLogByType(MLogType.valueOf(splitArr[1]));
         baseLog.fillInfo(splitArr);
         return baseLog;
     }
@@ -86,23 +78,31 @@ public abstract class MBaseLog implements Comparable<MBaseLog> {
     public static MBaseLog getLogFromMap(Map<String, Object> logMap) {
         MBaseLog baseLog = null;
         try {
-            switch (MLogType.valueOf((String)logMap.get("logType"))) {
-                case METRICS_LOG:
-                    baseLog = new MMetricsBaseLog();
-                    break;
-                case FUNCTION_CALL_END:
-                    baseLog = new MFunctionCallEndLog();
-                    break;
-                case FUNCTION_CALL:
-                    baseLog = new MFunctionCalledLog();
-                    break;
-                default:
-                    return null;
-            }
-
+            baseLog = getPlainBaseLogByType(MLogType.valueOf((String) logMap.get("logType")));
             baseLog.fillInfo(logMap);
         } catch (Exception e) {
             baseLog = null;
+        }
+        return baseLog;
+    }
+
+    private static MBaseLog getPlainBaseLogByType(MLogType logType) {
+        MBaseLog baseLog = null;
+        switch (logType) {
+            case NODE_METRICS_LOG:
+                baseLog = new MNodeMetricsLog();
+                break;
+            case CONTAINER_METRICS_LOG:
+                baseLog = new MDockerMetricsLog();
+                break;
+            case FUNCTION_CALL_END:
+                baseLog = new MFunctionCallEndLog();
+                break;
+            case FUNCTION_CALL:
+                baseLog = new MFunctionCalledLog();
+                break;
+            default:
+                return null;
         }
         return baseLog;
     }

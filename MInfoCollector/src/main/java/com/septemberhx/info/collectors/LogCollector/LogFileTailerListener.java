@@ -1,8 +1,7 @@
-package com.septemberhx.infocollector.collector.LogCollector;
+package com.septemberhx.info.collectors.LogCollector;
 
 import com.septemberhx.common.log.MBaseLog;
-import com.septemberhx.common.log.MServiceBaseLog;
-import com.septemberhx.infocollector.utils.LogstashUtils;
+import com.septemberhx.info.utils.LogstashUtils;
 import org.apache.commons.io.input.Tailer;
 import org.apache.commons.io.input.TailerListener;
 import org.apache.logging.log4j.LogManager;

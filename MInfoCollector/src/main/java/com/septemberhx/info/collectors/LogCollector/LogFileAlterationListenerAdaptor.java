@@ -1,4 +1,4 @@
-package com.septemberhx.infocollector.collector.LogCollector;
+package com.septemberhx.info.collectors.LogCollector;
 
 import org.apache.commons.io.input.Tailer;
 import org.apache.commons.io.monitor.FileAlterationListenerAdaptor;

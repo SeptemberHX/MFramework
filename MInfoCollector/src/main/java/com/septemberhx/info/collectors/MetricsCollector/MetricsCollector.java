@@ -1,7 +1,7 @@
-package com.septemberhx.infocollector.collector.MetricsCollector;
+package com.septemberhx.info.collectors.MetricsCollector;
 
-import com.septemberhx.infocollector.utils.CAdvisorUtils;
-import com.septemberhx.infocollector.collector.IInfoCollector;
+import com.septemberhx.info.utils.CAdvisorUtils;
+import com.septemberhx.common.base.IInfoCollector;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
