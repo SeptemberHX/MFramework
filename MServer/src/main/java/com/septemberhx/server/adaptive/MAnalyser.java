@@ -2,10 +2,13 @@ package com.septemberhx.server.adaptive;
 
 import com.septemberhx.common.log.MServiceBaseLog;
 import com.septemberhx.server.base.MAnalyserResult;
+import com.septemberhx.server.base.MUser;
 import lombok.Getter;
 import org.joda.time.DateTime;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -23,6 +26,8 @@ public class MAnalyser {
     }
 
     public MAnalyserResult analyse(List<MServiceBaseLog> logList) {
+        Map<String, MUser> userMap = new HashMap<>();
+
         return new MAnalyserResult();
     }
 

@@ -1,5 +1,6 @@
 package com.septemberhx.server.base;
 
+import com.septemberhx.common.base.MBaseObject;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,7 +13,6 @@ import java.util.List;
  */
 @Getter
 @Setter
-public class MUser {
-    private String userId;
+public class MUser extends MBaseObject {
     private List<MUserDemand> demandChain;      // user demand chain to satisfy user AT THIS TIME ONLY
 }

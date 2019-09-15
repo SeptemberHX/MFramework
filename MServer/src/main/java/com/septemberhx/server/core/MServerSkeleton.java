@@ -25,7 +25,6 @@ public class MServerSkeleton {
     private static Logger logger = LogManager.getLogger(MServerSkeleton.class);
     private static volatile MServerSkeleton instance;
     private Map<String, Map<String, String>> remoteInstanceIdMap;
-    private MSystemModel currModel;
 
     @Getter
     private MJobManager jobManager = new MJobManager();
@@ -35,7 +34,6 @@ public class MServerSkeleton {
 
     private MServerSkeleton() {
         this.remoteInstanceIdMap = new HashMap<>();
-        this.currModel = new MSystemModel();
         this.repoManager = MRepoManager.loadFromFile("./project.json");
     }
 
@@ -51,15 +49,15 @@ public class MServerSkeleton {
     }
 
     public void updateInstanceInfo(MInstanceInfoBean infoBean) {
-        this.currModel.loadInstanceInfo(infoBean);
+        MSystemModel.getInstance().loadInstanceInfo(infoBean);
     }
 
     public Optional<MServiceInstance> getInstanceInfo(String instanceId) {
-        return this.currModel.getInstanceById(instanceId);
+        return MSystemModel.getInstance().getInstanceById(instanceId);
     }
 
     public List<MServiceInstance> getAllInstanceInfos() {
-        return this.currModel.getAllServiceInstance();
+        return MSystemModel.getInstance().getAllServiceInstance();
     }
 
     // Remote Uri stuffs below ---------------------------------
@@ -72,7 +70,7 @@ public class MServerSkeleton {
 
         if (this.remoteInstanceIdMap.containsKey(mObjectId)
                 && this.remoteInstanceIdMap.get(mObjectId).containsKey(funcName)) {
-            Optional<MServiceInstance> instance = this.currModel.getInstanceById(
+            Optional<MServiceInstance> instance = MSystemModel.getInstance().getInstanceById(
                     this.remoteInstanceIdMap.get(mObjectId).get(funcName)
             );
             if (instance.isPresent()) {
@@ -113,7 +111,7 @@ public class MServerSkeleton {
         }
 
         this.remoteInstanceIdMap.get(mObjectId).put(funcName, remoteInstanceId);
-        Optional<MServiceInstance> instanceOp = this.currModel.getInstanceByMObjectId(mObjectId);
+        Optional<MServiceInstance> instanceOp = MSystemModel.getInstance().getInstanceByMObjectId(mObjectId);
         instanceOp.ifPresent(
                 mServiceInstance -> MServerUtils.notifyAddNewRemoteUri(mServiceInstance.getId(), mObjectId, funcName));
     }
@@ -124,7 +122,7 @@ public class MServerSkeleton {
 
     private void deleteRemoteUri(String instanceId, String mObjectId, String funcName) {
         this.remoteInstanceIdMap.get(mObjectId).remove(funcName);
-        Optional<MServiceInstance> instanceOp = this.currModel.getInstanceByMObjectId(mObjectId);
+        Optional<MServiceInstance> instanceOp = MSystemModel.getInstance().getInstanceByMObjectId(mObjectId);
         instanceOp.ifPresent(
                 mServiceInstance -> MServerUtils.notifyDeleteRemoteUri(mServiceInstance.getId(), mObjectId, funcName));
     }
