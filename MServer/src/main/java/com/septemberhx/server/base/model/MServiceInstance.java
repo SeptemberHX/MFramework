@@ -16,14 +16,16 @@ public class MServiceInstance extends MBaseObject {
     private String ip;
     private int port;
     private Set<String> mObjectIdSet;
+    private String serviceName;
 
-    public MServiceInstance(Map<String, String> parentIdMap, String nodeId, String ip, int port, String instanceId, Set<String> mObjectIdSet) {
+    public MServiceInstance(Map<String, String> parentIdMap, String nodeId, String ip, int port, String instanceId, Set<String> mObjectIdSet, String serviceName) {
         this.parentIdMap = parentIdMap;
         this.nodeId = nodeId;
         this.ip = ip;
         this.port = port;
         this.id = instanceId;
         this.mObjectIdSet = mObjectIdSet;
+        this.serviceName = serviceName;
     }
 
     @Override

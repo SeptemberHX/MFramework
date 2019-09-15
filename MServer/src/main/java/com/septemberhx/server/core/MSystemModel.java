@@ -20,9 +20,6 @@ public class MSystemModel {
     private MServerNodeManager mSNManager;
 
     @Getter
-    private MSystemModel systemModel;
-
-    @Getter
     private MUserManager userManager;
 
     @Getter
@@ -30,6 +27,9 @@ public class MSystemModel {
 
     @Getter
     private MDemandStateManager demandStateManager;
+
+    @Getter
+    private MServiceManager serviceManager;
 
     private static MSystemModel ourInstance = new MSystemModel();
 
@@ -40,10 +40,10 @@ public class MSystemModel {
     private MSystemModel() {
         this.mSIManager = new MServiceInstanceManager();
         this.mSNManager = new MServerNodeManager();
-        this.systemModel = new MSystemModel();
         this.userManager = new MUserManager();
         this.repoManager = new MRepoManager();
         this.demandStateManager = new MDemandStateManager();
+        this.serviceManager = new MServiceManager();
     }
 
     public void loadInstanceInfo(MInstanceInfoBean instanceInfo) {
@@ -60,7 +60,8 @@ public class MSystemModel {
                     instanceInfo.getIp(),
                     instanceInfo.getPort(),
                     instanceInfo.getId(),
-                    instanceInfo.getMObjectIdMap()
+                    instanceInfo.getMObjectIdMap(),
+                    instanceInfo.getId()
             ));
         } else if (this.mSIManager.containsById(instanceInfo.getId())){
             // remove the useless info when the instance is dead

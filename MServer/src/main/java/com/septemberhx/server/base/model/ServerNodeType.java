@@ -4,4 +4,3 @@ public enum ServerNodeType {
     CLOUD,
     EDGE
 }
- 

@@ -172,6 +172,7 @@ public class MClientSkeleton {
         serviceBaseLog.setLogFromIpAddr(request.getRemoteAddr());
         serviceBaseLog.setLogFromPort(request.getRemotePort());
         serviceBaseLog.setLogUserId(request.getHeader("userId"));
+        // todo: get the ip address and set it to serviceBaseLog.logIpAddr
         MLogUtils.log(serviceBaseLog);
     }
 
@@ -183,6 +184,7 @@ public class MClientSkeleton {
         serviceBaseLog.setLogFromIpAddr(request.getRemoteAddr());
         serviceBaseLog.setLogFromPort(request.getRemotePort());
         serviceBaseLog.setLogUserId(request.getHeader("userId"));
+        // todo: get the ip address and set it to serviceBaseLog.logIpAddr
         MLogUtils.log(serviceBaseLog);
     }
 

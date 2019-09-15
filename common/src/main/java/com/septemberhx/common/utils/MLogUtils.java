@@ -78,6 +78,7 @@ public class MLogUtils {
         testLog.setLogUserId("user-123-321-123-321");
         testLog.setLogFromIpAddr("127.0.0.1");
         testLog.setLogFromPort(2222);
+        testLog.setLogIpAddr("127.0.0.1");
 
         String str = MLogUtils.convertLogObjectToString(testLog);
         System.out.println(str);

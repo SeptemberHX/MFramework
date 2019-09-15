@@ -1,9 +1,7 @@
 package com.septemberhx.server.base.model;
 
 import com.septemberhx.common.base.MBaseObject;
-import com.septemberhx.server.base.model.MServiceInstance;
-import com.septemberhx.server.base.model.MServiceInterface;
-import com.septemberhx.server.base.model.MUserDemand;
+import lombok.Getter;
 
 /**
  * @author SeptemberHX
@@ -13,6 +11,7 @@ import com.septemberhx.server.base.model.MUserDemand;
  * This class stores the state of one user demand.
  * The ID of this class is the ID of the user demand.
  */
+@Getter
 public class MDemandState extends MBaseObject {
     private String instanceId;  // the id of the service instance that the demand is served at
     private String interfaceId; // the id of the interface this demand is actually served at

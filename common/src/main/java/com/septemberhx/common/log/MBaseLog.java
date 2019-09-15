@@ -19,6 +19,7 @@ import java.util.Map;
 public abstract class MBaseLog implements Comparable<MBaseLog> {
     protected DateTime logDateTime;
     protected MLogType logType;
+    protected String logIpAddr;
 
     @Override
     public int compareTo(MBaseLog o) {
@@ -41,7 +42,7 @@ public abstract class MBaseLog implements Comparable<MBaseLog> {
      * @return
      */
     protected String uniqueLogInfo() {
-        return this.concatInfo(logDateTime.toString(), logType.toString());
+        return this.concatInfo(logDateTime.toString(), logType.toString(), logIpAddr);
     }
 
     /**
@@ -52,7 +53,8 @@ public abstract class MBaseLog implements Comparable<MBaseLog> {
     protected String[] fillInfo(String[] strArr) {
         this.logDateTime = DateTime.parse(strArr[0]);
         this.logType = MLogType.valueOf(strArr[1]);
-        return this.getUnusedStrArr(strArr, 2);
+        this.logIpAddr = strArr[2];
+        return this.getUnusedStrArr(strArr, 3);
     }
 
     /**
@@ -62,11 +64,12 @@ public abstract class MBaseLog implements Comparable<MBaseLog> {
     protected void fillInfo(Map<String, Object> logMap) {
         this.logDateTime = DateTime.parse((String) logMap.get("logDateTimeInMills"));
         this.logType = MLogType.valueOf((String) logMap.get("logType"));
+        this.logIpAddr = (String) logMap.get("logIpAddr");
     }
 
     public static MBaseLog getLogFromStr(String strLine) {
         String[] splitArr = strLine.split("\\|");
-        if (splitArr.length < 2) {
+        if (splitArr.length < 3) {
             return null;
         }
 
@@ -115,6 +118,7 @@ public abstract class MBaseLog implements Comparable<MBaseLog> {
         Map<String, Object> jsonMap = new HashMap<>();
         jsonMap.put("logDateTimeInMills", logDateTime.getMillis());
         jsonMap.put("logType", logType);
+        jsonMap.put("logIpAddr", logIpAddr);
         return new JSONObject(jsonMap);
     }
 
