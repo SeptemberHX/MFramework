@@ -4,7 +4,7 @@ import com.septemberhx.common.bean.MApiContinueRequest;
 import com.septemberhx.common.bean.MApiSplitBean;
 import com.septemberhx.common.bean.MS2CSetApiCStatus;
 import com.septemberhx.common.base.MClassFunctionPair;
-import com.septemberhx.server.base.MServiceInstance;
+import com.septemberhx.server.base.model.MServiceInstance;
 import com.septemberhx.server.core.MRepoManager;
 import com.septemberhx.server.core.MServerSkeleton;
 import com.septemberhx.server.utils.MServerUtils;

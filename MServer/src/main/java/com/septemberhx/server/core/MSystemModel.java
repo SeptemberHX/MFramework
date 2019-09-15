@@ -1,7 +1,7 @@
 package com.septemberhx.server.core;
 
 import com.septemberhx.common.bean.MInstanceInfoBean;
-import com.septemberhx.server.base.MServiceInstance;
+import com.septemberhx.server.base.model.MServiceInstance;
 import lombok.Getter;
 
 import java.util.List;

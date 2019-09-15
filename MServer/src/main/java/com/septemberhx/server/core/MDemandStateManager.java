@@ -1,7 +1,7 @@
 package com.septemberhx.server.core;
 
 import com.septemberhx.common.base.MObjectManager;
-import com.septemberhx.server.base.MDemandState;
+import com.septemberhx.server.base.model.MDemandState;
 
 /**
  * @author SeptemberHX

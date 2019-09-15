@@ -1,6 +1,9 @@
-package com.septemberhx.server.base;
+package com.septemberhx.server.base.model;
 
 import com.septemberhx.common.base.MBaseObject;
+import com.septemberhx.server.base.model.MServiceInstance;
+import com.septemberhx.server.base.model.MServiceInterface;
+import com.septemberhx.server.base.model.MUserDemand;
 
 /**
  * @author SeptemberHX

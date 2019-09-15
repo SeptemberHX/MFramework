@@ -6,7 +6,7 @@ import com.google.gson.stream.JsonReader;
 import com.septemberhx.server.base.MApiInfo;
 import com.septemberhx.common.base.MClassFunctionPair;
 import com.septemberhx.server.base.MModuleInfo;
-import com.septemberhx.server.base.MProjectInfo;
+import com.septemberhx.server.base.model.MProjectInfo;
 
 import java.io.FileReader;
 import java.io.FileWriter;

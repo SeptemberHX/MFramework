@@ -1,4 +1,4 @@
-package com.septemberhx.server.base;
+package com.septemberhx.server.base.model;
 
 import java.util.ArrayList;
 import java.util.List;

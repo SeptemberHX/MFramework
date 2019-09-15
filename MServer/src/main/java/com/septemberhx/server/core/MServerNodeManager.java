@@ -3,7 +3,7 @@ package com.septemberhx.server.core;
 
 import com.septemberhx.server.base.MNodeConnectionInfo;
 import com.septemberhx.common.base.MObjectManager;
-import com.septemberhx.server.base.MServerNode;
+import com.septemberhx.server.base.model.MServerNode;
 
 import java.util.HashMap;
 import java.util.Map;

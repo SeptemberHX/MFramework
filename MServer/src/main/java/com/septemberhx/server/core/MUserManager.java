@@ -1,7 +1,7 @@
 package com.septemberhx.server.core;
 
 import com.septemberhx.common.base.MObjectManager;
-import com.septemberhx.server.base.MUser;
+import com.septemberhx.server.base.model.MUser;
 
 /**
  * @author SeptemberHX

@@ -1,5 +1,7 @@
-package com.septemberhx.server.base;
+package com.septemberhx.server.base.model;
 
+import com.septemberhx.server.base.MApiInfo;
+import com.septemberhx.server.base.MModuleInfo;
 import lombok.Getter;
 import lombok.Setter;
 

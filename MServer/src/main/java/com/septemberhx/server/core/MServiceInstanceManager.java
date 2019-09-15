@@ -1,7 +1,7 @@
 package com.septemberhx.server.core;
 
 import com.septemberhx.common.base.MObjectManager;
-import com.septemberhx.server.base.MServiceInstance;
+import com.septemberhx.server.base.model.MServiceInstance;
 
 import java.util.Optional;
 

@@ -1,4 +1,4 @@
-package com.septemberhx.server.base;
+package com.septemberhx.server.base.model;
 
 import lombok.Getter;
 import lombok.Setter;

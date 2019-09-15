@@ -2,7 +2,7 @@ package com.septemberhx.server.adaptive;
 
 import com.septemberhx.common.log.MServiceBaseLog;
 import com.septemberhx.server.base.MAnalyserResult;
-import com.septemberhx.server.base.MUser;
+import com.septemberhx.server.base.model.MUser;
 import lombok.Getter;
 import org.joda.time.DateTime;
 
