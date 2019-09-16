@@ -2,6 +2,7 @@ package com.septemberhx.server.core;
 
 import com.septemberhx.common.bean.MInstanceInfoBean;
 import com.septemberhx.server.base.model.MServiceInstance;
+import com.septemberhx.server.base.model.MSystemIndex;
 import lombok.Getter;
 
 import java.util.List;
@@ -31,6 +32,9 @@ public class MSystemModel {
     @Getter
     private MServiceManager serviceManager;
 
+    @Getter
+    private MSystemIndex lastSystemIndex;
+
     private static MSystemModel ourInstance = new MSystemModel();
 
     public static MSystemModel getInstance() {
@@ -44,6 +48,7 @@ public class MSystemModel {
         this.repoManager = new MRepoManager();
         this.demandStateManager = new MDemandStateManager();
         this.serviceManager = new MServiceManager();
+        this.lastSystemIndex = new MSystemIndex();
     }
 
     public void loadInstanceInfo(MInstanceInfoBean instanceInfo) {
@@ -53,6 +58,7 @@ public class MSystemModel {
         }
 
         // check if the instance is alive. The mObjectIdMap will not be null if alive
+        // todo: get actual serviceId of the service instance
         if (instanceInfo.getMObjectIdMap() != null) {
             this.mSIManager.update(new MServiceInstance(
                     instanceInfo.getParentIdMap(),
@@ -61,6 +67,7 @@ public class MSystemModel {
                     instanceInfo.getPort(),
                     instanceInfo.getId(),
                     instanceInfo.getMObjectIdMap(),
+                    instanceInfo.getId(),
                     instanceInfo.getId()
             ));
         } else if (this.mSIManager.containsById(instanceInfo.getId())){

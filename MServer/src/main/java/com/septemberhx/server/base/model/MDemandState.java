@@ -15,9 +15,11 @@ import lombok.Getter;
 public class MDemandState extends MBaseObject {
     private String instanceId;  // the id of the service instance that the demand is served at
     private String interfaceId; // the id of the interface this demand is actually served at
+    private String userId;      // the id of the user
 
     public MDemandState(MUserDemand userDemand) {
         this.id = userDemand.getId();
+        this.userId = userDemand.getUserId();
     }
 
     public void satisfy(MServiceInstance serviceInstance, MServiceInterface serviceInterface) {
@@ -30,7 +32,7 @@ public class MDemandState extends MBaseObject {
         this.interfaceId = null;
     }
 
-    public boolean isSatisfied() {
+    public boolean isAssigned() {
         return this.instanceId != null && this.interfaceId != null;
     }
 }

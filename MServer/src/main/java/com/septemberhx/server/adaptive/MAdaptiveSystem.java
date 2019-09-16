@@ -28,6 +28,8 @@ public class MAdaptiveSystem {
     private MAlgorithmInterface algorithm;
     private MSystemState state;
 
+    public static Double userPercentOfMajorThreshold = 0.1;     // when 10% users are not satisfied, we use major
+
     public MAdaptiveSystem() {
         this.monitor = new MMonitor();
         this.analyser = new MAnalyser();

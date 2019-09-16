@@ -2,6 +2,7 @@ package com.septemberhx.server.core;
 
 import com.septemberhx.common.base.MObjectManager;
 import com.septemberhx.server.base.model.MUser;
+import com.septemberhx.server.base.model.MUserDemand;
 
 /**
  * @author SeptemberHX
@@ -9,4 +10,14 @@ import com.septemberhx.server.base.model.MUser;
  * @date 2019/9/15
  */
 public class MUserManager extends MObjectManager<MUser> {
+
+    public MUserDemand getUserDemandByUserAndDemandId(String userId, String demandId) {
+        if (this.objectMap.containsKey(userId)) {
+            MUser mUser = this.objectMap.get(userId);
+            if (mUser.getDemandMap().containsKey(demandId)) {
+                return mUser.getDemandMap().get(demandId);
+            }
+        }
+        return null;
+    }
 }

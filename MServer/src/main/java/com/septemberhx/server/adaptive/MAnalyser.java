@@ -3,9 +3,13 @@ package com.septemberhx.server.adaptive;
 import com.septemberhx.common.log.MLogType;
 import com.septemberhx.common.log.MServiceBaseLog;
 import com.septemberhx.server.base.MAnalyserResult;
+import com.septemberhx.server.base.model.MDemandState;
 import com.septemberhx.server.base.model.MLogChain;
+import com.septemberhx.server.base.model.MSystemIndex;
 import com.septemberhx.server.base.model.MUser;
+import com.septemberhx.server.core.MDemandStateManager;
 import com.septemberhx.server.core.MServiceInstanceManager;
+import com.septemberhx.server.core.MSystemModel;
 import lombok.Getter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -36,7 +40,15 @@ public class MAnalyser {
         return new MAnalyserResult();
     }
 
-    public void analyseAvgResTimePerReqOnEachUser(Map<String, List<MServiceBaseLog>> userId2logList) {
+    public void analyseAffectedUserNum(Map<String, List<MServiceBaseLog>> userId2logList, List<MDemandState> demandStates) {
+        Map<String, Double> userId2AvgTime = this.analyseAvgResTimePerReqOnEachUser(userId2logList);
+        Set<String> affectedUserIdByAvgTime = this.getUserIdWithWorseAvgTime(userId2AvgTime);
+        Set<String> affectedUserIdBySla = this.getUserIdWithWorseSla(demandStates);
+        affectedUserIdByAvgTime.addAll(affectedUserIdBySla);
+    }
+
+    public Map<String, Double> analyseAvgResTimePerReqOnEachUser(Map<String, List<MServiceBaseLog>> userId2logList) {
+        Map<String, Double> userId2AvgTime = new HashMap<>();
         Map<String, List<MLogChain>> userId2ChainList = new HashMap<>();
         for (String userId : userId2logList.keySet()) {
             userId2ChainList.put(userId, this.splitLogsByEachRequestChains(userId2logList.get(userId)));
@@ -48,8 +60,32 @@ public class MAnalyser {
                 allResponseTimeInMills += logChain.getFullResponseTime();
             }
             double avgTimePerReq = allResponseTimeInMills * 1.0 / userId2ChainList.get(userId).size();
-            // todo: do the remain job here
+            userId2AvgTime.put(userId, avgTimePerReq);
         }
+        return userId2AvgTime;
+    }
+
+    public Set<String> getUserIdWithWorseAvgTime(Map<String, Double> userId2AvgTime) {
+        MSystemIndex lastSystemIndex = MSystemModel.getInstance().getLastSystemIndex();
+        Set<String> userIdNeedAdjustSet = new HashSet<>();
+
+        for (String userId : userId2AvgTime.keySet()) {
+            if (lastSystemIndex.getUserId2AvgResTimeEachReq().containsKey(userId)
+                    && lastSystemIndex.getUserId2AvgResTimeEachReq().get(userId) < userId2AvgTime.get(userId)) {
+                userIdNeedAdjustSet.add(userId);
+            }
+        }
+        return userIdNeedAdjustSet;
+    }
+
+    public Set<String> getUserIdWithWorseSla(List<MDemandState> demandStates) {
+        Set<String> userIdSet = new HashSet<>();
+        for (MDemandState demandState : demandStates) {
+            if (!MDemandStateManager.checkIfDemandSatisfied(demandState)) {
+                userIdSet.add(demandState.getUserId());
+            }
+        }
+        return userIdSet;
     }
 
     private List<MLogChain> splitLogsByEachRequestChains(List<MServiceBaseLog> logList) {
