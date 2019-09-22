@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author SeptemberHX
@@ -15,5 +14,14 @@ import java.util.Map;
 @Getter
 @Setter
 public class MUser extends MBaseObject {
-    private Map<String, MUserDemand> demandMap;      // user demand chain to satisfy user AT THIS TIME ONLY
+    private List<MDemandChain> demandChainList;      // user demand chain to satisfy user AT THIS TIME ONLY
+
+    public MUserDemand getDemandByDemandId(String demandId) {
+        for (MDemandChain demandChain : this.demandChainList) {
+            if (demandChain.containsDemandId(demandId)) {
+                return demandChain.getDemandById(demandId);
+            }
+        }
+        return null;
+    }
 }

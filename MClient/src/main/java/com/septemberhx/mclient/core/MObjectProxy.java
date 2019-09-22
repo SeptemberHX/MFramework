@@ -16,7 +16,6 @@ import java.util.List;
 /**
  * @Author: septemberhx
  * @Date: 2018-12-10
- * @Description: TODO
  * @Version 0.1
  */
 public class MObjectProxy implements MethodInterceptor {

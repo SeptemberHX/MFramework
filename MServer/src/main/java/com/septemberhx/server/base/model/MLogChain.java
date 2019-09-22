@@ -3,9 +3,11 @@ package com.septemberhx.server.base.model;
 import com.septemberhx.common.log.MLogType;
 import com.septemberhx.common.log.MServiceBaseLog;
 import com.septemberhx.server.core.MServiceInstanceManager;
+import com.septemberhx.server.core.MSystemModel;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author SeptemberHX
@@ -43,5 +45,25 @@ public class MLogChain {
         MServiceBaseLog firstLog = this.logList.get(0);
         MServiceBaseLog lastLog = this.logList.get(this.logList.size() - 1);
         return lastLog.getLogDateTime().getMillis() - firstLog.getLogDateTime().getMillis();
+    }
+
+    public List<MSIInterface> getConnections() {
+        List<MSIInterface> instanceInterfaces = new ArrayList<>();
+        for (MServiceBaseLog serviceBaseLog : this.logList) {
+            if (serviceBaseLog.getLogType() != MLogType.FUNCTION_CALL) {
+                continue;
+            }
+
+            Optional<MServiceInstance> serviceInstance = MSystemModel.getInstance().getMSIManager().getInstanceByIpAddr(serviceBaseLog.getLogIpAddr());
+            if (serviceInstance.isPresent()) {
+                MSIInterface instanceInterface = new MSIInterface(
+                        serviceInstance.get().getId(),
+                        serviceBaseLog.getLogObjectId(),
+                        serviceBaseLog.getLogMethodName()
+                );
+                instanceInterfaces.add(instanceInterface);
+            }
+        }
+        return instanceInterfaces;
     }
 }

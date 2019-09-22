@@ -8,6 +8,7 @@ import com.septemberhx.server.adaptive.executor.MClusterExecutor;
 import com.septemberhx.server.adaptive.executor.MExecutor;
 import com.septemberhx.server.base.MAnalyserResult;
 import com.septemberhx.server.base.MPlannerResult;
+import com.septemberhx.server.core.MSystemModel;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
@@ -28,7 +29,10 @@ public class MAdaptiveSystem {
     private MAlgorithmInterface algorithm;
     private MSystemState state;
 
-    public static Double userPercentOfMajorThreshold = 0.1;     // when 10% users are not satisfied, we use major
+    public static Double MINOR_THRESHOLD = 0.0;     // when there are users not satisfied, we will use minor
+    public static Double MAJOR_THRESHOLD = 0.1;     // when 10% users are not satisfied, we use major
+
+    public static Double COMPOSITION_THRESHOLD = 0.2;
 
     public MAdaptiveSystem() {
         this.monitor = new MMonitor();
@@ -89,7 +93,7 @@ public class MAdaptiveSystem {
         DateTime logEndTime = DateTime.now();
         DateTime logStartTime = logEndTime.minus(analyser.getTimeWindowInMillis());
         List<MServiceBaseLog> logList = this.monitor.getLogBetweenDateTime(logStartTime, logEndTime);
-        return analyser.analyse(logList);
+        return analyser.analyse(logList, MSystemModel.getInstance().getDemandStateManager().getAllValues());
     }
 
     /**

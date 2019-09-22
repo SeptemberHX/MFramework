@@ -10,12 +10,12 @@ import com.septemberhx.server.base.model.MUserDemand;
  * @date 2019/9/15
  */
 public class MUserManager extends MObjectManager<MUser> {
-
     public MUserDemand getUserDemandByUserAndDemandId(String userId, String demandId) {
         if (this.objectMap.containsKey(userId)) {
             MUser mUser = this.objectMap.get(userId);
-            if (mUser.getDemandMap().containsKey(demandId)) {
-                return mUser.getDemandMap().get(demandId);
+            MUserDemand mUserDemand = mUser.getDemandByDemandId(demandId);
+            if (mUserDemand != null) {
+                return mUserDemand;
             }
         }
         return null;
