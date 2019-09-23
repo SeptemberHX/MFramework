@@ -42,4 +42,8 @@ public class MService extends MBaseObject {
     public static Boolean checkIfInstanceIsGatewayByServiceName(String serviceName) {
         return serviceName.startsWith("Gateway");
     }
+
+    public List<MServiceInterface> getAllInterface() {
+        return new ArrayList<>(this.interfaceMap.values());
+    }
 }

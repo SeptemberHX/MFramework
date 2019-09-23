@@ -38,10 +38,39 @@ public class MMinorAlgorithm implements MAlgorithmInterface {
             MServerNode closestNode = closestNodeOption.get();
             List<MServerNode> serverNodeList = MSystemModel.getInstance().getMSNManager().getAllConnectedNodesOrderedDecent(closestNodeId);
             for (MDemandState demandState : notMetMap.get(userId)) {
-               MUserDemand userDemand = MSystemModel.getInstance().getUserManager()
-                       .getUserDemandByUserAndDemandId(demandState.getUserId(), demandState.getInstanceId());
+                MUserDemand userDemand = MSystemModel.getInstance().getUserManager()
+                        .getUserDemandByUserAndDemandId(demandState.getUserId(), demandState.getInstanceId());
 
+               // try to find an exist instance
+                boolean isSuccess = false;
+                for (MServerNode serverNode : serverNodeList) {
+                    List<MServiceInstance> candidateList = serverOperator.getInstancesCanMetWithEnoughCapOnNode(serverNode.getId(), userDemand);
+                    if (candidateList.size() > 0) {
+                        serverOperator.assignDemandToIns(userDemand.getId(), candidateList.get(0).getId(), demandState);
+                        isSuccess = true;
+                        break;
+                    }
+                }
 
+                // try to create a new instance for it
+                // todo: find suitable service for demand function
+                // todo: generate unique instance id
+                if (!isSuccess) {
+                    for (MServerNode serviceMode : serverNodeList) {
+                        String bestServiceId = "FFFFFFFFFFFFFFFF";
+                        if (serverOperator.ifNodeHasResForIns(serviceMode.getId(), bestServiceId)) {
+                            String uniqueInstanceId = "FFFFFFFFFFFF";
+                            serverOperator.addNewInstance(bestServiceId, serviceMode.getId(), uniqueInstanceId);
+                            serverOperator.assignDemandToIns(userDemand.getId(), uniqueInstanceId, demandState);
+                            isSuccess = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (!isSuccess) {
+                    throw new RuntimeException("Demand cannot be satisfied! : " + userDemand.toString());
+                }
             }
         }
 

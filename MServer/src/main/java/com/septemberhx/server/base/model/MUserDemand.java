@@ -30,4 +30,14 @@ public class MUserDemand extends MBaseObject {
     public boolean isServiceInterfaceMet(MServiceInterface serviceInterface) {
         return this.isDemandMet(serviceInterface.getFunctionId(), serviceInterface.getSlaLevel());
     }
+
+    @Override
+    public String toString() {
+        return "MUserDemand{" +
+                "userId='" + userId + '\'' +
+                ", functionId='" + functionId + '\'' +
+                ", slaLevel=" + slaLevel +
+                ", id='" + id + '\'' +
+                '}';
+    }
 }

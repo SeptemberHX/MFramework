@@ -3,18 +3,35 @@ package com.septemberhx.server.core;
 import com.septemberhx.common.base.MObjectManager;
 import com.septemberhx.server.base.model.MService;
 import com.septemberhx.server.base.model.MServiceInstance;
+import lombok.Setter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.swing.text.html.Option;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
-
+@Setter
 public class MServiceInstanceManager extends MObjectManager<MServiceInstance> {
 
     private static Logger logger = LogManager.getLogger(MServiceInstanceManager.class);
+    private Map<String, Set<String>> nodeId2InsIdSet = new HashMap<>();
+
+    public MServiceInstanceManager shallowClone() {
+        MServiceInstanceManager cloneObejct = new MServiceInstanceManager();
+        Map<String, MServiceInstance> instanceMap = new HashMap<>(this.objectMap);  // do not need deep clone here !
+        Map<String, Set<String>> cloneMapSet = new HashMap<>();
+        for (String nodeId : this.nodeId2InsIdSet.keySet()) {
+            cloneMapSet.put(nodeId, new HashSet<>(this.nodeId2InsIdSet.get(nodeId)));
+        }
+        cloneObejct.setNodeId2InsIdSet(nodeId2InsIdSet);
+        cloneObejct.setObjectMap(instanceMap);
+        return cloneObejct;
+    }
+
+    public void delete(MServiceInstance serviceInstance) {
+        this.objectMap.remove(serviceInstance.getId());
+        this.nodeId2InsIdSet.get(serviceInstance.getNodeId()).remove(serviceInstance.getId());
+    }
 
     public Optional<MServiceInstance> getInstanceByMObjectId(String mObjectId) {
         MServiceInstance result = null;
@@ -38,14 +55,22 @@ public class MServiceInstanceManager extends MObjectManager<MServiceInstance> {
         return Optional.ofNullable(result);
     }
 
+    public void add(MServiceInstance serviceInstance) {
+        this.objectMap.put(serviceInstance.getId(), serviceInstance);
+        if (!this.nodeId2InsIdSet.containsKey(serviceInstance.getNodeId())) {
+            this.nodeId2InsIdSet.put(serviceInstance.getNodeId(), new HashSet<>());
+        }
+        this.nodeId2InsIdSet.get(serviceInstance.getNodeId()).add(serviceInstance.getId());
+    }
+
     public List<MServiceInstance> getInstancesOnNode(String nodeId) {
-        List<MServiceInstance> serviceInstanceList = new ArrayList<>();
-        for (MServiceInstance serviceInstance : this.objectMap.values()) {
-            if (serviceInstance.getNodeId().equals(nodeId)) {
-                serviceInstanceList.add(serviceInstance);
+        List<MServiceInstance> resultList = new ArrayList<>();
+        if (this.nodeId2InsIdSet.containsKey(nodeId)) {
+            for (String insId : this.nodeId2InsIdSet.get(nodeId)) {
+                resultList.add(this.objectMap.get(insId));
             }
         }
-        return serviceInstanceList;
+        return resultList;
     }
 
     /**

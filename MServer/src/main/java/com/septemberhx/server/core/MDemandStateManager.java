@@ -6,9 +6,7 @@ import com.septemberhx.server.base.model.MServiceInstance;
 import com.septemberhx.server.base.model.MServiceInterface;
 import com.septemberhx.server.base.model.MUserDemand;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * @author SeptemberHX
@@ -16,6 +14,21 @@ import java.util.Optional;
  * @date 2019/9/15
  */
 public class MDemandStateManager extends MObjectManager<MDemandState> {
+
+    public MDemandStateManager shallowClone() {
+        MDemandStateManager cloneObject = new MDemandStateManager();
+        Map<String, MDemandState> cloneObjMap = new HashMap<>(this.objectMap);
+        cloneObject.setObjectMap(cloneObjMap);
+        return cloneObject;
+    }
+
+    public void deleteById(String demandId) {
+        this.objectMap.remove(demandId);
+    }
+
+    public void add(MDemandState demandState) {
+        this.objectMap.put(demandState.getId(), demandState);
+    }
 
     public List<MDemandState> getDemandStateByInstanceId(String instanceId) {
         List<MDemandState> resultList = new ArrayList<>();

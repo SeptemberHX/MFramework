@@ -39,7 +39,7 @@ public class MResource {
         this.bandwidth = this.bandwidth - mResource.bandwidth;
     }
 
-    public void alloc(MResource mResource) {
+    public void free(MResource mResource) {
         this.cpu = this.cpu + mResource.cpu;
         this.ram = this.ram + mResource.ram;
         this.bandwidth = this.bandwidth + this.bandwidth;

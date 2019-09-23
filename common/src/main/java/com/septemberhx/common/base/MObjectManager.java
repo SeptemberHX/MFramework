@@ -1,10 +1,14 @@
 package com.septemberhx.common.base;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 
+@Setter
+@Getter
 public class MObjectManager<T extends MBaseObject> {
 
     protected Map<String, T> objectMap;

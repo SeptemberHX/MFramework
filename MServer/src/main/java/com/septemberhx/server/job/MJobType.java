@@ -6,5 +6,6 @@ public enum MJobType {
     DEPLOY,
     NOTIFY,
     SPLIT,
+    SWITCH,
     COMPOSITE
 }

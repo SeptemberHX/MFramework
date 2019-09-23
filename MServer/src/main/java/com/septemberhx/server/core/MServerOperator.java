@@ -2,10 +2,10 @@ package com.septemberhx.server.core;
 
 import com.septemberhx.common.base.MObjectManager;
 import com.septemberhx.server.base.model.*;
+import com.septemberhx.server.job.MBaseJob;
+import com.septemberhx.server.job.MSwitchJob;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * @author SeptemberHX
@@ -14,19 +14,23 @@ import java.util.Optional;
  */
 public class MServerOperator extends MObjectManager<MServerState> {
 
-    private Map<String, Integer> instanceId2UserCap;    // left user capability of each instance current time
-    private Map<String, Integer> preInstanceId2UserCap; // left user capability after operations.
-                                                        // For planning only because no action will be done when planning
-                                                        // All actions should be done when executing.
-
+    private Map<String, Integer> insId2UserCap;     // left user capability of each instance current time
+                                                    // For planning only because no action will be done when planning
+                                                    // All actions should be done when executing.
     private Map<String, MResource> nodeId2ResourceLeft;
-    private Map<String, MResource> preNodeId2ResourceLeft;
+    private Map<String, Set<String>> funcId2InsIdSet;
+
+    // clone objects
+    private MDemandStateManager demandStateManager;
+    private MServiceInstanceManager instanceManager;
+
+    private List<MBaseJob> jobList;
 
     public MServerOperator() {
-        this.instanceId2UserCap = new HashMap<>();
-        this.preInstanceId2UserCap = new HashMap<>();
+        this.insId2UserCap = new HashMap<>();
         this.nodeId2ResourceLeft = new HashMap<>();
-        this.preNodeId2ResourceLeft = new HashMap<>();
+        this.funcId2InsIdSet = new HashMap<>();
+        this.jobList = new ArrayList<>();
     }
 
     /**
@@ -34,8 +38,11 @@ public class MServerOperator extends MObjectManager<MServerState> {
      * SHOULD BE CALLED BEFORE ANY OTHER OPERATIONS.
      */
     public void reInit() {
-        this.instanceId2UserCap.clear();
-        this.preInstanceId2UserCap.clear();
+        this.demandStateManager = MSystemModel.getInstance().getDemandStateManager().shallowClone();
+        this.instanceManager = MSystemModel.getInstance().getMSIManager().shallowClone();
+
+        this.jobList.clear();
+        this.insId2UserCap.clear();
 
         Map<String, Integer> insId2UserNum = new HashMap<>();
         for (MDemandState demandState : MSystemModel.getInstance().getDemandStateManager().getAllValues()) {
@@ -50,13 +57,22 @@ public class MServerOperator extends MObjectManager<MServerState> {
             if (instanceOptional.isPresent()) {
                 Optional<MService> serviceOptional = MSystemModel.getInstance().getServiceManager().getById(instanceOptional.get().getServiceId());
                 serviceOptional.ifPresent(mService ->
-                    instanceId2UserCap.put(instanceId, mService.getMaxUserCap() - instanceId2UserCap.get(instanceId))
+                    insId2UserCap.put(instanceId, mService.getMaxUserCap() - insId2UserCap.get(instanceId))
                 );
             }
         }
 
+        this.funcId2InsIdSet.clear();
+        for (MService mService : MSystemModel.getInstance().getServiceManager().getAllValues()) {
+            for (MServiceInterface serviceInterface : mService.getAllInterface()) {
+                if (!this.funcId2InsIdSet.containsKey(serviceInterface.getFunctionId())) {
+                    this.funcId2InsIdSet.put(serviceInterface.getFunctionId(), new HashSet<>());
+                }
+                // todo
+            }
+        }
+
         this.nodeId2ResourceLeft.clear();
-        this.preNodeId2ResourceLeft.clear();
         for (MServerState serverState : this.objectMap.values()) {
             Optional<MServerNode> nodeOptional = MSystemModel.getInstance().getMSNManager().getById(serverState.getId());
             nodeOptional.ifPresent(serverNode ->
@@ -72,26 +88,66 @@ public class MServerOperator extends MObjectManager<MServerState> {
         }
         MService service = serviceOptional.get();
 
-        return this.getNodeResourceLeft(nodeId).isEnough(service.getResource());
+        return this.nodeId2ResourceLeft.get(nodeId).isEnough(service.getResource());
     }
 
-    private MResource getNodeResourceLeft(String nodeId) {
-        MResource resourceLeft;
-        if (this.preNodeId2ResourceLeft.containsKey(nodeId)) {
-            resourceLeft = this.preNodeId2ResourceLeft.get(nodeId);
-        } else {
-            resourceLeft = this.nodeId2ResourceLeft.get(nodeId);
-        }
-        return resourceLeft;
+    public boolean ifInstanceHasCap(String instanceId, Integer capWanted) {
+        return this.insId2UserCap.getOrDefault(instanceId, 0) >= capWanted;
     }
 
-    private Integer getUserCapLeft(String instanceId) {
-        Integer leftUserCap;
-        if (this.preInstanceId2UserCap.containsKey(instanceId)) {
-            leftUserCap = this.preInstanceId2UserCap.get(instanceId);
-        } else {
-            leftUserCap = this.instanceId2UserCap.get(instanceId);
+    public void assignDemandToIns(MUserDemand userDemand, MServiceInstance instance, MServiceInterface serviceInterface, MDemandState oldState) {
+        if (oldState != null) {
+            if (!this.insId2UserCap.containsKey(oldState.getInstanceId())) {
+                this.insId2UserCap.put(oldState.getInstanceId(), this.insId2UserCap.get(oldState.getInstanceId()) - 1);
+                this.demandStateManager.deleteById(oldState.getId());
+            }
         }
-        return leftUserCap;
+        this.insId2UserCap.put(instance.getId(), 1 + this.insId2UserCap.getOrDefault(instance.getId(), 0));
+        this.jobList.add(new MSwitchJob(userDemand.getId(), instance.getId()));
+
+        MDemandState newDemandState = new MDemandState(userDemand);
+        newDemandState.satisfy(instance, serviceInterface);
+        this.demandStateManager.add(newDemandState);
+    }
+
+    public void addNewInstance(String serviceId, String nodeId, String instanceId) {
+        MServiceInstance instance = new MServiceInstance(null, nodeId, null, null, instanceId, null, null, serviceId);
+        this.instanceManager.add(instance);
+        Optional<MService> serviceOptional = MSystemModel.getInstance().getServiceManager().getById(serviceId);
+        serviceOptional.ifPresent(mService -> {
+            this.nodeId2ResourceLeft.get(nodeId).assign(mService.getResource());
+            this.insId2UserCap.put(instance.getId(), mService.getMaxUserCap());
+        });
+    }
+
+    public void deleteInstance(MServiceInstance serviceInstance) {
+        this.insId2UserCap.remove(serviceInstance.getId());
+        Optional<MService> serviceOptional = MSystemModel.getInstance().getServiceManager().getById(serviceInstance.getServiceId());
+        serviceOptional.ifPresent(mService -> {
+            this.nodeId2ResourceLeft.get(serviceInstance.getNodeId()).free(mService.getResource());
+            this.insId2UserCap.remove(serviceInstance.getId());
+        });
+        this.instanceManager.delete(serviceInstance);
+    }
+
+    public List<MServiceInstance> getInstancesOnNode(String nodeId) {
+        return new ArrayList<>(this.instanceManager.getInstancesOnNode(nodeId));
+    }
+
+    public List<MServiceInstance> getInstancesCanMetWithEnoughCapOnNode(String nodeId, MUserDemand userDemand) {
+        List<MServiceInstance> instanceList = this.getInstancesOnNode(nodeId);
+        for (MServiceInstance instance : instanceList) {
+            if (!this.ifInstanceHasCap(instance.getId(), 1)) {
+                continue;
+            }
+            // todo: Calculate a functionId2InstanceId map in reInit(). So we don't need to search it in this part
+            Optional<MService> serviceOptional = MSystemModel.getInstance().getServiceManager().getById(instance.getServiceId());
+            serviceOptional.ifPresent(mService -> {
+                if (mService.getInterfaceMetUserDemand(userDemand).size() > 0) {
+                    instanceList.add(instance);
+                }
+            });
+        }
+        return instanceList;
     }
 }
