@@ -17,12 +17,16 @@ public class MService extends MBaseObject {
     private String serviceName;                     // Service Name
     private String gitUrl;                          // the git repo url
     private Map<String, MServiceInterface> interfaceMap;  // interface list
+    private MResource resource;
+    private Integer maxUserCap;
 
     public MService(String id, String name, String gitUrl, Map<String, MServiceInterface> interfaceMap) {
         this.id = id;
         this.serviceName = name;
         this.gitUrl = gitUrl;
         this.interfaceMap = interfaceMap;
+        this.resource = new MResource();
+        this.maxUserCap = 0;
     }
 
     public List<MServiceInterface> getInterfaceMetUserDemand(MUserDemand userDemand) {

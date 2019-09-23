@@ -10,4 +10,6 @@ import lombok.ToString;
 @ToString
 public class MServerNode extends MBaseObject {
     private ServerNodeType nodeType;
+    private MResource resource;
+    private MPosition position;
 }

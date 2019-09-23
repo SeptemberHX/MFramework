@@ -5,7 +5,9 @@ import com.google.common.graph.MutableValueGraph;
 import com.google.common.graph.ValueGraphBuilder;
 import com.septemberhx.server.base.MNodeConnectionInfo;
 import com.septemberhx.common.base.MObjectManager;
+import com.septemberhx.server.base.model.MPosition;
 import com.septemberhx.server.base.model.MServerNode;
+import com.septemberhx.server.base.model.MUser;
 
 import java.util.*;
 
@@ -54,5 +56,23 @@ public class MServerNodeManager extends MObjectManager<MServerNode> {
             }
         });
         return successorList;
+    }
+
+    public String getClosestNodeId(MPosition position) {
+        if (this.objectMap.size() == 0) {
+            return null;
+        }
+        List<String> nodeIdList = new ArrayList<>(this.objectMap.keySet());
+        String targetNodeId = nodeIdList.get(0);
+        Double distance = this.objectMap.get(targetNodeId).getPosition().distanceTo(position);
+
+        for (String nodeId : nodeIdList) {
+            Double d = this.objectMap.get(nodeId).getPosition().distanceTo(position);
+            if (d < distance) {
+                distance = d;
+                targetNodeId = nodeId;
+            }
+        }
+        return targetNodeId;
     }
 }

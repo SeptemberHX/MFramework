@@ -15,6 +15,7 @@ import java.util.List;
 @Setter
 public class MUser extends MBaseObject {
     private List<MDemandChain> demandChainList;      // user demand chain to satisfy user AT THIS TIME ONLY
+    private MPosition position;
 
     public MUserDemand getDemandByDemandId(String demandId) {
         for (MDemandChain demandChain : this.demandChainList) {

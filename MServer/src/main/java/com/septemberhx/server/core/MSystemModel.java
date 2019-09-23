@@ -35,6 +35,9 @@ public class MSystemModel {
     @Getter
     private MSystemIndex lastSystemIndex;
 
+    @Getter
+    private MServerOperator serverOperator;
+
     private static MSystemModel ourInstance = new MSystemModel();
 
     public static MSystemModel getInstance() {
@@ -49,6 +52,7 @@ public class MSystemModel {
         this.demandStateManager = new MDemandStateManager();
         this.serviceManager = new MServiceManager();
         this.lastSystemIndex = new MSystemIndex();
+        this.serverOperator = new MServerOperator();
     }
 
     public void loadInstanceInfo(MInstanceInfoBean instanceInfo) {

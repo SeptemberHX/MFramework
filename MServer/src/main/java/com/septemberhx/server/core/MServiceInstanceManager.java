@@ -6,6 +6,9 @@ import com.septemberhx.server.base.model.MServiceInstance;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import javax.swing.text.html.Option;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 
@@ -33,6 +36,16 @@ public class MServiceInstanceManager extends MObjectManager<MServiceInstance> {
             }
         }
         return Optional.ofNullable(result);
+    }
+
+    public List<MServiceInstance> getInstancesOnNode(String nodeId) {
+        List<MServiceInstance> serviceInstanceList = new ArrayList<>();
+        for (MServiceInstance serviceInstance : this.objectMap.values()) {
+            if (serviceInstance.getNodeId().equals(nodeId)) {
+                serviceInstanceList.add(serviceInstance);
+            }
+        }
+        return serviceInstanceList;
     }
 
     /**
