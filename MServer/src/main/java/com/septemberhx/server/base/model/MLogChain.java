@@ -54,7 +54,7 @@ public class MLogChain {
                 continue;
             }
 
-            Optional<MServiceInstance> serviceInstance = MSystemModel.getInstance().getMSIManager().getInstanceByIpAddr(serviceBaseLog.getLogIpAddr());
+            Optional<MServiceInstance> serviceInstance = MSystemModel.getIns().getMSIManager().getInstanceByIpAddr(serviceBaseLog.getLogIpAddr());
             if (serviceInstance.isPresent()) {
                 MSIInterface instanceInterface = new MSIInterface(
                         serviceInstance.get().getId(),

@@ -4,8 +4,10 @@ import com.septemberhx.common.base.MBaseObject;
 import lombok.Getter;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author SeptemberHX
@@ -30,13 +32,8 @@ public class MService extends MBaseObject {
     }
 
     public List<MServiceInterface> getInterfaceMetUserDemand(MUserDemand userDemand) {
-        List<MServiceInterface> resultList = new ArrayList<>();
-        for (MServiceInterface serviceInterface : this.interfaceMap.values()) {
-            if (userDemand.isServiceInterfaceMet(serviceInterface)) {
-                resultList.add(serviceInterface);
-            }
-        }
-        return resultList;
+        return this.interfaceMap.values().stream().filter(userDemand::isServiceInterfaceMet)
+                .collect(Collectors.toList());
     }
 
     public static Boolean checkIfInstanceIsGatewayByServiceName(String serviceName) {
@@ -45,5 +42,9 @@ public class MService extends MBaseObject {
 
     public List<MServiceInterface> getAllInterface() {
         return new ArrayList<>(this.interfaceMap.values());
+    }
+
+    public boolean checkIfMeetDemand(MUserDemand userDemand) {
+        return !this.getInterfaceMetUserDemand(userDemand).isEmpty();
     }
 }

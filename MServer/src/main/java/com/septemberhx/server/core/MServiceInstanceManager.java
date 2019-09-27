@@ -7,7 +7,6 @@ import lombok.Setter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import javax.swing.text.html.Option;
 import java.util.*;
 
 @Setter
@@ -15,22 +14,31 @@ public class MServiceInstanceManager extends MObjectManager<MServiceInstance> {
 
     private static Logger logger = LogManager.getLogger(MServiceInstanceManager.class);
     private Map<String, Set<String>> nodeId2InsIdSet = new HashMap<>();
+    private Map<String, Set<String>> serviceId2InsIdSet = new HashMap<>();
 
     public MServiceInstanceManager shallowClone() {
-        MServiceInstanceManager cloneObejct = new MServiceInstanceManager();
+        MServiceInstanceManager cloneObject = new MServiceInstanceManager();
         Map<String, MServiceInstance> instanceMap = new HashMap<>(this.objectMap);  // do not need deep clone here !
-        Map<String, Set<String>> cloneMapSet = new HashMap<>();
+        cloneObject.setObjectMap(instanceMap);
+
+        Map<String, Set<String>> cloneNodeId2InsIdSet = new HashMap<>();
         for (String nodeId : this.nodeId2InsIdSet.keySet()) {
-            cloneMapSet.put(nodeId, new HashSet<>(this.nodeId2InsIdSet.get(nodeId)));
+            cloneNodeId2InsIdSet.put(nodeId, new HashSet<>(this.nodeId2InsIdSet.get(nodeId)));
         }
-        cloneObejct.setNodeId2InsIdSet(nodeId2InsIdSet);
-        cloneObejct.setObjectMap(instanceMap);
-        return cloneObejct;
+        cloneObject.setNodeId2InsIdSet(cloneNodeId2InsIdSet);
+
+        Map<String, Set<String>> cloneServiceId2InsIdSet = new HashMap<>();
+        for (String serviceId : this.serviceId2InsIdSet.keySet()) {
+            cloneServiceId2InsIdSet.put(serviceId, new HashSet<>(this.serviceId2InsIdSet.get(serviceId)));
+        }
+        cloneObject.setServiceId2InsIdSet(cloneServiceId2InsIdSet);
+        return cloneObject;
     }
 
     public void delete(MServiceInstance serviceInstance) {
         this.objectMap.remove(serviceInstance.getId());
         this.nodeId2InsIdSet.get(serviceInstance.getNodeId()).remove(serviceInstance.getId());
+        this.serviceId2InsIdSet.get(serviceInstance.getServiceId()).remove(serviceInstance.getId());
     }
 
     public Optional<MServiceInstance> getInstanceByMObjectId(String mObjectId) {
@@ -61,6 +69,11 @@ public class MServiceInstanceManager extends MObjectManager<MServiceInstance> {
             this.nodeId2InsIdSet.put(serviceInstance.getNodeId(), new HashSet<>());
         }
         this.nodeId2InsIdSet.get(serviceInstance.getNodeId()).add(serviceInstance.getId());
+
+        if (!this.serviceId2InsIdSet.containsKey(serviceInstance.getServiceId())) {
+            this.serviceId2InsIdSet.put(serviceInstance.getServiceId(), new HashSet<>());
+        }
+        this.serviceId2InsIdSet.get(serviceInstance.getServiceId()).add(serviceInstance.getId());
     }
 
     public List<MServiceInstance> getInstancesOnNode(String nodeId) {
@@ -73,6 +86,14 @@ public class MServiceInstanceManager extends MObjectManager<MServiceInstance> {
         return resultList;
     }
 
+    public List<MServiceInstance> getInstancesOfService(String serviceId) {
+        List<MServiceInstance> resultList = new ArrayList<>();
+        for (String insId : this.serviceId2InsIdSet.getOrDefault(serviceId, new HashSet<>())) {
+            resultList.add(this.objectMap.get(insId));
+        }
+        return resultList;
+    }
+
     /**
      * Check whether the given ip address is an instance of Gateway.
      * @param ipAddr: The ip address of the given instance
@@ -80,7 +101,7 @@ public class MServiceInstanceManager extends MObjectManager<MServiceInstance> {
      */
     public static boolean checkIfInstanceIsGateway(String ipAddr) {
         Optional<MServiceInstance> serviceInstanceOptional =
-                MSystemModel.getInstance().getMSIManager().getInstanceByIpAddr(ipAddr);
+                MSystemModel.getIns().getMSIManager().getInstanceByIpAddr(ipAddr);
         if (!serviceInstanceOptional.isPresent()) {
             logger.warn("The log came from an nonexistent instance : " + ipAddr);
             return false;

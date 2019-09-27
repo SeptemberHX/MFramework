@@ -147,7 +147,7 @@ public class MAnalyser {
     }
 
     private Set<String> getUserIdWithWorseAvgTime(Map<String, Double> userId2AvgTime) {
-        MSystemIndex lastSystemIndex = MSystemModel.getInstance().getLastSystemIndex();
+        MSystemIndex lastSystemIndex = MSystemModel.getIns().getLastSystemIndex();
         Set<String> userIdNeedAdjustSet = new HashSet<>();
 
         for (String userId : userId2AvgTime.keySet()) {

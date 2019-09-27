@@ -51,11 +51,11 @@ public class MDemandStateManager extends MObjectManager<MDemandState> {
     }
 
     public static boolean checkIfDemandSatisfied(MDemandState demandState) {
-        MUserDemand userDemand = MSystemModel.getInstance().getUserManager()
+        MUserDemand userDemand = MSystemModel.getIns().getUserManager()
                                         .getUserDemandByUserAndDemandId(demandState.getUserId(), demandState.getId());
-        Optional<MServiceInstance> instanceOptional = MSystemModel.getInstance().getInstanceById(demandState.getInstanceId());
+        Optional<MServiceInstance> instanceOptional = MSystemModel.getIns().getInstanceById(demandState.getInstanceId());
         if (instanceOptional.isPresent()) {
-            MServiceInterface serviceInterface = MSystemModel.getInstance().getServiceManager()
+            MServiceInterface serviceInterface = MSystemModel.getIns().getServiceManager()
                     .getServiceInterfaceByServiceAndInterfaceId(instanceOptional.get().getServiceId(), demandState.getInterfaceId());
             return userDemand.isServiceInterfaceMet(serviceInterface);
         }

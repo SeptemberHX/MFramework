@@ -49,15 +49,15 @@ public class MServerSkeleton {
     }
 
     public void updateInstanceInfo(MInstanceInfoBean infoBean) {
-        MSystemModel.getInstance().loadInstanceInfo(infoBean);
+        MSystemModel.getIns().loadInstanceInfo(infoBean);
     }
 
     public Optional<MServiceInstance> getInstanceInfo(String instanceId) {
-        return MSystemModel.getInstance().getInstanceById(instanceId);
+        return MSystemModel.getIns().getInstanceById(instanceId);
     }
 
     public List<MServiceInstance> getAllInstanceInfos() {
-        return MSystemModel.getInstance().getAllServiceInstance();
+        return MSystemModel.getIns().getAllServiceInstance();
     }
 
     // Remote Uri stuffs below ---------------------------------
@@ -70,7 +70,7 @@ public class MServerSkeleton {
 
         if (this.remoteInstanceIdMap.containsKey(mObjectId)
                 && this.remoteInstanceIdMap.get(mObjectId).containsKey(funcName)) {
-            Optional<MServiceInstance> instance = MSystemModel.getInstance().getInstanceById(
+            Optional<MServiceInstance> instance = MSystemModel.getIns().getInstanceById(
                     this.remoteInstanceIdMap.get(mObjectId).get(funcName)
             );
             if (instance.isPresent()) {
@@ -111,7 +111,7 @@ public class MServerSkeleton {
         }
 
         this.remoteInstanceIdMap.get(mObjectId).put(funcName, remoteInstanceId);
-        Optional<MServiceInstance> instanceOp = MSystemModel.getInstance().getInstanceByMObjectId(mObjectId);
+        Optional<MServiceInstance> instanceOp = MSystemModel.getIns().getInstanceByMObjectId(mObjectId);
         instanceOp.ifPresent(
                 mServiceInstance -> MServerUtils.notifyAddNewRemoteUri(mServiceInstance.getId(), mObjectId, funcName));
     }
@@ -122,7 +122,7 @@ public class MServerSkeleton {
 
     private void deleteRemoteUri(String instanceId, String mObjectId, String funcName) {
         this.remoteInstanceIdMap.get(mObjectId).remove(funcName);
-        Optional<MServiceInstance> instanceOp = MSystemModel.getInstance().getInstanceByMObjectId(mObjectId);
+        Optional<MServiceInstance> instanceOp = MSystemModel.getIns().getInstanceByMObjectId(mObjectId);
         instanceOp.ifPresent(
                 mServiceInstance -> MServerUtils.notifyDeleteRemoteUri(mServiceInstance.getId(), mObjectId, funcName));
     }

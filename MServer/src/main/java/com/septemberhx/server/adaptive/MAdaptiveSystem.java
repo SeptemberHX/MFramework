@@ -33,6 +33,8 @@ public class MAdaptiveSystem {
     public static Double MAJOR_THRESHOLD = 0.1;     // when 10% users are not satisfied, we use major
 
     public static Double COMPOSITION_THRESHOLD = 0.2;
+    public static Long MAX_DELAY_TOLERANCE = 300L;
+    public static Long UNAVAILAVLE_TOLERANCE = 3000L;
 
     public MAdaptiveSystem() {
         this.monitor = new MMonitor();
@@ -93,7 +95,7 @@ public class MAdaptiveSystem {
         DateTime logEndTime = DateTime.now();
         DateTime logStartTime = logEndTime.minus(analyser.getTimeWindowInMillis());
         List<MServiceBaseLog> logList = this.monitor.getLogBetweenDateTime(logStartTime, logEndTime);
-        return analyser.analyse(logList, MSystemModel.getInstance().getDemandStateManager().getAllValues());
+        return analyser.analyse(logList, MSystemModel.getIns().getDemandStateManager().getAllValues());
     }
 
     /**

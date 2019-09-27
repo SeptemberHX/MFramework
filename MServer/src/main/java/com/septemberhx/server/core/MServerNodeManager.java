@@ -3,6 +3,7 @@ package com.septemberhx.server.core;
 import com.google.common.graph.EndpointPair;
 import com.google.common.graph.MutableValueGraph;
 import com.google.common.graph.ValueGraphBuilder;
+import com.septemberhx.server.adaptive.MAdaptiveSystem;
 import com.septemberhx.server.base.MNodeConnectionInfo;
 import com.septemberhx.common.base.MObjectManager;
 import com.septemberhx.server.base.model.MPosition;
@@ -10,6 +11,7 @@ import com.septemberhx.server.base.model.MServerNode;
 import com.septemberhx.server.base.model.MUser;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 /**
@@ -36,7 +38,13 @@ public class MServerNodeManager extends MObjectManager<MServerNode> {
         this.serverNodeGraph.addNode(serverNode.getId());
     }
 
-    public List<MServerNode> getAllConnectedNodesOrderedDecent(String serverNodeId) {
+    /**
+     * Get other nodes that the delay between it and given node is less than MAX_DELAY_TOLERANCE
+     * The result will be ordered by the delay in decent
+     * @param serverNodeId: given node id
+     * @return server node list
+     */
+    public List<MServerNode> getConnectedNodesDecentWithDelayTolerance(String serverNodeId) {
         List<EndpointPair<String>> edgeList = new ArrayList<>(this.serverNodeGraph.incidentEdges(serverNodeId));
         List<MServerNode> successorList = new ArrayList<>();
         for (EndpointPair<String> edge : edgeList) {
@@ -55,6 +63,11 @@ public class MServerNodeManager extends MObjectManager<MServerNode> {
                 }
             }
         });
+
+        successorList = successorList.stream().filter(n -> {
+                Optional<MNodeConnectionInfo> eInfo = serverNodeGraph.edgeValue(serverNodeId, n.getId());
+                return eInfo.isPresent() && eInfo.get().getDelay() <= MAdaptiveSystem.MAX_DELAY_TOLERANCE;
+            }).collect(Collectors.toList());
         return successorList;
     }
 
