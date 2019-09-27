@@ -31,6 +31,14 @@ public class MDemandChain {
         }
     }
 
+    public List<MUserDemand> getDemandList() {
+        List<MUserDemand> demandList = new ArrayList<>();
+        for (String demandId : demandIdList) {
+            demandList.add(this.demandMap.get(demandId));
+        }
+        return demandList;
+    }
+
     public boolean containsDemandId(String demandId) {
         return this.demandMap.containsKey(demandId);
     }

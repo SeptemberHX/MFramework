@@ -2,6 +2,7 @@ package com.septemberhx.server.base.model;
 
 import com.septemberhx.common.base.MBaseObject;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -14,8 +15,10 @@ import java.util.stream.Collectors;
  * @version 0.1
  * @date 2019/9/12
  */
+@Setter
 @Getter
 public class MService extends MBaseObject {
+    private boolean generated;
     private String serviceName;                     // Service Name
     private String gitUrl;                          // the git repo url
     private Map<String, MServiceInterface> interfaceMap;  // interface list
@@ -23,6 +26,7 @@ public class MService extends MBaseObject {
     private Integer maxUserCap;
 
     public MService(String id, String name, String gitUrl, Map<String, MServiceInterface> interfaceMap) {
+        this.generated = false;
         this.id = id;
         this.serviceName = name;
         this.gitUrl = gitUrl;
@@ -36,7 +40,7 @@ public class MService extends MBaseObject {
                 .collect(Collectors.toList());
     }
 
-    public static Boolean checkIfInstanceIsGatewayByServiceName(String serviceName) {
+    public static boolean checkIfInstanceIsGatewayByServiceName(String serviceName) {
         return serviceName.startsWith("Gateway");
     }
 
@@ -46,5 +50,9 @@ public class MService extends MBaseObject {
 
     public boolean checkIfMeetDemand(MUserDemand userDemand) {
         return !this.getInterfaceMetUserDemand(userDemand).isEmpty();
+    }
+
+    public List<MServiceInterface> getAllComInterfaces() {
+        return this.interfaceMap.values().stream().filter(MServiceInterface::isGenerated).collect(Collectors.toList());
     }
 }

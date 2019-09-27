@@ -4,6 +4,7 @@ import com.septemberhx.common.base.MObjectManager;
 import com.septemberhx.server.base.model.*;
 import com.septemberhx.server.job.MBaseJob;
 import com.septemberhx.server.job.MSwitchJob;
+import org.javatuples.Pair;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -24,8 +25,10 @@ public class MServerOperator extends MObjectManager<MServerState> {
     // clone objects
     private MDemandStateManager demandStateManager;
     private MServiceInstanceManager instanceManager;
+    private MServiceManager serviceManager;
 
     private List<MBaseJob> jobList;
+    private List<MServiceInterface> generatedInterfaceList;     // should update in reInit() and addNewService()
     private Random random = new Random(20190927);
 
     public MServerOperator() {
@@ -42,6 +45,7 @@ public class MServerOperator extends MObjectManager<MServerState> {
     public void reInit() {
         this.demandStateManager = MSystemModel.getIns().getDemandStateManager().shallowClone();
         this.instanceManager = MSystemModel.getIns().getMSIManager().shallowClone();
+        this.serviceManager = MSystemModel.getIns().getServiceManager().shallowClone();
 
         this.jobList.clear();
         this.insId2UserCap.clear();
@@ -55,9 +59,9 @@ public class MServerOperator extends MObjectManager<MServerState> {
         }
 
         for (String instanceId : insId2UserNum.keySet()) {
-            Optional<MServiceInstance> instanceOptional = MSystemModel.getIns().getInstanceById(instanceId);
+            Optional<MServiceInstance> instanceOptional = this.instanceManager.getById(instanceId);
             if (instanceOptional.isPresent()) {
-                Optional<MService> serviceOptional = MSystemModel.getIns().getServiceManager().getById(instanceOptional.get().getServiceId());
+                Optional<MService> serviceOptional = this.serviceManager.getById(instanceOptional.get().getServiceId());
                 serviceOptional.ifPresent(mService ->
                     insId2UserCap.put(instanceId, mService.getMaxUserCap() - insId2UserCap.get(instanceId))
                 );
@@ -65,7 +69,7 @@ public class MServerOperator extends MObjectManager<MServerState> {
         }
 
         this.funcId2InsIdSet.clear();
-        for (MService mService : MSystemModel.getIns().getServiceManager().getAllValues()) {
+        for (MService mService : this.serviceManager.getAllValues()) {
             for (MServiceInterface serviceInterface : mService.getAllInterface()) {
                 if (!this.funcId2InsIdSet.containsKey(serviceInterface.getFunctionId())) {
                     this.funcId2InsIdSet.put(serviceInterface.getFunctionId(), new HashSet<>());
@@ -81,10 +85,12 @@ public class MServerOperator extends MObjectManager<MServerState> {
                 this.nodeId2ResourceLeft.put(serverState.getId(), serverNode.getResource().sub(serverState.getResource()))
             );
         }
+
+        this.generatedInterfaceList = this.serviceManager.getAllComInterfaces();
     }
 
     public boolean ifNodeHasResForIns(String nodeId, String serviceId) {
-        Optional<MService> serviceOptional = MSystemModel.getIns().getServiceManager().getById(serviceId);
+        Optional<MService> serviceOptional = this.serviceManager.getById(serviceId);
         if (!serviceOptional.isPresent()) {
             return false;
         }
@@ -114,7 +120,7 @@ public class MServerOperator extends MObjectManager<MServerState> {
     public MServiceInstance addNewInstance(String serviceId, String nodeId, String instanceId) {
         MServiceInstance instance = new MServiceInstance(null, nodeId, null, null, instanceId, null, null, serviceId);
         this.instanceManager.add(instance);
-        Optional<MService> serviceOptional = MSystemModel.getIns().getServiceManager().getById(serviceId);
+        Optional<MService> serviceOptional = this.serviceManager.getById(serviceId);
         serviceOptional.ifPresent(mService -> {
             this.nodeId2ResourceLeft.get(nodeId).assign(mService.getResource());
             this.insId2UserCap.put(instance.getId(), mService.getMaxUserCap());
@@ -124,7 +130,7 @@ public class MServerOperator extends MObjectManager<MServerState> {
 
     public void deleteInstance(MServiceInstance serviceInstance) {
         this.insId2UserCap.remove(serviceInstance.getId());
-        Optional<MService> serviceOptional = MSystemModel.getIns().getServiceManager().getById(serviceInstance.getServiceId());
+        Optional<MService> serviceOptional = this.serviceManager.getById(serviceInstance.getServiceId());
         serviceOptional.ifPresent(mService -> {
             this.nodeId2ResourceLeft.get(serviceInstance.getNodeId()).free(mService.getResource());
             this.insId2UserCap.remove(serviceInstance.getId());
@@ -143,7 +149,7 @@ public class MServerOperator extends MObjectManager<MServerState> {
                 continue;
             }
             // todo: Calculate a functionId2InstanceId map in reInit(). So we don't need to search it in this part
-            Optional<MService> serviceOptional = MSystemModel.getIns().getServiceManager().getById(instance.getServiceId());
+            Optional<MService> serviceOptional = this.serviceManager.getById(instance.getServiceId());
             serviceOptional.ifPresent(mService -> {
                 if (mService.getInterfaceMetUserDemand(userDemand).size() > 0) {
                     instanceList.add(instance);
@@ -154,7 +160,7 @@ public class MServerOperator extends MObjectManager<MServerState> {
     }
 
     public List<MService> getAllSatisfiedService(MUserDemand userDemand) {
-        List<MService> allServices = MSystemModel.getIns().getServiceManager().getAllValues();
+        List<MService> allServices = this.serviceManager.getAllValues();
         return allServices.stream().filter(s -> s.checkIfMeetDemand(userDemand)).collect(Collectors.toList());
     }
 
@@ -166,7 +172,7 @@ public class MServerOperator extends MObjectManager<MServerState> {
      * @param serviceInstance: the given instance
      */
     private MDemandState assignDemandToInterfaceOnSpecificInstance(MUserDemand userDemand, MServiceInstance serviceInstance) {
-        Optional<MService> serviceOptional = MSystemModel.getIns().getServiceManager().getById(serviceInstance.getServiceId());
+        Optional<MService> serviceOptional = this.serviceManager.getById(serviceInstance.getServiceId());
         MDemandState state = null;
         if (serviceOptional.isPresent()) {
             List<MServiceInterface> interfaceList = serviceOptional.get().getInterfaceMetUserDemand(userDemand);
@@ -177,7 +183,7 @@ public class MServerOperator extends MObjectManager<MServerState> {
     }
 
     public MService findBestServiceToCreate(MUserDemand userDemand) {
-        List<MService> serviceList = MSystemModel.getIns().getServiceManager().getAllValues();
+        List<MService> serviceList = this.getAllSatisfiedService(userDemand);
         if (serviceList.isEmpty()) {
             logger.warn("User demand cannot find suitable service: " + userDemand.toString());
             return null;
@@ -192,5 +198,34 @@ public class MServerOperator extends MObjectManager<MServerState> {
             }
         }
         return bestService;
+    }
+
+    public void addNewService(MService service) {
+        this.serviceManager.add(service);
+        this.generatedInterfaceList = this.serviceManager.getAllComInterfaces();
+    }
+
+    public Pair<MServiceInterface, Integer> findNextSuitableComService(List<MUserDemand> userDemands, int startIndex) {
+        int maxLength = 1;
+        MServiceInterface targetInterface = null;
+        for (MServiceInterface serviceInterface : this.generatedInterfaceList) {
+            List<String> interfaceIdList = serviceInterface.getCompositionList();
+            boolean ifSuccess = true;
+            for (int i = startIndex, j = 0; i < userDemands.size() && j < interfaceIdList.size(); ++i, ++j) {
+                MServiceInterface subInterface = this.serviceManager.getInterfaceById(interfaceIdList.get(j));
+                if (!userDemands.get(i).isServiceInterfaceMet(subInterface)) {
+                    ifSuccess = false;
+                    break;
+                }
+            }
+
+            if (ifSuccess) {
+                if (serviceInterface.getCompositionList().size() >= maxLength) {
+                    maxLength = serviceInterface.getCompositionList().size();
+                    targetInterface = serviceInterface;
+                }
+            }
+        }
+        return new Pair<>(targetInterface, startIndex + maxLength);
     }
 }
