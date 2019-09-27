@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 @Setter
 public class MServiceManager extends MObjectManager<MService> {
 
-    private Map<String, MServiceInterface> interfaceMap;
+    private Map<String, MServiceInterface> interfaceMap = new HashMap<>();
 
     public MServiceInterface getServiceInterfaceByServiceAndInterfaceId(String serviceId, String interfaceId) {
         if (this.objectMap.containsKey(serviceId)) {

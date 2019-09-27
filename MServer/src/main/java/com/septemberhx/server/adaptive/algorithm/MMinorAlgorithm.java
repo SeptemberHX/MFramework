@@ -108,12 +108,12 @@ public class MMinorAlgorithm implements MAlgorithmInterface {
         return null;
     }
 
-    private List<MUserDemand> replaceCompositionPart(List<MUserDemand> userDemands) {
+    List<MUserDemand> replaceCompositionPart(List<MUserDemand> userDemands) {
         MServerOperator operator = MSystemModel.getIns().getOperator();
         List<MUserDemand> resultList = new ArrayList<>();
         int startIndex = 0;
         Pair<MServiceInterface, Integer> r = operator.findNextSuitableComService(userDemands, startIndex);
-        while (r.getValue1() < userDemands.size()) {
+        while (r.getValue1() <= userDemands.size()) {
             if (r.getValue0() == null) {
                 resultList.add(userDemands.get(startIndex));
             } else {

@@ -55,4 +55,17 @@ public class MService extends MBaseObject {
     public List<MServiceInterface> getAllComInterfaces() {
         return this.interfaceMap.values().stream().filter(MServiceInterface::isGenerated).collect(Collectors.toList());
     }
+
+    @Override
+    public String toString() {
+        return "MService{" +
+                "generated=" + generated +
+                ", serviceName='" + serviceName + '\'' +
+                ", gitUrl='" + gitUrl + '\'' +
+                ", interfaceMap=" + interfaceMap +
+                ", resource=" + resource +
+                ", maxUserCap=" + maxUserCap +
+                ", id='" + id + '\'' +
+                '}';
+    }
 }

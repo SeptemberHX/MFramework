@@ -46,4 +46,12 @@ public class MDemandChain {
     public MUserDemand getDemandById(String demandId) {
         return this.demandMap.getOrDefault(demandId, null);
     }
+
+    @Override
+    public String toString() {
+        return "MDemandChain{" +
+                "demandIdList=" + demandIdList +
+                ", demandMap=" + demandMap +
+                '}';
+    }
 }

@@ -20,4 +20,8 @@ public class MUserManager extends MObjectManager<MUser> {
         }
         return null;
     }
+
+    public void add(MUser user) {
+        this.objectMap.put(user.getId(), user);
+    }
 }

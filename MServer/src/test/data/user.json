@@ -1,0 +1,38 @@
+[
+  {
+    "demandChainList": [
+      {
+        "demandIdList": [
+          "user1-demand3",
+          "user1-demand1",
+          "user1-demand2"
+        ],
+        "demandMap": {
+          "user1-demand3": {
+            "userId": "user1",
+            "functionId": "function3-111111",
+            "slaLevel": 1,
+            "id": "user1-demand3"
+          },
+          "user1-demand1": {
+            "userId": "user1",
+            "functionId": "function1-111111",
+            "slaLevel": 1,
+            "id": "user1-demand1"
+          },
+          "user1-demand2": {
+            "userId": "user1",
+            "functionId": "function2-111111",
+            "slaLevel": 2,
+            "id": "user1-demand2"
+          }
+        }
+      }
+    ],
+    "position": {
+      "x": 0,
+      "y": 0
+    },
+    "id": "user1"
+  }
+]

@@ -60,4 +60,13 @@ public class MResource {
             this.bandwidth + mResource.bandwidth
         );
     }
+
+    @Override
+    public String toString() {
+        return "MResource{" +
+                "cpu=" + cpu +
+                ", ram=" + ram +
+                ", bandwidth=" + bandwidth +
+                '}';
+    }
 }

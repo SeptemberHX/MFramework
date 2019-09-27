@@ -25,4 +25,13 @@ public class MUser extends MBaseObject {
         }
         return null;
     }
+
+    @Override
+    public String toString() {
+        return "MUser{" +
+                "demandChainList=" + demandChainList +
+                ", position=" + position +
+                ", id='" + id + '\'' +
+                '}';
+    }
 }

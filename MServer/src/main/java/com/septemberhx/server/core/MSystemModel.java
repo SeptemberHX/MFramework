@@ -4,6 +4,7 @@ import com.septemberhx.common.bean.MInstanceInfoBean;
 import com.septemberhx.server.base.model.MServiceInstance;
 import com.septemberhx.server.base.model.MSystemIndex;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
 import java.util.Optional;
@@ -15,27 +16,35 @@ import java.util.Optional;
 public class MSystemModel {
 
     @Getter
+    @Setter
     private MServiceInstanceManager mSIManager;
 
     @Getter
+    @Setter
     private MServerNodeManager mSNManager;
 
     @Getter
+    @Setter
     private MUserManager userManager;
 
     @Getter
+    @Setter
     private MRepoManager repoManager;
 
     @Getter
+    @Setter
     private MDemandStateManager demandStateManager;
 
     @Getter
+    @Setter
     private MServiceManager serviceManager;
 
     @Getter
+    @Setter
     private MSystemIndex lastSystemIndex;
 
     @Getter
+    @Setter
     private MServerOperator operator;
 
     private static MSystemModel ourInstance = new MSystemModel();

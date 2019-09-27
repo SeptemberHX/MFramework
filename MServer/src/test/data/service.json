@@ -1,0 +1,80 @@
+[
+  {
+    "generated": false,
+    "serviceName": "service1",
+    "gitUrl": "",
+    "interfaceMap": {
+      "service1_interface1": {
+        "patternUrl": "",
+        "functionName": "function1",
+        "slaLevel": 3,
+        "functionId": "function1-111111",
+        "cpuResource": 0,
+        "ramResource": 0,
+        "maxUserNum": 0,
+        "interfaceId": "service1_interface1",
+        "compositionList": null
+      }
+    },
+    "resource": {
+      "cpu": 0,
+      "ram": 0,
+      "bandwidth": 0
+    },
+    "maxUserCap": 0,
+    "id": "service1-111111"
+  },
+  {
+    "generated": false,
+    "serviceName": "service2",
+    "gitUrl": "",
+    "interfaceMap": {
+      "service2_interface1": {
+        "patternUrl": "",
+        "functionName": "function2",
+        "slaLevel": 2,
+        "functionId": "function2-111111",
+        "cpuResource": 0,
+        "ramResource": 0,
+        "maxUserNum": 0,
+        "interfaceId": "service2_interface1",
+        "compositionList": null
+      }
+    },
+    "resource": {
+      "cpu": 0,
+      "ram": 0,
+      "bandwidth": 0
+    },
+    "maxUserCap": 0,
+    "id": "service2-111111"
+  },
+  {
+    "generated": true,
+    "serviceName": "service1_interface1-service2_interface1",
+    "gitUrl": "",
+    "interfaceMap": {
+      "service1_service2_interface1": {
+        "patternUrl": "",
+        "functionName": "function1_function2",
+        "slaLevel": 0,
+        "functionId": "function1_function2-111111",
+        "cpuResource": 0,
+        "ramResource": 0,
+        "maxUserNum": 0,
+        "interfaceId": "service1_service2_interface1",
+        "compositionList": [
+          "service1_interface1",
+          "service2_interface1"
+        ]
+      }
+    },
+    "resource": {
+      "cpu": 0,
+      "ram": 0,
+      "bandwidth": 0
+    },
+    "maxUserCap": 0,
+    "id": "service2-111111"
+  }
+]

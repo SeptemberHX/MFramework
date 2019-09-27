@@ -12,4 +12,16 @@ public class MIDUtils {
     public static String generateInstanceId(String nodeId, String serviceId) {
         return String.format("%s_%s_%s", nodeId, serviceId, UUID.randomUUID());
     }
+
+    public static String generateServiceId(String serviceName) {
+        return String.format("%s_%s", serviceName, UUID.randomUUID());
+    }
+
+    public static String generateInterfaceId(String serviceId, String interfaceName) {
+        return String.format("%s_%s", serviceId, interfaceName);
+    }
+
+    public static String generateFunctionId(String functionName) {
+        return String.format("%s_%s", functionName, UUID.randomUUID());
+    }
 }

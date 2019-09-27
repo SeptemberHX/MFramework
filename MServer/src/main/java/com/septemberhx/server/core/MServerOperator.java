@@ -205,24 +205,33 @@ public class MServerOperator extends MObjectManager<MServerState> {
         this.generatedInterfaceList = this.serviceManager.getAllComInterfaces();
     }
 
+    /**
+     * This function will try to match the longest composited service from the startIndex
+     * The matched service and next index of the matched sub-demands will be returned
+     * @param userDemands: given demand chain
+     * @param startIndex: start index
+     * @return pair of matched service and the next index of the matched sub-demands
+     */
     public Pair<MServiceInterface, Integer> findNextSuitableComService(List<MUserDemand> userDemands, int startIndex) {
         int maxLength = 1;
         MServiceInterface targetInterface = null;
-        for (MServiceInterface serviceInterface : this.generatedInterfaceList) {
-            List<String> interfaceIdList = serviceInterface.getCompositionList();
-            boolean ifSuccess = true;
-            for (int i = startIndex, j = 0; i < userDemands.size() && j < interfaceIdList.size(); ++i, ++j) {
-                MServiceInterface subInterface = this.serviceManager.getInterfaceById(interfaceIdList.get(j));
-                if (!userDemands.get(i).isServiceInterfaceMet(subInterface)) {
-                    ifSuccess = false;
-                    break;
+        if (startIndex < userDemands.size()) {
+            for (MServiceInterface serviceInterface : this.generatedInterfaceList) {
+                List<String> interfaceIdList = serviceInterface.getCompositionList();
+                boolean ifSuccess = true;
+                for (int i = startIndex, j = 0; i < userDemands.size() && j < interfaceIdList.size(); ++i, ++j) {
+                    MServiceInterface subInterface = this.serviceManager.getInterfaceById(interfaceIdList.get(j));
+                    if (!userDemands.get(i).isServiceInterfaceMet(subInterface)) {
+                        ifSuccess = false;
+                        break;
+                    }
                 }
-            }
 
-            if (ifSuccess) {
-                if (serviceInterface.getCompositionList().size() >= maxLength) {
-                    maxLength = serviceInterface.getCompositionList().size();
-                    targetInterface = serviceInterface;
+                if (ifSuccess) {
+                    if (serviceInterface.getCompositionList().size() >= maxLength) {
+                        maxLength = serviceInterface.getCompositionList().size();
+                        targetInterface = serviceInterface;
+                    }
                 }
             }
         }
