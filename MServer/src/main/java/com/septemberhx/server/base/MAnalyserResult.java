@@ -2,6 +2,7 @@ package com.septemberhx.server.base;
 
 
 import com.google.common.graph.EndpointPair;
+import com.google.common.graph.MutableValueGraph;
 import com.septemberhx.server.adaptive.algorithm.MEvolveType;
 import com.septemberhx.server.base.model.MDemandState;
 import com.septemberhx.server.base.model.MSIInterface;
@@ -21,7 +22,7 @@ public class MAnalyserResult {
     private MEvolveType evolveType;
     private Set<String> affectedUserIdByAvgTime;
     private Map<String, List<MDemandState>> affectedUserId2MDemandStateBySla;
-    private List<EndpointPair<MSIInterface>> potentialCompositionList;
+    private MutableValueGraph<MSIInterface, Integer> callGraph;
 
     public MAnalyserResult() {
         this.evolveType = MEvolveType.NO_NEED;

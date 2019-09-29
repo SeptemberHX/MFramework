@@ -262,7 +262,7 @@ public class MServerOperator extends MObjectManager<MServerState> {
         return this.instanceManager.getById(instanceId).orElse(null);
     }
 
-    MService getServiceById(String serviceId) {
+    public MService getServiceById(String serviceId) {
         return this.serviceManager.getById(serviceId).orElse(null);
     }
 }

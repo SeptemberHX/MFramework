@@ -63,6 +63,14 @@ public class MResource {
         );
     }
 
+    public MResource max(MResource mResource) {
+        return new MResource(
+                Math.max(this.cpu, mResource.cpu),
+                Math.max(this.ram, mResource.ram),
+                Math.max(this.bandwidth, mResource.bandwidth)
+        );
+    }
+
     @Override
     public String toString() {
         return "MResource{" +

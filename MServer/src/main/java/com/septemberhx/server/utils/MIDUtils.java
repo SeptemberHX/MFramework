@@ -17,8 +17,9 @@ public class MIDUtils {
         return String.format("%s_%s", nodeId, serviceId);
     }
 
+    // The serviceName should be unique
     public static String generateServiceId(String serviceName) {
-        return String.format("%s_%s", serviceName, UUID.randomUUID());
+        return serviceName;
     }
 
     public static String generateInterfaceId(String serviceId, String interfaceName) {

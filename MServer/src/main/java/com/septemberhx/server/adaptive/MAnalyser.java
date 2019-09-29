@@ -36,10 +36,17 @@ public class MAnalyser {
         System.out.println(DateTime.now().minus(this.timeWindowInMillis));
     }
 
+    /**
+     * Analyse the logs and demand states. It will not get any conclusion.
+     * Only prepare data for Planner, and planner will do things to modify the system model.
+     * @param logList: ALL logs from the service system
+     * @param demandStates: All demand state at this time
+     * @return the result of the analysing
+     */
     public MAnalyserResult analyse(List<MServiceBaseLog> logList, List<MDemandState> demandStates) {
         MAnalyserResult analyserResult = new MAnalyserResult();
         Map<String, List<MLogChain>> userId2LogChainList = this.analyseLogChains(logList);
-        analyserResult.setPotentialCompositionList(this.analyseMostUsedCombination(userId2LogChainList));
+        analyserResult.setCallGraph(this.buildCallGraph(userId2LogChainList));
 
         Map<String, Double> userId2AvgTime = this.analyseAvgResTimePerReqOnEachUser(userId2LogChainList);
         Set<String> affectedUserIdByAvgTime = this.getUserIdWithWorseAvgTime(userId2AvgTime);
@@ -63,14 +70,12 @@ public class MAnalyser {
     }
 
     /**
-     * We are trying to find the most common used service combinations here. And abandon combinations are also concerned.
-     * Only concern the users whose service quality is decreasing !!!
-     *  First we will try to find the top-K service combinations;
-     *  Then we will compare it to the service composition instances we have already;
-     *  Finally we will decide whether we need build a new composition service or remove old composition instance;
+     * Build the call graph with all the logs
+     *  node: interface of specific service instance
+     *  edge: call direction and frequency
      * @param userId2LogChainList: All the service log chains of the affected users
      */
-    private List<EndpointPair<MSIInterface>> analyseMostUsedCombination(Map<String, List<MLogChain>> userId2LogChainList) {
+    private MutableValueGraph<MSIInterface, Integer> buildCallGraph(Map<String, List<MLogChain>> userId2LogChainList) {
         MutableValueGraph<MSIInterface, Integer> interfaceGraph = ValueGraphBuilder.directed().build();
 
         for (String userId : userId2LogChainList.keySet()) {
@@ -94,24 +99,7 @@ public class MAnalyser {
                 }
             }
         }
-
-        List<EndpointPair<MSIInterface>> edgeList = new ArrayList<>(interfaceGraph.edges());
-        Collections.sort(edgeList, (o1, o2) ->
-                -interfaceGraph.edgeValueOrDefault(o1, 0).compareTo(interfaceGraph.edgeValueOrDefault(o2, 0)));
-        int callChainCount = 0;
-        for (String userId : userId2LogChainList.keySet()) {
-            callChainCount += userId2LogChainList.get(userId).size();
-        }
-
-        List<EndpointPair<MSIInterface>> resultList = new ArrayList<>();
-        for (EndpointPair<MSIInterface> edge : edgeList) {
-            if (interfaceGraph.edgeValueOrDefault(edge, 0) > callChainCount * MAdaptiveSystem.COMPOSITION_THRESHOLD) {
-                resultList.add(edge);
-            } else {
-                break;
-            }
-        }
-        return resultList;
+        return interfaceGraph;
     }
 
     private Map<String, List<MLogChain>> analyseLogChains(List<MServiceBaseLog> logList) {

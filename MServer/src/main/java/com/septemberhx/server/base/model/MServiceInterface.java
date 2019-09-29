@@ -22,7 +22,7 @@ public class MServiceInterface {
     private Long ramResource;       // 6. demand RAM resource       --- Not Used. Just Keep It
     private Integer maxUserNum;     // 7. max number it can serve at the same time  --- Not Used. Just Keep It
     private String interfaceId;     // 8. unique interface id
-    private List<String> compositionList;   // 9. Interface Id lists which are used to composite this interface
+    private List<String> compositionList = new ArrayList<>();   // 9. Interface Id lists which are used to composite this interface
 
     public boolean isGenerated() {
         return this.compositionList != null && !this.compositionList.isEmpty();

@@ -24,10 +24,14 @@ public class MMinorAlgorithm implements MAlgorithmInterface {
 
     @Override
     public MPlannerResult calc(MAnalyserResult data) {
+        // First, init operator
         MServerOperator serverOperator = MSystemModel.getIns().getOperator();
         serverOperator.reInit();
+        // Then, do the composition job behind initialization. It will modify system model by operator
+        MCompositionAlgorithmInCommon.doCompositionPart(data.getCallGraph());
+        // DO NOT CHANGE THE ORDER ABOVE.
 
-        List<EndpointPair<MSIInterface>> pCompositionList = data.getPotentialCompositionList();
+        // Below, do the calc job
         Map<String, List<MDemandState>> notMetMap = data.getAffectedUserId2MDemandStateBySla();
         Set<String> longResTimeUserIdSet = data.getAffectedUserIdByAvgTime();
 
