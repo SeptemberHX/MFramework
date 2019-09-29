@@ -1,0 +1,18 @@
+ [
+   {
+     "successor": "node1",
+     "predecessor": "node2",
+     "connection": {
+       "delay": 40,
+       "bandwidth": 10000000
+     }
+   },
+   {
+     "successor": "node2",
+     "predecessor": "node1",
+     "connection": {
+       "delay": 40,
+       "bandwidth": 10000000
+     }
+   }
+ ]

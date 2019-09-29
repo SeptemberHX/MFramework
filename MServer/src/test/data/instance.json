@@ -1,0 +1,14 @@
+[
+  {
+    "parentIdMap": {},
+    "nodeId": "node1",
+    "ip": "127.0.0.1",
+    "port": 8888,
+    "mObjectIdSet": [
+      ""
+    ],
+    "serviceName": "service1",
+    "serviceId": "service1-111111",
+    "id": "service1-111111-123321"
+  }
+]

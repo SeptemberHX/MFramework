@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
  */
 public class MServerOperator extends MObjectManager<MServerState> {
 
-    private Map<String, Integer> insId2UserCap;     // left user capability of each instance current time
+    private Map<String, Integer> insId2LeftCap;     // left user capability of each instance current time
                                                     // For planning only because no action will be done when planning
                                                     // All actions should be done when executing.
     private Map<String, MResource> nodeId2ResourceLeft;
@@ -32,7 +32,7 @@ public class MServerOperator extends MObjectManager<MServerState> {
     private Random random = new Random(20190927);
 
     public MServerOperator() {
-        this.insId2UserCap = new HashMap<>();
+        this.insId2LeftCap = new HashMap<>();
         this.nodeId2ResourceLeft = new HashMap<>();
         this.funcId2InsIdSet = new HashMap<>();
         this.jobList = new ArrayList<>();
@@ -48,7 +48,7 @@ public class MServerOperator extends MObjectManager<MServerState> {
         this.serviceManager = MSystemModel.getIns().getServiceManager().shallowClone();
 
         this.jobList.clear();
-        this.insId2UserCap.clear();
+        this.insId2LeftCap.clear();
 
         Map<String, Integer> insId2UserNum = new HashMap<>();
         for (MDemandState demandState : MSystemModel.getIns().getDemandStateManager().getAllValues()) {
@@ -58,12 +58,17 @@ public class MServerOperator extends MObjectManager<MServerState> {
             insId2UserNum.put(demandState.getInstanceId(), 1 + insId2UserNum.get(demandState.getInstanceId()));
         }
 
+
+        for (MServiceInstance instance : this.instanceManager.getAllValues()) {
+            Optional<MService> serviceOptional = this.serviceManager.getById(instance.getServiceId());
+            serviceOptional.ifPresent(s -> insId2LeftCap.put(instance.getId(), s.getMaxUserCap()));
+        }
         for (String instanceId : insId2UserNum.keySet()) {
             Optional<MServiceInstance> instanceOptional = this.instanceManager.getById(instanceId);
             if (instanceOptional.isPresent()) {
                 Optional<MService> serviceOptional = this.serviceManager.getById(instanceOptional.get().getServiceId());
                 serviceOptional.ifPresent(mService ->
-                    insId2UserCap.put(instanceId, mService.getMaxUserCap() - insId2UserCap.get(instanceId))
+                    insId2LeftCap.put(instanceId, mService.getMaxUserCap() - insId2UserNum.get(instanceId))
                 );
             }
         }
@@ -79,6 +84,11 @@ public class MServerOperator extends MObjectManager<MServerState> {
         }
 
         this.nodeId2ResourceLeft.clear();
+        // get all resources for each node
+        for (MServerNode node : MSystemModel.getIns().getMSNManager().getAllValues()) {
+            this.nodeId2ResourceLeft.put(node.getId(), node.getResource());
+        }
+        // and sub the used resources
         for (MServerState serverState : this.objectMap.values()) {
             Optional<MServerNode> nodeOptional = MSystemModel.getIns().getMSNManager().getById(serverState.getId());
             nodeOptional.ifPresent(serverNode ->
@@ -100,21 +110,22 @@ public class MServerOperator extends MObjectManager<MServerState> {
     }
 
     public boolean ifInstanceHasCap(String instanceId, Integer capWanted) {
-        return this.insId2UserCap.getOrDefault(instanceId, 0) >= capWanted;
+        return this.insId2LeftCap.getOrDefault(instanceId, 0) >= capWanted;
     }
 
-    public void assignDemandToIns(MUserDemand userDemand, MServiceInstance instance, MDemandState oldState) {
+    public MDemandState assignDemandToIns(MUserDemand userDemand, MServiceInstance instance, MDemandState oldState) {
         if (oldState != null) {
-            if (!this.insId2UserCap.containsKey(oldState.getInstanceId())) {
-                this.insId2UserCap.put(oldState.getInstanceId(), this.insId2UserCap.get(oldState.getInstanceId()) - 1);
+            if (this.insId2LeftCap.containsKey(oldState.getInstanceId())) {
+                this.insId2LeftCap.put(oldState.getInstanceId(), this.insId2LeftCap.get(oldState.getInstanceId()) + 1);
                 this.demandStateManager.deleteById(oldState.getId());
             }
         }
-        this.insId2UserCap.put(instance.getId(), 1 + this.insId2UserCap.getOrDefault(instance.getId(), 0));
+        this.insId2LeftCap.put(instance.getId(), this.insId2LeftCap.getOrDefault(instance.getId(), 0) - 1);
         this.jobList.add(new MSwitchJob(userDemand.getId(), instance.getId()));
 
         MDemandState newDemandState = this.assignDemandToInterfaceOnSpecificInstance(userDemand, instance);
         this.demandStateManager.add(newDemandState);
+        return newDemandState;
     }
 
     public MServiceInstance addNewInstance(String serviceId, String nodeId, String instanceId) {
@@ -123,19 +134,19 @@ public class MServerOperator extends MObjectManager<MServerState> {
         Optional<MService> serviceOptional = this.serviceManager.getById(serviceId);
         serviceOptional.ifPresent(mService -> {
             this.nodeId2ResourceLeft.get(nodeId).assign(mService.getResource());
-            this.insId2UserCap.put(instance.getId(), mService.getMaxUserCap());
+            this.insId2LeftCap.put(instance.getId(), mService.getMaxUserCap());
         });
         return instance;
     }
 
-    public void deleteInstance(MServiceInstance serviceInstance) {
-        this.insId2UserCap.remove(serviceInstance.getId());
-        Optional<MService> serviceOptional = this.serviceManager.getById(serviceInstance.getServiceId());
+    public void deleteInstance(String instanceId) {
+        this.insId2LeftCap.remove(instanceId);
+        Optional<MService> serviceOptional = this.serviceManager.getById(instanceId);
         serviceOptional.ifPresent(mService -> {
-            this.nodeId2ResourceLeft.get(serviceInstance.getNodeId()).free(mService.getResource());
-            this.insId2UserCap.remove(serviceInstance.getId());
+            this.nodeId2ResourceLeft.get(this.instanceManager.getById(instanceId).get().getNodeId()).free(mService.getResource());
+            this.insId2LeftCap.remove(instanceId);
         });
-        this.instanceManager.delete(serviceInstance);
+        this.instanceManager.delete(instanceId);
     }
 
     public List<MServiceInstance> getInstancesOnNode(String nodeId) {
@@ -144,6 +155,7 @@ public class MServerOperator extends MObjectManager<MServerState> {
 
     public List<MServiceInstance> getInstancesCanMetWithEnoughCapOnNode(String nodeId, MUserDemand userDemand) {
         List<MServiceInstance> instanceList = this.getInstancesOnNode(nodeId);
+        List<MServiceInstance> resultList = new ArrayList<>();
         for (MServiceInstance instance : instanceList) {
             if (!this.ifInstanceHasCap(instance.getId(), 1)) {
                 continue;
@@ -152,11 +164,11 @@ public class MServerOperator extends MObjectManager<MServerState> {
             Optional<MService> serviceOptional = this.serviceManager.getById(instance.getServiceId());
             serviceOptional.ifPresent(mService -> {
                 if (mService.getInterfaceMetUserDemand(userDemand).size() > 0) {
-                    instanceList.add(instance);
+                    resultList.add(instance);
                 }
             });
         }
-        return instanceList;
+        return resultList;
     }
 
     public List<MService> getAllSatisfiedService(MUserDemand userDemand) {
@@ -236,5 +248,21 @@ public class MServerOperator extends MObjectManager<MServerState> {
             }
         }
         return new Pair<>(targetInterface, startIndex + maxLength);
+    }
+
+    MResource getNodeLeftResource(String nodeId) {
+        return this.nodeId2ResourceLeft.get(nodeId);
+    }
+
+    Integer getInstanceLeftCap(String instanceId) {
+        return this.insId2LeftCap.getOrDefault(instanceId, 0);
+    }
+
+    MServiceInstance getInstanceById(String instanceId) {
+        return this.instanceManager.getById(instanceId).orElse(null);
+    }
+
+    MService getServiceById(String serviceId) {
+        return this.serviceManager.getById(serviceId).orElse(null);
     }
 }

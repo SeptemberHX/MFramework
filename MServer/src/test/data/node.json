@@ -1,0 +1,28 @@
+[
+  {
+    "nodeType": "EDGE",
+    "resource": {
+      "cpu": 8000000,
+      "ram": 16000000,
+      "bandwidth": 100000000
+    },
+    "position": {
+      "x": 0,
+      "y": 0
+    },
+    "id": "node1"
+  },
+  {
+    "nodeType": "EDGE",
+    "resource": {
+      "cpu": 8000000,
+      "ram": 16000000,
+      "bandwidth": 100000000
+    },
+    "position": {
+      "x": 10,
+      "y": 10
+    },
+    "id": "node2"
+  }
+]

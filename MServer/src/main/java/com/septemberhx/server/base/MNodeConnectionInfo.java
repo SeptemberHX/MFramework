@@ -23,4 +23,12 @@ public class MNodeConnectionInfo implements Comparable<MNodeConnectionInfo> {
     public static int compare(MNodeConnectionInfo o1, MNodeConnectionInfo o2) {
         return o1.compareTo(o2);
     }
+
+    @Override
+    public String toString() {
+        return "MNodeConnectionInfo{" +
+                "delay=" + delay +
+                ", bandwidth=" + bandwidth +
+                '}';
+    }
 }

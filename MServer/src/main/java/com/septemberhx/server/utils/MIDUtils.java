@@ -13,6 +13,10 @@ public class MIDUtils {
         return String.format("%s_%s_%s", nodeId, serviceId, UUID.randomUUID());
     }
 
+    public static String generateSpecificInstanceIdForTest(String nodeId, String serviceId) {
+        return String.format("%s_%s", nodeId, serviceId);
+    }
+
     public static String generateServiceId(String serviceName) {
         return String.format("%s_%s", serviceName, UUID.randomUUID());
     }

@@ -33,7 +33,7 @@ public class MServerNodeManager extends MObjectManager<MServerNode> {
         this.serverNodeGraph.removeEdge(startNodeId, endNodeId);
     }
 
-    public void addNode(MServerNode serverNode) {
+    public void add(MServerNode serverNode) {
         this.objectMap.put(serverNode.getId(), serverNode);
         this.serverNodeGraph.addNode(serverNode.getId());
     }

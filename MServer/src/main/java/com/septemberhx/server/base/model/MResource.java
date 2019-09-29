@@ -3,6 +3,8 @@ package com.septemberhx.server.base.model;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.Objects;
+
 /**
  * @author SeptemberHX
  * @version 0.1
@@ -68,5 +70,20 @@ public class MResource {
                 ", ram=" + ram +
                 ", bandwidth=" + bandwidth +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        MResource resource = (MResource) o;
+        return Objects.equals(cpu, resource.cpu) &&
+                Objects.equals(ram, resource.ram) &&
+                Objects.equals(bandwidth, resource.bandwidth);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(cpu, ram, bandwidth);
     }
 }

@@ -35,10 +35,15 @@ public class MServiceInstanceManager extends MObjectManager<MServiceInstance> {
         return cloneObject;
     }
 
-    public void delete(MServiceInstance serviceInstance) {
-        this.objectMap.remove(serviceInstance.getId());
-        this.nodeId2InsIdSet.get(serviceInstance.getNodeId()).remove(serviceInstance.getId());
-        this.serviceId2InsIdSet.get(serviceInstance.getServiceId()).remove(serviceInstance.getId());
+    public void delete(String instanceId) {
+        if (!this.objectMap.containsKey(instanceId)) {
+            return;
+        }
+
+        MServiceInstance serviceInstance = this.objectMap.get(instanceId);
+        this.objectMap.remove(instanceId);
+        this.nodeId2InsIdSet.get(serviceInstance.getNodeId()).remove(instanceId);
+        this.serviceId2InsIdSet.get(serviceInstance.getServiceId()).remove(instanceId);
     }
 
     public Optional<MServiceInstance> getInstanceByMObjectId(String mObjectId) {

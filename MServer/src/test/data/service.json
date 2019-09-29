@@ -11,7 +11,7 @@
         "functionId": "function1-111111",
         "cpuResource": 0,
         "ramResource": 0,
-        "maxUserNum": 0,
+        "maxUserNum": 100,
         "interfaceId": "service1_interface1",
         "compositionList": null
       }
@@ -21,7 +21,7 @@
       "ram": 0,
       "bandwidth": 0
     },
-    "maxUserCap": 0,
+    "maxUserCap": 100,
     "id": "service1-111111"
   },
   {
@@ -36,7 +36,7 @@
         "functionId": "function2-111111",
         "cpuResource": 0,
         "ramResource": 0,
-        "maxUserNum": 0,
+        "maxUserNum": 200,
         "interfaceId": "service2_interface1",
         "compositionList": null
       }
@@ -74,7 +74,7 @@
       "ram": 0,
       "bandwidth": 0
     },
-    "maxUserCap": 0,
+    "maxUserCap": 200,
     "id": "service2-111111"
   }
 ]
