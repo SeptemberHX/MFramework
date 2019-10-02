@@ -1,7 +1,7 @@
 package com.septemberhx.common.bean;
 
 import com.septemberhx.common.base.MClassFunctionPair;
-import com.septemberhx.common.base.MDependency;
+import com.septemberhx.common.base.MArchitectInfo;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -18,7 +18,7 @@ public class MCompositionRequest {
     private String docker_tag;
     private String register_url;
     private List<MClassFunctionPair> chain_list;
-    private List<MDependency> dependencies;
+    private List<MArchitectInfo> dependencies;
 
     @Override
     public String toString() {

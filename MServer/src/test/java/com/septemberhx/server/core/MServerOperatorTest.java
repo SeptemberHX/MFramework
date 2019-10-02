@@ -1,5 +1,6 @@
 package com.septemberhx.server.core;
 
+import com.septemberhx.common.base.MClassFunctionPair;
 import com.septemberhx.server.base.model.*;
 import com.septemberhx.server.utils.MDataUtils;
 import com.septemberhx.server.utils.MIDUtils;
@@ -106,6 +107,21 @@ class MServerOperatorTest {
         assertNotNull(service);
         assertFalse(operator.ifInstanceHasCap(instanceId, service.getMaxUserCap() + 1));
         assertTrue(operator.ifInstanceHasCap(instanceId, service.getMaxUserCap()));
+    }
+
+    @Test
+    @Order(7)
+    void getCallChainList() {
+        String compositedServiceId = "service2-111111";
+        MServerOperator operator = MSystemModel.getIns().getOperator();
+        MService service = operator.getServiceById(compositedServiceId);
+        assertNotNull(service);
+
+        List<MClassFunctionPair> classFunctionPairs = operator.getCallChainList(service);
+        assertEquals(classFunctionPairs.size(), 2);
+        assertEquals(classFunctionPairs.get(0).getFunctionName(), "function1");
+        assertEquals(classFunctionPairs.get(1).getFunctionName(), "function2");
+        System.out.println(classFunctionPairs);
     }
 
     @BeforeEach

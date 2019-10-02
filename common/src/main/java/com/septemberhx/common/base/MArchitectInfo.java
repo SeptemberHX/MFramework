@@ -5,14 +5,14 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class MDependency {
+public class MArchitectInfo {
     private String groupId;
     private String artifactId;
     private String version;
 
     @Override
     public String toString() {
-        return "MDependency{" +
+        return "MArchitectInfo{" +
                 "groupId='" + groupId + '\'' +
                 ", artifactId='" + artifactId + '\'' +
                 ", version='" + version + '\'' +

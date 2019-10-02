@@ -1,5 +1,7 @@
 package com.septemberhx.server.core;
 
+import com.septemberhx.common.base.MArchitectInfo;
+import com.septemberhx.common.base.MClassFunctionPair;
 import com.septemberhx.common.base.MObjectManager;
 import com.septemberhx.server.base.model.*;
 import com.septemberhx.server.job.MBaseJob;
@@ -248,6 +250,45 @@ public class MServerOperator extends MObjectManager<MServerState> {
             }
         }
         return new Pair<>(targetInterface, startIndex + maxLength);
+    }
+
+    // ------------------- Call Chain Part --------------------
+    public List<MClassFunctionPair> getCallChainList(MService compositedService) {
+        List<MClassFunctionPair> resultList = new ArrayList<>();
+        if (compositedService.isGenerated()) {
+            if (compositedService.getAllInterface().size() != 1) {
+                throw new RuntimeException("Sorry, we do not allow two or more interfaces in one composited service");
+            }
+
+            for (MServiceInterface mInterface : compositedService.getAllInterface()) {
+                if (mInterface.isGenerated()) {
+                    resultList.addAll(this.getCallChainListFromInterface(mInterface));
+                }
+            }
+        }
+        return resultList;
+    }
+
+    private List<MClassFunctionPair> getCallChainListFromInterface(MServiceInterface mServiceInterface) {
+        List<MClassFunctionPair> resultList = new ArrayList<>();
+        if (mServiceInterface.isGenerated()) {
+            for (String interfaceId : mServiceInterface.getCompositionList()) {
+                resultList.addAll(this.getCallChainListFromInterface(this.serviceManager.getInterfaceById(interfaceId)));
+            }
+        } else {
+            resultList.add(mServiceInterface.toClassFuncPair());
+        }
+        return resultList;
+    }
+    // ------------------- Call Chain Part Ends --------------------
+
+    public List<MArchitectInfo> getDependencies(MService compositedService) {
+        List<MArchitectInfo> resultList = new ArrayList<>();
+        if (compositedService.isGenerated()) {
+            for (MServiceInterface mInterface : compositedService.getAllInterface()) {
+                
+            }
+        }
     }
 
     MResource getNodeLeftResource(String nodeId) {

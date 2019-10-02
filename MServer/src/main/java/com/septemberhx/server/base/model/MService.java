@@ -1,11 +1,11 @@
 package com.septemberhx.server.base.model;
 
 import com.septemberhx.common.base.MBaseObject;
+import com.septemberhx.common.base.MArchitectInfo;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -24,6 +24,7 @@ public class MService extends MBaseObject {
     private Map<String, MServiceInterface> interfaceMap;  // interface list
     private MResource resource;
     private Integer maxUserCap;
+    private MArchitectInfo artifactInfo;
 
     public MService(String id, String name, String gitUrl, Map<String, MServiceInterface> interfaceMap) {
         this.generated = false;
@@ -33,6 +34,7 @@ public class MService extends MBaseObject {
         this.interfaceMap = interfaceMap;
         this.resource = new MResource();
         this.maxUserCap = 0;
+        this.artifactInfo = new MArchitectInfo();
     }
 
     public List<MServiceInterface> getInterfaceMetUserDemand(MUserDemand userDemand) {
@@ -65,6 +67,7 @@ public class MService extends MBaseObject {
                 ", interfaceMap=" + interfaceMap +
                 ", resource=" + resource +
                 ", maxUserCap=" + maxUserCap +
+                ", artifactInfo=" + artifactInfo +
                 ", id='" + id + '\'' +
                 '}';
     }
