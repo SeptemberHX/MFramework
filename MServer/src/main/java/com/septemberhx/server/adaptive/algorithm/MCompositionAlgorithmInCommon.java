@@ -8,9 +8,11 @@ import com.septemberhx.common.bean.MCompositionRequest;
 import com.septemberhx.server.adaptive.MAdaptiveSystem;
 import com.septemberhx.server.base.model.MSIInterface;
 import com.septemberhx.server.base.model.MService;
+import com.septemberhx.server.base.model.MServiceInstance;
 import com.septemberhx.server.base.model.MServiceInterface;
 import com.septemberhx.server.core.MServerOperator;
 import com.septemberhx.server.core.MSystemModel;
+import com.septemberhx.server.job.MCBuildJob;
 import com.septemberhx.server.job.MCompositionJob;
 import com.septemberhx.server.utils.MIDUtils;
 
@@ -42,65 +44,25 @@ public class MCompositionAlgorithmInCommon {
                 break;
             }
         }
-    }
 
-    public static MService compositeService(MService service1, MServiceInterface interface1, MService service2, MServiceInterface interface2) {
-        // interfaceId contains serviceName
+        // composite the results
         MServerOperator operator = MSystemModel.getIns().getOperator();
-        String serviceId = MIDUtils.generateServiceId(String.format("%s__%s", interface1.getInterfaceId(), interface2.getInterfaceId()));
-        String serviceName = serviceId;
-        String functionName = String.format("%s__%s", interface1.getFullFuncName(), interface2.getFullFuncName());
-        MServiceInterface newInterface = new MServiceInterface();
-        newInterface.setInterfaceId(MIDUtils.generateInterfaceId(serviceId, functionName));
-        newInterface.setSlaLevel(-1);
-        newInterface.setFunctionId(MIDUtils.generateFunctionId(functionName));
-        newInterface.setServiceId(serviceId);
+        for (EndpointPair<MSIInterface> edge : resultList) {
+            String instanceId1 = edge.nodeU().getInstanceId();
+            String instanceId2 = edge.nodeV().getInstanceId();
+            MServiceInstance instance1 = operator.getInstanceById(instanceId1);
+            MServiceInstance instance2 = operator.getInstanceById(instanceId2);
 
-        List<String> compositionList = new ArrayList<>();
-        compositionList.addAll(interface1.getCompositionList());
-        compositionList.addAll(interface2.getCompositionList());
-        newInterface.setCompositionList(compositionList);
+            MService service1 = operator.getServiceById(instance1.getServiceId());
+            MService service2 = operator.getServiceById(instance2.getServiceId());
+            MServiceInterface interface1 = service1.getInterfaceById(edge.nodeU().getInterfaceName());
+            MServiceInterface interface2 = service2.getInterfaceById(edge.nodeV().getInterfaceName());
 
-        Map<String, MServiceInterface> interfaceMap = new HashMap<>();
-        interfaceMap.put(newInterface.getInterfaceId(), newInterface);
-
-        MService newService = new MService(serviceId, serviceName, null, interfaceMap);
-        newService.setGenerated(true);
-        newService.setMaxUserCap(Math.min(service1.getMaxUserCap(), service2.getMaxUserCap()));
-        newService.setResource(service1.getResource().max(service2.getResource()));
-        return newService;
+            operator.compositeService(service1, interface1, service2, interface2);
+        }
     }
 
-    /**
-     * Generate a new MCompositionJob according to given new generated composited service
-     * @param composedService
-     * @return
-     */
-    public static MCompositionJob compositeJob(MService compositedService) {
-        MServerOperator operator = MSystemModel.getIns().getOperator();
-        MCompositionJob compositionJob = new MCompositionJob();
-        MCompositionRequest compositionRequest = new MCompositionRequest();
-
-        String requestId = "";      // generated, random is ok
-        String serviceName = compositedService.getServiceName();
-        String docker_owner = "";   // should be owned by system admin
-        String docker_tag = "";     // version tag
-        String docker_name = compositedService.getServiceName();
-        String register_url = "";   // should be the register url of the cluster that wants to use this
-
-        List<MClassFunctionPair> classFunctionPairs = operator.getCallChainList(compositedService);    // build with the info in service repo
-        List<MArchitectInfo> dependencies = new ArrayList<>();     // build with the info in service repo
 
 
-        compositionRequest.setId(requestId);
-        compositionRequest.setName(serviceName);
-        compositionRequest.setDocker_owner(docker_owner);
-        compositionRequest.setDocker_tag(docker_tag);
-        compositionRequest.setDocker_name(docker_name);
-        compositionRequest.setRegister_url(register_url);
-        compositionRequest.setChain_list(classFunctionPairs);
-        compositionRequest.setDependencies(dependencies);
 
-        return compositionJob;
-    }
 }

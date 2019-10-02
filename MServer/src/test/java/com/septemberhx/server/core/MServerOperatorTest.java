@@ -1,5 +1,6 @@
 package com.septemberhx.server.core;
 
+import com.septemberhx.common.base.MArchitectInfo;
 import com.septemberhx.common.base.MClassFunctionPair;
 import com.septemberhx.server.base.model.*;
 import com.septemberhx.server.utils.MDataUtils;
@@ -112,25 +113,39 @@ class MServerOperatorTest {
     @Test
     @Order(7)
     void getCallChainList() {
-        String compositedServiceId = "service2-111111";
+        String compositedServiceId = "service2-111111-service1";
         MServerOperator operator = MSystemModel.getIns().getOperator();
         MService service = operator.getServiceById(compositedServiceId);
         assertNotNull(service);
 
         List<MClassFunctionPair> classFunctionPairs = operator.getCallChainList(service);
-        assertEquals(classFunctionPairs.size(), 2);
-        assertEquals(classFunctionPairs.get(0).getFunctionName(), "function1");
-        assertEquals(classFunctionPairs.get(1).getFunctionName(), "function2");
+        assertEquals(2, classFunctionPairs.size());
+        assertEquals("function1", classFunctionPairs.get(0).getFunctionName());
+        assertEquals("function2", classFunctionPairs.get(1).getFunctionName());
         System.out.println(classFunctionPairs);
+    }
+
+    @Test
+    @Order(8)
+    void getDependencies() {
+        String compositedServiceId = "service2-111111-service1";
+        MServerOperator operator = MSystemModel.getIns().getOperator();
+        MService service = operator.getServiceById(compositedServiceId);
+        assertNotNull(service);
+
+        List<MArchitectInfo> dependencies = operator.getDependencies(service);
+        assertEquals(2, dependencies.size());
+        assertEquals("service1", dependencies.get(0).getArtifactId());
+        assertEquals("service2", dependencies.get(1).getArtifactId());
     }
 
     @BeforeEach
     void setUp() {
-        MSystemModel.getIns().setServiceManager(MDataUtils.loadServiceManager("D:\\Workspace\\git\\MFramework\\MServer\\src\\test\\data\\service.json"));
-        MSystemModel.getIns().setUserManager(MDataUtils.loadUserManager("D:\\Workspace\\git\\MFramework\\MServer\\src\\test\\data\\user.json"));
-        MSystemModel.getIns().setMSNManager(MDataUtils.loadNodeManager("D:\\Workspace\\git\\MFramework\\MServer\\src\\test\\data\\node.json",
-                "D:\\Workspace\\git\\MFramework\\MServer\\src\\test\\data\\connection.json"));
-        MSystemModel.getIns().setMSIManager(MDataUtils.loadInstanceManager("D:\\Workspace\\git\\MFramework\\MServer\\src\\test\\data\\instance.json"));
+        MSystemModel.getIns().setServiceManager(MDataUtils.loadServiceManager("/home/septemberhx/Workspace/git/MFramework/MServer/src/test/data/service.json"));
+        MSystemModel.getIns().setUserManager(MDataUtils.loadUserManager("/home/septemberhx/Workspace/git/MFramework/MServer/src/test/data/user.json"));
+        MSystemModel.getIns().setMSNManager(MDataUtils.loadNodeManager("/home/septemberhx/Workspace/git/MFramework/MServer/src/test/data/node.json",
+                "/home/septemberhx/Workspace/git/MFramework/MServer/src/test/data/connection.json"));
+        MSystemModel.getIns().setMSIManager(MDataUtils.loadInstanceManager("/home/septemberhx/Workspace/git/MFramework/MServer/src/test/data/instance.json"));
         MSystemModel.getIns().getOperator().reInit();
     }
 }

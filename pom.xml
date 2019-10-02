@@ -12,11 +12,7 @@
         <module>MServer</module>
         <module>common</module>
         <module>MClusterAgent</module>
-        <module>SampleService</module>
-        <module>SampleService1</module>
-        <module>SampleService2</module>
         <module>MEurekaServer</module>
-        <module>SampleService3</module>
         <module>MInfoCollector</module>
         <module>utils</module>
         <module>MContainerMetricsCollector</module>

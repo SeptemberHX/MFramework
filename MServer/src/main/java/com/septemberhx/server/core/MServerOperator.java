@@ -3,9 +3,12 @@ package com.septemberhx.server.core;
 import com.septemberhx.common.base.MArchitectInfo;
 import com.septemberhx.common.base.MClassFunctionPair;
 import com.septemberhx.common.base.MObjectManager;
+import com.septemberhx.common.bean.MCompositionRequest;
 import com.septemberhx.server.base.model.*;
 import com.septemberhx.server.job.MBaseJob;
+import com.septemberhx.server.job.MCBuildJob;
 import com.septemberhx.server.job.MSwitchJob;
+import com.septemberhx.server.utils.MIDUtils;
 import org.javatuples.Pair;
 
 import java.util.*;
@@ -219,6 +222,10 @@ public class MServerOperator extends MObjectManager<MServerState> {
         this.generatedInterfaceList = this.serviceManager.getAllComInterfaces();
     }
 
+    public void addNewJob(MBaseJob baseJob) {
+        this.jobList.add(baseJob);
+    }
+
     /**
      * This function will try to match the longest composited service from the startIndex
      * The matched service and next index of the matched sub-demands will be returned
@@ -252,8 +259,69 @@ public class MServerOperator extends MObjectManager<MServerState> {
         return new Pair<>(targetInterface, startIndex + maxLength);
     }
 
-    // ------------------- Call Chain Part --------------------
-    public List<MClassFunctionPair> getCallChainList(MService compositedService) {
+    // ------------------- Composition Part --------------------
+    public void compositeService(MService service1, MServiceInterface interface1, MService service2, MServiceInterface interface2) {
+        // interfaceId contains serviceName
+        String serviceId = MIDUtils.generateServiceId(String.format("%s__%s", interface1.getInterfaceId(), interface2.getInterfaceId()));
+        String serviceName = serviceId;
+        String functionName = String.format("%s__%s", interface1.getFullFuncName(), interface2.getFullFuncName());
+        MServiceInterface newInterface = new MServiceInterface();
+        newInterface.setInterfaceId(MIDUtils.generateInterfaceId(serviceId, functionName));
+        newInterface.setSlaLevel(-1);
+        newInterface.setFunctionId(MIDUtils.generateFunctionId(functionName));
+        newInterface.setServiceId(serviceId);
+
+        List<String> compositionList = new ArrayList<>();
+        compositionList.addAll(interface1.getCompositionList());
+        compositionList.addAll(interface2.getCompositionList());
+        newInterface.setCompositionList(compositionList);
+
+        Map<String, MServiceInterface> interfaceMap = new HashMap<>();
+        interfaceMap.put(newInterface.getInterfaceId(), newInterface);
+
+        MService newService = new MService(serviceId, serviceName, null, interfaceMap);
+        newService.setGenerated(true);
+        newService.setMaxUserCap(Math.min(service1.getMaxUserCap(), service2.getMaxUserCap()));
+        newService.setResource(service1.getResource().max(service2.getResource()));
+
+        this.addNewService(newService);
+        this.addNewJob(this.getBuildJob(newService));
+    }
+
+    /**
+     * Generate a new MCBuildJob according to given new generated composited service
+     * @param composedService
+     * @return
+     */
+    private MCBuildJob getBuildJob(MService compositedService) {
+        MServerOperator operator = MSystemModel.getIns().getOperator();
+        MCompositionRequest compositionRequest = new MCompositionRequest();
+
+        String requestId = "";      // generated, random is ok
+        String serviceName = compositedService.getServiceName();
+        String docker_owner = "";   // should be owned by system admin
+        String docker_tag = "";     // version tag
+        String docker_name = compositedService.getServiceName();
+        String register_url = "";   // should be the register url of the cluster that wants to use this
+        List<MClassFunctionPair> classFunctionPairs = operator.getCallChainList(compositedService);    // build with the info in service repo
+        List<MArchitectInfo> dependencies = operator.getDependencies(compositedService);     // build with the info in service repo
+
+        compositionRequest.setId(requestId);
+        compositionRequest.setName(serviceName);
+        compositionRequest.setDocker_owner(docker_owner);
+        compositionRequest.setDocker_tag(docker_tag);
+        compositionRequest.setDocker_name(docker_name);
+        compositionRequest.setRegister_url(register_url);
+        compositionRequest.setChain_list(classFunctionPairs);
+        compositionRequest.setDependencies(dependencies);
+
+        MCBuildJob mcBuildJob = new MCBuildJob();
+        mcBuildJob.setCompositionRequest(compositionRequest);
+
+        return mcBuildJob;
+    }
+
+    List<MClassFunctionPair> getCallChainList(MService compositedService) {
         List<MClassFunctionPair> resultList = new ArrayList<>();
         if (compositedService.isGenerated()) {
             if (compositedService.getAllInterface().size() != 1) {
@@ -280,15 +348,19 @@ public class MServerOperator extends MObjectManager<MServerState> {
         }
         return resultList;
     }
-    // ------------------- Call Chain Part Ends --------------------
+    // ------------------- Composition Part Ends --------------------
 
     public List<MArchitectInfo> getDependencies(MService compositedService) {
         List<MArchitectInfo> resultList = new ArrayList<>();
         if (compositedService.isGenerated()) {
             for (MServiceInterface mInterface : compositedService.getAllInterface()) {
-                
+                for (String interfaceId : mInterface.getCompositionList()) {
+                    MServiceInterface serviceInterface = this.serviceManager.getInterfaceById(interfaceId);
+                    resultList.add(this.getServiceById(serviceInterface.getServiceId()).getArtifactInfo());
+                }
             }
         }
+        return resultList;
     }
 
     MResource getNodeLeftResource(String nodeId) {
@@ -299,7 +371,7 @@ public class MServerOperator extends MObjectManager<MServerState> {
         return this.insId2LeftCap.getOrDefault(instanceId, 0);
     }
 
-    MServiceInstance getInstanceById(String instanceId) {
+    public MServiceInstance getInstanceById(String instanceId) {
         return this.instanceManager.getById(instanceId).orElse(null);
     }
 

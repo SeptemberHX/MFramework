@@ -36,7 +36,7 @@ class MMinorAlgorithmTest {
 
     @BeforeEach
     void setUp() {
-        MSystemModel.getIns().setServiceManager(MDataUtils.loadServiceManager("D:\\Workspace\\git\\MFramework\\MServer\\src\\test\\data\\service.json"));
-        MSystemModel.getIns().setUserManager(MDataUtils.loadUserManager("D:\\Workspace\\git\\MFramework\\MServer\\src\\test\\data\\user.json"));
+        MSystemModel.getIns().setServiceManager(MDataUtils.loadServiceManager("MServer/src/test/data/service.json"));
+        MSystemModel.getIns().setUserManager(MDataUtils.loadUserManager("MServer/src/test/data/user.json"));
     }
 }

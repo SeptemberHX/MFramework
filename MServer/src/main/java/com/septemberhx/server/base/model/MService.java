@@ -58,6 +58,10 @@ public class MService extends MBaseObject {
         return this.interfaceMap.values().stream().filter(MServiceInterface::isGenerated).collect(Collectors.toList());
     }
 
+    public MServiceInterface getInterfaceById(String interfaceId) {
+        return this.interfaceMap.get(interfaceId);
+    }
+
     @Override
     public String toString() {
         return "MService{" +
