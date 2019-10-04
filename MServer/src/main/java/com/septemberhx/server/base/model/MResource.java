@@ -29,6 +29,12 @@ public class MResource {
         this.bandwidth = bandwidth;
     }
 
+    public MResource(MResource o) {
+        this.cpu = o.cpu;
+        this.ram = o.ram;
+        this.bandwidth = o.bandwidth;
+    }
+
     public boolean isEnough(MResource mResource) {
         return this.cpu >= mResource.cpu
                 && this.ram >= mResource.ram

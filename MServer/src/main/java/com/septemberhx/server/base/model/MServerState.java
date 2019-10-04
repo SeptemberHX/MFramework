@@ -21,4 +21,10 @@ public class MServerState extends MBaseObject {
     public MServerState(String nodeId) {
         this.id = nodeId;
     }
+
+    public MServerState mclone() {
+        MServerState serverState = new MServerState(this.id);
+        serverState.resource = new MResource(this.resource);
+        return  serverState;
+    }
 }

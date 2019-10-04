@@ -34,13 +34,42 @@ public class MServerOperator extends MObjectManager<MServerState> {
 
     private List<MBaseJob> jobList;
     private List<MServiceInterface> generatedInterfaceList;     // should update in reInit() and addNewService()
-    private Random random = new Random(20190927);
+    private static Random random = new Random(20190927);
 
     public MServerOperator() {
         this.insId2LeftCap = new HashMap<>();
         this.nodeId2ResourceLeft = new HashMap<>();
         this.funcId2InsIdSet = new HashMap<>();
         this.jobList = new ArrayList<>();
+    }
+
+    public MServerOperator shallowClone() {
+        MServerOperator operator = new MServerOperator();
+        Map<String, MServerState> objMapClone = new HashMap<>();
+        for (String nodeId : this.objectMap.keySet()) {
+            objMapClone.put(nodeId, this.objectMap.get(nodeId).mclone());
+        }
+        operator.objectMap = objMapClone;
+
+        operator.insId2LeftCap = new HashMap<>(this.insId2LeftCap);
+        Map<String, MResource> nodeId2ResourceLeftClone = new HashMap<>();
+        for (String nodeId : this.nodeId2ResourceLeft.keySet()) {
+            nodeId2ResourceLeftClone.put(nodeId, new MResource(this.nodeId2ResourceLeft.get(nodeId)));
+        }
+        operator.nodeId2ResourceLeft = nodeId2ResourceLeftClone;
+
+        Map<String, Set<String>> funcId2InsIdSetClone = new HashMap<>();
+        for (String funcId : this.funcId2InsIdSet.keySet()) {
+            funcId2InsIdSetClone.put(funcId, new HashSet<>(this.funcId2InsIdSet.get(funcId)));
+        }
+        operator.funcId2InsIdSet = funcId2InsIdSetClone;
+
+        operator.demandStateManager = this.demandStateManager.shallowClone();
+        operator.instanceManager = this.instanceManager.shallowClone();
+        operator.serviceManager = this.serviceManager.shallowClone();
+        operator.jobList = new ArrayList<>(this.jobList);
+        operator.generatedInterfaceList = new ArrayList<>(this.generatedInterfaceList);
+        return operator;
     }
 
     /**
@@ -377,5 +406,9 @@ public class MServerOperator extends MObjectManager<MServerState> {
 
     public MService getServiceById(String serviceId) {
         return this.serviceManager.getById(serviceId).orElse(null);
+    }
+
+    public List<MService> getAllServices() {
+        return this.serviceManager.getAllValues();
     }
 }
