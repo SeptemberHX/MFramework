@@ -56,58 +56,7 @@ public class MMinorAlgorithm implements MAlgorithmInterface {
         }
 
         // deal with all not good demands
-        for (MUserDemand userDemand : demandList) {
-            Optional<MUser> mUserOptional = MSystemModel.getIns().getUserManager().getById(userDemand.getUserId());
-            if (!mUserOptional.isPresent()) {
-                continue;
-            }
-
-            // Step 1: get all available nodes for this user according to max delay
-            MUser mUser = mUserOptional.get();
-            String closestNodeId = MSystemModel.getIns().getMSNManager().getClosestNodeId(mUser.getPosition());
-            Optional<MServerNode> closestNodeOption = MSystemModel.getIns().getMSNManager().getById(closestNodeId);
-            MServerNode closestNode = closestNodeOption.get();
-            List<MServerNode> serverNodeList = MSystemModel.getIns().getMSNManager().getConnectedNodesDecentWithDelayTolerance(closestNodeId);
-            serverNodeList.add(0, closestNode);
-
-            // Step 2: try to satisfy each demand not meet
-            Optional<MDemandState> demandStateOp = MSystemModel.getIns().getDemandStateManager().getById(userDemand.getId());
-            MDemandState demandState = demandStateOp.get();
-
-           // Step 2.1: try to find an exist instance
-            boolean isSuccess = false;
-            for (MServerNode serverNode : serverNodeList) {
-                List<MServiceInstance> candidateList = serverOperator.getInstancesCanMetWithEnoughCapOnNode(serverNode.getId(), userDemand);
-                if (candidateList.size() > 0) {
-                    serverOperator.assignDemandToIns(userDemand, candidateList.get(0), demandState);
-                    isSuccess = true;
-                    break;
-                }
-            }
-
-            // step 2.2: try to create a new instance for it
-            if (!isSuccess) {
-                MService bestService = MSystemModel.getIns().getOperator().findBestServiceToCreate(userDemand);
-                if (bestService == null) {
-                    logger.warn("Demand failed to find a suitable service: " + userDemand);
-                    continue;
-                }
-
-                for (MServerNode serverNode : serverNodeList) {
-                    if (serverOperator.ifNodeHasResForIns(serverNode.getId(), bestService.getId())) {
-                        String uniqueInstanceId = MIDUtils.generateInstanceId(serverNode.getId(), bestService.getId());
-                        MServiceInstance newInstance = serverOperator.addNewInstance(bestService.getId(), serverNode.getId(), uniqueInstanceId);
-                        serverOperator.assignDemandToIns(userDemand, newInstance, demandState);
-                        isSuccess = true;
-                        break;
-                    }
-                }
-            }
-
-            if (!isSuccess) {
-                throw new RuntimeException("Demand cannot be satisfied! : " + userDemand.toString());
-            }
-        }
+        MDemandAssignHA.calc(demandList, serverOperator);
 
         return null;
     }

@@ -173,7 +173,17 @@ public class MServerOperator extends MObjectManager<MServerState> {
         return instance;
     }
 
-    public void deleteInstance(String instanceId) {
+    public List<MUserDemand> deleteInstance(String instanceId) {
+        // collect user demands on this instance
+        List<MUserDemand> userDemands = new ArrayList<>();
+        for (MDemandState demandState : this.demandStateManager.getDemandStateByInstanceId(instanceId)) {
+            userDemands.add(
+                    MSystemModel.getIns()
+                            .getUserManager()
+                            .getUserDemandByUserAndDemandId(demandState.getUserId(), demandState.getId()));
+        }
+
+        // remove instance data
         this.insId2LeftCap.remove(instanceId);
         Optional<MService> serviceOptional = this.serviceManager.getById(instanceId);
         serviceOptional.ifPresent(mService -> {
@@ -181,6 +191,31 @@ public class MServerOperator extends MObjectManager<MServerState> {
             this.insId2LeftCap.remove(instanceId);
         });
         this.instanceManager.delete(instanceId);
+
+        return userDemands;
+    }
+
+    public boolean moveInstance(String instanceId, String targetNodeId) {
+        Optional<MServiceInstance> instanceOptional = this.instanceManager.getById(instanceId);
+        if (!instanceOptional.isPresent()) return false;
+        MServiceInstance instance = instanceOptional.get();
+        if (instance.getNodeId().equals(targetNodeId)) return true;
+
+        // change instance location
+        Optional<MService> serviceOptional = this.serviceManager.getById(instanceId);
+        if (!serviceOptional.isPresent()) return false;
+
+        if (this.nodeId2ResourceLeft.get(targetNodeId).isEnough(serviceOptional.get().getResource())) {
+            this.nodeId2ResourceLeft.get(instance.getNodeId()).free(serviceOptional.get().getResource());
+            this.nodeId2ResourceLeft.get(targetNodeId).assign(serviceOptional.get().getResource());
+            this.instanceManager.moveInstance(instanceId, targetNodeId);
+        }
+
+        // change user demands on this instance
+        for (MDemandState demandState : this.demandStateManager.getDemandStateByInstanceId(instanceId)) {
+            demandState.setNodeId(targetNodeId);
+        }
+        return true;
     }
 
     public List<MServiceInstance> getInstancesOnNode(String nodeId) {
@@ -319,7 +354,7 @@ public class MServerOperator extends MObjectManager<MServerState> {
 
     /**
      * Generate a new MCBuildJob according to given new generated composited service
-     * @param composedService
+     * @param compositedService
      * @return
      */
     private MCBuildJob getBuildJob(MService compositedService) {
@@ -409,6 +444,22 @@ public class MServerOperator extends MObjectManager<MServerState> {
     }
 
     public List<MService> getAllServices() {
-        return this.serviceManager.getAllValues();
+        List<MService> serviceList = this.serviceManager.getAllValues();
+        serviceList.sort(new Comparator<MService>() {
+            @Override
+            public int compare(MService o1, MService o2) {
+                return o1.getId().compareTo(o2.getId());
+            }
+        });
+        return serviceList;
+    }
+
+    public List<MServiceInstance> getInstancesOfService(String serviceId) {
+        return this.instanceManager.getInstancesOfService(serviceId);
+    }
+
+    // todo: finish cost function
+    public double calcCost() {
+        return 0.0;
     }
 }

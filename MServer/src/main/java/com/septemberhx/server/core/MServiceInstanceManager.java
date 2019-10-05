@@ -46,6 +46,17 @@ public class MServiceInstanceManager extends MObjectManager<MServiceInstance> {
         this.serviceId2InsIdSet.get(serviceInstance.getServiceId()).remove(instanceId);
     }
 
+    public void moveInstance(String instanceId, String targetNodeId) {
+        if (!this.objectMap.containsKey(instanceId)) {
+            return;
+        }
+
+        MServiceInstance serviceInstance = this.objectMap.get(instanceId);
+        this.nodeId2InsIdSet.get(serviceInstance.getNodeId()).remove(instanceId);
+        this.nodeId2InsIdSet.get(targetNodeId).add(instanceId);
+        serviceInstance.setNodeId(targetNodeId);
+    }
+
     public Optional<MServiceInstance> getInstanceByMObjectId(String mObjectId) {
         MServiceInstance result = null;
         for (MServiceInstance instance : this.objectMap.values()) {

@@ -7,6 +7,7 @@ import com.septemberhx.server.base.model.MServiceInterface;
 import com.septemberhx.server.base.model.MUserDemand;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author SeptemberHX
@@ -60,5 +61,13 @@ public class MDemandStateManager extends MObjectManager<MDemandState> {
             return userDemand.isServiceInterfaceMet(serviceInterface);
         }
         return false;
+    }
+
+    public List<MDemandState> getDemandStatesOnNode(String nodeId) {
+        return this.objectMap.values().stream().filter(s -> s.getNodeId().equals(nodeId)).collect(Collectors.toList());
+    }
+
+    public List<MDemandState> getDemandStatesOnInstance(String instanceId) {
+        return this.objectMap.values().stream().filter(s -> s.getInstanceId().equals(instanceId)).collect(Collectors.toList());
     }
 }

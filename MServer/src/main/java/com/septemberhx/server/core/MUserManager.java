@@ -1,8 +1,12 @@
 package com.septemberhx.server.core;
 
 import com.septemberhx.common.base.MObjectManager;
+import com.septemberhx.server.base.model.MDemandChain;
 import com.septemberhx.server.base.model.MUser;
 import com.septemberhx.server.base.model.MUserDemand;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author SeptemberHX
@@ -23,5 +27,15 @@ public class MUserManager extends MObjectManager<MUser> {
 
     public void add(MUser user) {
         this.objectMap.put(user.getId(), user);
+    }
+
+    public List<MUserDemand> getAllUserDemands() {
+        List<MUserDemand> resultList = new ArrayList<>();
+        for (MUser user : this.objectMap.values()) {
+            for (MDemandChain demandChain : user.getDemandChainList()) {
+                resultList.addAll(demandChain.getDemandList());
+            }
+        }
+        return resultList;
     }
 }

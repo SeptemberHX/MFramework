@@ -88,4 +88,15 @@ public class MServerNodeManager extends MObjectManager<MServerNode> {
         }
         return targetNodeId;
     }
+
+    public List<MServerNode> getFixedOrderNodeList() {
+        List<MServerNode> nodeList = this.getAllValues();
+        nodeList.sort(new Comparator<MServerNode>() {
+            @Override
+            public int compare(MServerNode o1, MServerNode o2) {
+                return o1.getId().compareTo(o2.getId());
+            }
+        });
+        return nodeList;
+    }
 }
