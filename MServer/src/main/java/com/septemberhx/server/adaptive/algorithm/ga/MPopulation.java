@@ -1,11 +1,11 @@
 package com.septemberhx.server.adaptive.algorithm.ga;
 
+import com.septemberhx.server.adaptive.MAdaptiveSystem;
 import com.septemberhx.server.core.MServerOperator;
 import com.septemberhx.server.core.MSystemModel;
+import org.javatuples.Pair;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 /**
  * @author SeptemberHX
@@ -24,8 +24,68 @@ public class MPopulation {
     public static Random MUTATION_RATE_RAND = new Random(4000000);
     public static Random MUTATION_SELECT_RAND = new Random(5000000);
 
+    public static List<String> fixedNodeIdList;
+    public static List<String> fixedServiceIdList;
+    public static Map<String, Integer> fixedNodeId2Index;
+    public static Map<String, Integer> fixedServiceId2Index;
+
+    private int populationSize = 100;
+    private int maxRound = 200;
+    private double mutationRate = 0.25;
+
     public MPopulation(MServerOperator snapshotOperator) {
-        MSystemModel.getIns().getMSNManager().getAllValues().forEach(node -> nodeIdList.add(node.getId()));
-        snapshotOperator.getAllServices().forEach(service -> serviceIdList.add(service.getId()));
+        fixedNodeIdList = new ArrayList<>();
+        fixedServiceIdList = new ArrayList<>();
+        MSystemModel.getIns().getMSNManager().getFixedOrderNodeList().forEach(n -> fixedNodeIdList.add(n.getId()));
+        snapshotOperator.getServiceManager().getFixedServiceList().forEach(s -> fixedServiceIdList.add(s.getId()));
+
+        fixedNodeId2Index = new HashMap<>();
+        for (int i = 0; i < fixedNodeIdList.size(); ++i) {
+            fixedNodeId2Index.put(fixedNodeIdList.get(i), i);
+        }
+
+        fixedServiceId2Index = new HashMap<>();
+        for (int i = 0; i < fixedServiceIdList.size(); ++i) {
+            fixedServiceId2Index.put(fixedServiceIdList.get(i), i);
+        }
+    }
+
+    public void init(int populationSize, int maxRound) {
+
+    }
+
+    public void evolve() {
+        int currRound = 1;
+        while (currRound <= maxRound) {
+            this.chromosomes.sort(new Comparator<MChromosome>() {
+                @Override
+                public int compare(MChromosome o1, MChromosome o2) {
+                    return -Double.compare(o1.fitness(), o2.fitness());
+                }
+            });
+            this.chromosomes = this.chromosomes.subList(0, this.populationSize);    // eliminate
+            List<MChromosome> nextG = new ArrayList<>();
+
+            while (nextG.size() < this.populationSize) {
+                Pair<Integer, Integer> parentIndics = this.randomParentIndics();
+                List<MChromosome> children = this.chromosomes.get(parentIndics.getValue0()).crossover(this.chromosomes.get(parentIndics.getValue1()));
+                if (MUTATION_RATE_RAND.nextDouble() < this.mutationRate) {
+                    children.forEach(c -> {
+                        c.mutation();
+                        c.afterBorn();
+                    });
+                }
+                nextG.addAll(children);
+            }
+        }
+    }
+
+    private Pair<Integer, Integer> randomParentIndics() {
+        int p1 = CROSSOVER_RATE_RAND.nextInt(this.populationSize);
+        int p2;
+        do {
+            p2 = CROSSOVER_RATE_RAND.nextInt(this.populationSize);
+        } while (p2 == p1);
+        return new Pair<>(p1, p2);
     }
 }

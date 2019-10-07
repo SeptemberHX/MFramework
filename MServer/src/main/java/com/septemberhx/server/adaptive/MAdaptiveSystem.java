@@ -34,7 +34,10 @@ public class MAdaptiveSystem {
 
     public static Double COMPOSITION_THRESHOLD = 0.2;
     public static Long MAX_DELAY_TOLERANCE = 300L;
-    public static Long UNAVAILAVLE_TOLERANCE = 3000L;
+    public static Long UNAVAILABLE_TOLERANCE = 3000L;
+    public static Long UNAVAILABLE_TRANSFORM_TIME = 1000000L;
+
+    public static double ALPHA = 0.1;
 
     public MAdaptiveSystem() {
         this.monitor = new MMonitor();

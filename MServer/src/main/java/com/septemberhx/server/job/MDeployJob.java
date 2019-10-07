@@ -15,6 +15,7 @@ public class MDeployJob extends MBaseJob {
     private String nodeId;
     private String imageName;
     private V1Pod pod;
+    private String serviceId;
 
     public MDeployJob() {
         type = MJobType.DEPLOY;

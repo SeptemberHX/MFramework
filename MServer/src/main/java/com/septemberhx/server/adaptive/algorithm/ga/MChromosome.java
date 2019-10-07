@@ -1,13 +1,16 @@
 package com.septemberhx.server.adaptive.algorithm.ga;
 
 import com.septemberhx.server.adaptive.algorithm.MDemandAssignHA;
-import com.septemberhx.server.base.model.MServiceInstance;
-import com.septemberhx.server.base.model.MUserDemand;
+import com.septemberhx.server.base.model.*;
 import com.septemberhx.server.core.MServerOperator;
 import com.septemberhx.server.core.MSystemModel;
+import com.septemberhx.server.job.MBaseJob;
+import com.septemberhx.server.job.MDeployJob;
+import com.septemberhx.server.job.MJobType;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author SeptemberHX
@@ -21,6 +24,8 @@ public class MChromosome {
     private MServerOperator rawOperator;
     private MServerOperator currOperator;
     private boolean ifDemandsAssigned = false;
+
+    private double fitness = -1;
 
     public MChromosome(int nodeSize, int serviceSize, MServerOperator rawOperator) {
         this.genes = new MGene[nodeSize];
@@ -91,7 +96,7 @@ public class MChromosome {
         this.genes[nodeIndex].deleteInstance(serviceIndex);
 
         // re-assign user demands on this instance
-        String serviceId = this.currOperator.getAllServices().get(serviceIndex).getId();
+        String serviceId = MPopulation.fixedServiceIdList.get(serviceIndex);
         List<MServiceInstance> instanceList = this.currOperator.getInstancesOfService(serviceId);
         int instanceIndex = MPopulation.MUTATION_SELECT_RAND.nextInt(instanceList.size());
         String targetInstanceId = instanceList.get(instanceIndex).getId();
@@ -126,11 +131,11 @@ public class MChromosome {
             this.genes[toNodeIndex].addInstance(serviceIndex);
 
             // re-assign user demands on this instance
-            String serviceId = this.currOperator.getAllServices().get(serviceIndex).getId();
+            String serviceId = MPopulation.fixedServiceIdList.get(serviceIndex);
             List<MServiceInstance> instanceList = this.currOperator.getInstancesOfService(serviceId);
             int instanceIndex = MPopulation.MUTATION_SELECT_RAND.nextInt(instanceList.size());
             instanceId = instanceList.get(instanceIndex).getId();
-            targetNodeId = MSystemModel.getIns().getMSNManager().getFixedOrderNodeList().get(toNodeIndex).getId();
+            targetNodeId = MPopulation.fixedNodeIdList.get(toNodeIndex);
         } while (!this.currOperator.moveInstance(instanceId, targetNodeId));
     }
 
@@ -140,10 +145,21 @@ public class MChromosome {
     private void assignDemands() {
         List<MUserDemand> allUserDemands = MSystemModel.getIns().getUserManager().getAllUserDemands();
         MDemandAssignHA.calc(allUserDemands, currOperator);
+        for (MBaseJob job : currOperator.getJobList()) {
+            if (job.getType() == MJobType.DEPLOY) {
+                MDeployJob deployJob = (MDeployJob) job;
+                int nodeIndex = MPopulation.fixedNodeId2Index.get(deployJob.getServiceId());
+                int serviceIndex = MPopulation.fixedServiceId2Index.get(deployJob.getNodeId());
+                this.genes[nodeIndex].addInstance(serviceIndex);
+            }
+        }
         this.ifDemandsAssigned = true;
     }
 
     public double fitness() {
-        return this.currOperator.calcCost();
+        if (this.fitness < 0) {
+            this.fitness = this.currOperator.calcCost();
+        }
+        return this.fitness;
     }
 }

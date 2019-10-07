@@ -25,6 +25,8 @@ public class MServiceInterface {
     private String interfaceId;     // 8. unique interface id
     private List<String> compositionList = new ArrayList<>();   // 9. Interface Id lists which are used to composite this interface
     private String serviceId;
+    private Long inDataSize;
+    private Long outDataSize;
 
     public boolean isGenerated() {
         return this.compositionList != null && !this.compositionList.isEmpty();
@@ -42,6 +44,9 @@ public class MServiceInterface {
                 ", maxUserNum=" + maxUserNum +
                 ", interfaceId='" + interfaceId + '\'' +
                 ", compositionList=" + compositionList +
+                ", serviceId='" + serviceId + '\'' +
+                ", inDataSize=" + inDataSize +
+                ", outDataSize=" + outDataSize +
                 '}';
     }
 

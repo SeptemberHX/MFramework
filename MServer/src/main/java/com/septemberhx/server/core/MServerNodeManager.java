@@ -99,4 +99,8 @@ public class MServerNodeManager extends MObjectManager<MServerNode> {
         });
         return nodeList;
     }
+
+    public MNodeConnectionInfo getConnectionInfo(String fromNodeId, String toNodeId) {
+        return this.serverNodeGraph.edgeValueOrDefault(fromNodeId, toNodeId, null);
+    }
 }

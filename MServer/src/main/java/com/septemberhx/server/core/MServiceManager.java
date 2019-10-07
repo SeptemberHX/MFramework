@@ -6,6 +6,7 @@ import com.septemberhx.server.base.model.MServiceInstance;
 import com.septemberhx.server.base.model.MServiceInterface;
 import lombok.Setter;
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -66,5 +67,16 @@ public class MServiceManager extends MObjectManager<MService> {
 
     public List<MServiceInterface> getAllComInterfaces() {
         return this.interfaceMap.values().stream().filter(MServiceInterface::isGenerated).collect(Collectors.toList());
+    }
+
+    public List<MService> getFixedServiceList() {
+        List<MService> resultList = this.getAllValues();
+        resultList.sort(new Comparator<MService>() {
+            @Override
+            public int compare(MService o1, MService o2) {
+                return o1.getId().compareTo(o2.getId());
+            }
+        });
+        return resultList;
     }
 }

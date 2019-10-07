@@ -4,11 +4,14 @@ import com.septemberhx.common.base.MArchitectInfo;
 import com.septemberhx.common.base.MClassFunctionPair;
 import com.septemberhx.common.base.MObjectManager;
 import com.septemberhx.common.bean.MCompositionRequest;
+import com.septemberhx.server.adaptive.MAdaptiveSystem;
+import com.septemberhx.server.base.MNodeConnectionInfo;
 import com.septemberhx.server.base.model.*;
 import com.septemberhx.server.job.MBaseJob;
 import com.septemberhx.server.job.MCBuildJob;
 import com.septemberhx.server.job.MSwitchJob;
 import com.septemberhx.server.utils.MIDUtils;
+import lombok.Getter;
 import org.javatuples.Pair;
 
 import java.util.*;
@@ -30,8 +33,11 @@ public class MServerOperator extends MObjectManager<MServerState> {
     // clone objects
     private MDemandStateManager demandStateManager;
     private MServiceInstanceManager instanceManager;
+
+    @Getter
     private MServiceManager serviceManager;
 
+    @Getter
     private List<MBaseJob> jobList;
     private List<MServiceInterface> generatedInterfaceList;     // should update in reInit() and addNewService()
     private static Random random = new Random(20190927);
@@ -458,8 +464,35 @@ public class MServerOperator extends MObjectManager<MServerState> {
         return this.instanceManager.getInstancesOfService(serviceId);
     }
 
-    // todo: finish cost function
     public double calcCost() {
-        return 0.0;
+        List<MUser> userList = MSystemModel.getIns().getUserManager().getAllValues();
+        double allScore = 0;
+        Long chainCount = 0L;
+        for (MUser user : userList) {
+            String nodeId = MSystemModel.getIns().getMSNManager().getClosestNodeId(user.getPosition());
+            for (MDemandChain demandChain : user.getDemandChainList()) {
+                double tDelay = 0;
+                double tTrans = 0;
+                String prevNodeId = nodeId;
+                for (MUserDemand demand : demandChain.getDemandList()) {
+                    Optional<MDemandState> demandStateOptional = this.demandStateManager.getById(demand.getId());
+                    if (demandStateOptional.isPresent()) {
+                        MNodeConnectionInfo info = MSystemModel.getIns().getMSNManager()
+                                .getConnectionInfo(prevNodeId, demandStateOptional.get().getNodeId());
+
+                        MServiceInterface serviceInterface = this.serviceManager.getInterfaceById(demandStateOptional.get().getInterfaceId());
+                        tDelay = info.getDelay();
+                        tTrans = (double) (serviceInterface.getInDataSize() + serviceInterface.getOutDataSize()) / info.getBandwidth();
+                    } else {
+                        tDelay = MAdaptiveSystem.UNAVAILABLE_TOLERANCE;
+                        tTrans = MAdaptiveSystem.UNAVAILABLE_TRANSFORM_TIME;
+                    }
+                    prevNodeId = demandStateOptional.get().getNodeId();
+                    allScore += MAdaptiveSystem.ALPHA / (1 + tTrans) + (1 - MAdaptiveSystem.ALPHA) / (1 + tDelay);
+                }
+            }
+            chainCount += user.getDemandChainList().size();
+        }
+        return allScore / chainCount;
     }
 }
