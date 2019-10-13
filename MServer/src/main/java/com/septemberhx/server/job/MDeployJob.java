@@ -16,11 +16,15 @@ public class MDeployJob extends MBaseJob {
     private String imageName;
     private V1Pod pod;
     private String serviceId;
+    private String instanceId;
 
-    public MDeployJob() {
+    public MDeployJob(String nodeId, String serviceId, String instanceId) {
         type = MJobType.DEPLOY;
         this.id = type.toString() + "_" + UUID.randomUUID().toString();
         this.priority = DEPLOY;
+        this.nodeId = nodeId;
+        this.serviceId = serviceId;
+        this.instanceId = instanceId;
     }
 
     public MDeployPodRequest toMDeployPodRequest() {

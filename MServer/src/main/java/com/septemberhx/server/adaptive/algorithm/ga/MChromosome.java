@@ -7,10 +7,11 @@ import com.septemberhx.server.core.MSystemModel;
 import com.septemberhx.server.job.MBaseJob;
 import com.septemberhx.server.job.MDeployJob;
 import com.septemberhx.server.job.MJobType;
+import com.septemberhx.server.utils.MIDUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author SeptemberHX
@@ -26,6 +27,7 @@ public class MChromosome {
     private boolean ifDemandsAssigned = false;
 
     private double fitness = -1;
+    private double cost = -1;
 
     public MChromosome(int nodeSize, int serviceSize, MServerOperator rawOperator) {
         this.genes = new MGene[nodeSize];
@@ -46,8 +48,8 @@ public class MChromosome {
 
     public List<MChromosome> crossover(MChromosome other) {
         // two point crossover
-        int index1 = MPopulation.CROSSOVER_POINT_RAND.nextInt(this.geneLength);
-        int index2 = MPopulation.CROSSOVER_POINT_RAND.nextInt(this.geneLength);
+        int index1 = MWSGAPopulation.CROSSOVER_POINT_RAND.nextInt(this.geneLength);
+        int index2 = MWSGAPopulation.CROSSOVER_POINT_RAND.nextInt(this.geneLength);
 
         int startIndex = Math.min(index1, index2);
         int endIndex = Math.max(index1, index2);
@@ -63,7 +65,9 @@ public class MChromosome {
 
         List<MChromosome> resultList = new ArrayList<>();
         MChromosome child1 = new MChromosome(childGene1, this.geneLength, this.rawOperator);
+        child1.initGenes();
         MChromosome child2 = new MChromosome(childGene2, this.geneLength, this.rawOperator);
+        child2.initGenes();
         resultList.add(child1);
         resultList.add(child2);
         return resultList;
@@ -71,7 +75,7 @@ public class MChromosome {
 
     // todo: select instance by the frequency
     public void mutation() {
-        double mutationType = MPopulation.MUTATION_SELECT_RAND.nextDouble();
+        double mutationType = MWSGAPopulation.MUTATION_SELECT_RAND.nextDouble();
         if (mutationType < 0.33) {              // add a new instance
             this.addOneInstance();
             this.assignDemands();
@@ -85,28 +89,28 @@ public class MChromosome {
     }
 
     private void deleteOneInstance() {
-        int nodeIndex = MPopulation.MUTATION_SELECT_RAND.nextInt(this.genes.length);
+        int nodeIndex = MWSGAPopulation.MUTATION_SELECT_RAND.nextInt(this.genes.length);
         List<Integer> indicsWithInstance = new ArrayList<>();
         for (int i = 0; i < this.geneLength; ++i) {
             if (this.genes[nodeIndex].getGeneIntArr()[i] > 0) {
                 indicsWithInstance.add(i);
             }
         }
-        int serviceIndex = indicsWithInstance.get(MPopulation.MUTATION_SELECT_RAND.nextInt(indicsWithInstance.size()));
+        int serviceIndex = indicsWithInstance.get(MWSGAPopulation.MUTATION_SELECT_RAND.nextInt(indicsWithInstance.size()));
         this.genes[nodeIndex].deleteInstance(serviceIndex);
 
         // re-assign user demands on this instance
-        String serviceId = MPopulation.fixedServiceIdList.get(serviceIndex);
+        String serviceId = MWSGAPopulation.fixedServiceIdList.get(serviceIndex);
         List<MServiceInstance> instanceList = this.currOperator.getInstancesOfService(serviceId);
-        int instanceIndex = MPopulation.MUTATION_SELECT_RAND.nextInt(instanceList.size());
+        int instanceIndex = MWSGAPopulation.MUTATION_SELECT_RAND.nextInt(instanceList.size());
         String targetInstanceId = instanceList.get(instanceIndex).getId();
         List<MUserDemand> userDemands = this.currOperator.deleteInstance(targetInstanceId);
         MDemandAssignHA.calc(userDemands, this.currOperator);
     }
 
     private void addOneInstance() {
-        int nodeIndex = MPopulation.MUTATION_SELECT_RAND.nextInt(this.genes.length);
-        int serviceIndex = MPopulation.MUTATION_SELECT_RAND.nextInt(this.geneLength);
+        int nodeIndex = MWSGAPopulation.MUTATION_SELECT_RAND.nextInt(this.genes.length);
+        int serviceIndex = MWSGAPopulation.MUTATION_SELECT_RAND.nextInt(this.geneLength);
         this.genes[nodeIndex].addInstance(serviceIndex);
     }
 
@@ -117,8 +121,8 @@ public class MChromosome {
     private void moveOneInstance() {
         String instanceId, targetNodeId;
         do {
-            int fromNodeIndex = MPopulation.MUTATION_SELECT_RAND.nextInt(this.genes.length);
-            int toNodeIndex = MPopulation.MUTATION_SELECT_RAND.nextInt(this.genes.length);
+            int fromNodeIndex = MWSGAPopulation.MUTATION_SELECT_RAND.nextInt(this.genes.length);
+            int toNodeIndex = MWSGAPopulation.MUTATION_SELECT_RAND.nextInt(this.genes.length);
 
             List<Integer> indicsWithInstance = new ArrayList<>();
             for (int i = 0; i < this.geneLength; ++i) {
@@ -126,16 +130,16 @@ public class MChromosome {
                     indicsWithInstance.add(i);
                 }
             }
-            int serviceIndex = indicsWithInstance.get(MPopulation.MUTATION_SELECT_RAND.nextInt(indicsWithInstance.size()));
+            int serviceIndex = indicsWithInstance.get(MWSGAPopulation.MUTATION_SELECT_RAND.nextInt(indicsWithInstance.size()));
             this.genes[fromNodeIndex].deleteInstance(serviceIndex);
             this.genes[toNodeIndex].addInstance(serviceIndex);
 
             // re-assign user demands on this instance
-            String serviceId = MPopulation.fixedServiceIdList.get(serviceIndex);
+            String serviceId = MWSGAPopulation.fixedServiceIdList.get(serviceIndex);
             List<MServiceInstance> instanceList = this.currOperator.getInstancesOfService(serviceId);
-            int instanceIndex = MPopulation.MUTATION_SELECT_RAND.nextInt(instanceList.size());
+            int instanceIndex = MWSGAPopulation.MUTATION_SELECT_RAND.nextInt(instanceList.size());
             instanceId = instanceList.get(instanceIndex).getId();
-            targetNodeId = MPopulation.fixedNodeIdList.get(toNodeIndex);
+            targetNodeId = MWSGAPopulation.fixedNodeIdList.get(toNodeIndex);
         } while (!this.currOperator.moveInstance(instanceId, targetNodeId));
     }
 
@@ -148,18 +152,60 @@ public class MChromosome {
         for (MBaseJob job : currOperator.getJobList()) {
             if (job.getType() == MJobType.DEPLOY) {
                 MDeployJob deployJob = (MDeployJob) job;
-                int nodeIndex = MPopulation.fixedNodeId2Index.get(deployJob.getServiceId());
-                int serviceIndex = MPopulation.fixedServiceId2Index.get(deployJob.getNodeId());
+                int nodeIndex = MWSGAPopulation.fixedNodeId2Index.get(deployJob.getServiceId());
+                int serviceIndex = MWSGAPopulation.fixedServiceId2Index.get(deployJob.getNodeId());
                 this.genes[nodeIndex].addInstance(serviceIndex);
             }
         }
         this.ifDemandsAssigned = true;
     }
 
-    public double fitness() {
+    /**
+     * Init operator with current genes. Especially when a new chromosome is just born.
+     */
+    private void initGenes() {
+        for (int nodeIndex = 0; nodeIndex < this.genes.length; ++nodeIndex) {
+            String nodeId = MWSGAPopulation.fixedNodeIdList.get(nodeIndex);
+            for (int serviceIndex = 0; serviceIndex < this.geneLength; ++serviceIndex) {
+                int serviceCount = this.genes[nodeIndex].getGeneIntArr()[serviceIndex];
+                String serviceId = MWSGAPopulation.fixedServiceIdList.get(serviceIndex);
+                List<String> idList = this.currOperator.getInstanceIdListOnNodeOfService(nodeId, serviceId);
+                Collections.sort(idList);
+
+                if (idList.size() > serviceCount) {
+                    for (int i = 0; i < idList.size() - serviceCount; ++i) {
+                        this.currOperator.deleteInstance(idList.get(idList.size() - 1 - i));
+                    }
+                } else if (idList.size() < serviceCount) {
+                    while (idList.size() < serviceCount) {
+                        String newInstanceId = MIDUtils.generateInstanceId(nodeId, serviceId, idList);
+                        this.currOperator.addNewInstance(serviceId, nodeId, newInstanceId);
+                        idList = this.currOperator.getInstanceIdListOnNodeOfService(nodeId, serviceId);
+                    }
+                }
+            }
+        }
+    }
+
+    public double getFitness() {
         if (this.fitness < 0) {
-            this.fitness = this.currOperator.calcCost();
+            this.fitness = this.currOperator.calcScore();
         }
         return this.fitness;
+    }
+
+    public double getCost() {
+        if (this.cost < 0) {
+            this.cost = this.currOperator.calcEvolutionCost(this.rawOperator);
+        }
+        return this.cost;
+    }
+
+    public double getWSGAFitness() {
+        double score = this.getFitness();
+        double cost = this.getCost();
+
+        return MWSGAPopulation.W_SCORE * score * MWSGAPopulation.P_SCORE
+                + MWSGAPopulation.W_COST * cost * MWSGAPopulation.P_COST;
     }
 }

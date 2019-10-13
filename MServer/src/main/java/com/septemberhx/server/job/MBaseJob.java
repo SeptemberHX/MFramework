@@ -29,6 +29,7 @@ public class MBaseJob extends MBaseObject {
     public static Integer BUILD = 1;
     public static Integer CBUILD = 1;
     public static Integer DEPLOY = 21;
+    public static Integer DELETE = 21;
     public static Integer NOTIFY = 41;
 
     protected List<MBaseJob> subJobs = new ArrayList<>();
@@ -76,6 +77,11 @@ public class MBaseJob extends MBaseObject {
                 return null;
             }
         }
+    }
+
+    public double cost() {
+        // todo: return cost of each operation
+        return 0;
     }
 
     public void markAsDoing() {

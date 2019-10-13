@@ -4,6 +4,7 @@ public enum MJobType {
     BUILD,
     CBUILD,
     DEPLOY,
+    DELETE,
     NOTIFY,
     SPLIT,
     SWITCH,

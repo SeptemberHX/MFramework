@@ -66,7 +66,11 @@ public class MDemandAssignHA {
 
                 for (MServerNode serverNode : serverNodeList) {
                     if (snapshotOperator.ifNodeHasResForIns(serverNode.getId(), bestService.getId())) {
-                        String uniqueInstanceId = MIDUtils.generateInstanceId(serverNode.getId(), bestService.getId());
+                        String uniqueInstanceId = MIDUtils.generateInstanceId(
+                                serverNode.getId(),
+                                bestService.getId(),
+                                snapshotOperator.getInstanceIdListOnNodeOfService(serverNode.getId(), bestService.getId())
+                        );
                         MServiceInstance newInstance = snapshotOperator.addNewInstance(bestService.getId(), serverNode.getId(), uniqueInstanceId);
                         snapshotOperator.assignDemandToIns(userDemand, newInstance, demandState);
                         isSuccess = true;

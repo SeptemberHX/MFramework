@@ -85,11 +85,11 @@ public class MServerController {
         testJob.addSubJob(buildJob);
 
         // sub job 2: deploy sampleservice2
-        MDeployJob deployJob = new MDeployJob();
-        deployJob.setImageName(buildJob.getImageFullName());
-        deployJob.setNodeId("ices-104");
-        deployJob.setPod(MServerUtils.readPodYaml("sampleservice3"));
-        testJob.addSubJob(deployJob);
+//        MDeployJob deployJob = new MDeployJob();
+//        deployJob.setImageName(buildJob.getImageFullName());
+//        deployJob.setNodeId("ices-104");
+//        deployJob.setPod(MServerUtils.readPodYaml("sampleservice3"));
+//        testJob.addSubJob(deployJob);
 
         testJob.addSubJob(new MNotifyJob());
 
@@ -107,11 +107,11 @@ public class MServerController {
         mcBuildJob.setCompositionRequest(compositionRequest);
         compositionJob.addSubJob(mcBuildJob);
 
-        MDeployJob deployJob = new MDeployJob();
-        deployJob.setImageName(mcBuildJob.getImageFullName());
-        deployJob.setNodeId("ices-104");
-        deployJob.setPod(MServerUtils.getCompositionYaml(compositionRequest.getName()));
-        compositionJob.addSubJob(deployJob);
+//        MDeployJob deployJob = new MDeployJob();
+//        deployJob.setImageName(mcBuildJob.getImageFullName());
+//        deployJob.setNodeId("ices-104");
+//        deployJob.setPod(MServerUtils.getCompositionYaml(compositionRequest.getName()));
+//        compositionJob.addSubJob(deployJob);
         MServerSkeleton.getInstance().getJobManager().addJob(compositionJob);
 
         MJobExecutor.doJob(compositionJob);

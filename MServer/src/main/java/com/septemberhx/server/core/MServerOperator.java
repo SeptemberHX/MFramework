@@ -7,9 +7,7 @@ import com.septemberhx.common.bean.MCompositionRequest;
 import com.septemberhx.server.adaptive.MAdaptiveSystem;
 import com.septemberhx.server.base.MNodeConnectionInfo;
 import com.septemberhx.server.base.model.*;
-import com.septemberhx.server.job.MBaseJob;
-import com.septemberhx.server.job.MCBuildJob;
-import com.septemberhx.server.job.MSwitchJob;
+import com.septemberhx.server.job.*;
 import com.septemberhx.server.utils.MIDUtils;
 import lombok.Getter;
 import org.javatuples.Pair;
@@ -154,14 +152,16 @@ public class MServerOperator extends MObjectManager<MServerState> {
     }
 
     public MDemandState assignDemandToIns(MUserDemand userDemand, MServiceInstance instance, MDemandState oldState) {
+        String oldInstanceId = null;
         if (oldState != null) {
             if (this.insId2LeftCap.containsKey(oldState.getInstanceId())) {
                 this.insId2LeftCap.put(oldState.getInstanceId(), this.insId2LeftCap.get(oldState.getInstanceId()) + 1);
                 this.demandStateManager.deleteById(oldState.getId());
+                oldInstanceId = oldState.getInstanceId();
             }
         }
         this.insId2LeftCap.put(instance.getId(), this.insId2LeftCap.getOrDefault(instance.getId(), 0) - 1);
-        this.jobList.add(new MSwitchJob(userDemand.getId(), instance.getId()));
+        this.jobList.add(new MSwitchJob(userDemand.getId(), instance.getId(), oldInstanceId));
 
         MDemandState newDemandState = this.assignDemandToInterfaceOnSpecificInstance(userDemand, instance);
         this.demandStateManager.add(newDemandState);
@@ -226,6 +226,16 @@ public class MServerOperator extends MObjectManager<MServerState> {
 
     public List<MServiceInstance> getInstancesOnNode(String nodeId) {
         return new ArrayList<>(this.instanceManager.getInstancesOnNode(nodeId));
+    }
+
+    public List<String> getInstanceIdListOnNodeOfService(String nodeId, String serviceId) {
+        List<String> resultList = new LinkedList<>();
+        for (MServiceInstance serviceInstance : this.instanceManager.getInstancesOnNode(nodeId)) {
+            if (serviceInstance.getServiceId().equals(serviceId)) {
+                resultList.add(serviceInstance.getId());
+            }
+        }
+        return resultList;
     }
 
     public List<MServiceInstance> getInstancesCanMetWithEnoughCapOnNode(String nodeId, MUserDemand userDemand) {
@@ -464,7 +474,7 @@ public class MServerOperator extends MObjectManager<MServerState> {
         return this.instanceManager.getInstancesOfService(serviceId);
     }
 
-    public double calcCost() {
+    public double calcScore() {
         List<MUser> userList = MSystemModel.getIns().getUserManager().getAllValues();
         double allScore = 0;
         Long chainCount = 0L;
@@ -494,5 +504,64 @@ public class MServerOperator extends MObjectManager<MServerState> {
             chainCount += user.getDemandChainList().size();
         }
         return allScore / chainCount;
+    }
+
+    public double calcEvolutionCost(MServerOperator rawOperator) {
+        List<MBaseJob> newJobList = new ArrayList<>();
+
+        // Service part
+        List<MService> serviceListNow = this.serviceManager.getAllValues();
+        for (MService service : serviceListNow) {
+            if (!rawOperator.serviceManager.containsById(service.getId())) {
+                newJobList.add(this.getBuildJob(service));
+            }
+        }
+
+        // Instance part
+        // use exist instances if possible
+        for (MServerNode node : MSystemModel.getIns().getMSNManager().getAllValues()) {
+            List<MServiceInstance> instanceListNow = this.getInstancesOnNode(node.getId());
+            List<MServiceInstance> instanceListOld = rawOperator.getInstancesOnNode(node.getId());
+
+            Set<String> currInstanceIdSet = new HashSet<>();
+            instanceListNow.forEach(i -> currInstanceIdSet.add(i.getId()));
+            Set<String> oldInstanceIdSet = new HashSet<>();
+            instanceListOld.forEach(i -> oldInstanceIdSet.add(i.getId()));
+
+            for (String currId : currInstanceIdSet) {
+                if (!oldInstanceIdSet.contains(currId)) {
+                    newJobList.add(new MDeployJob(node.getId(), this.getInstanceById(currId).getServiceId(), currId));
+                }
+            }
+            for (String oldId : oldInstanceIdSet) {
+                if (!currInstanceIdSet.contains(oldId)) {
+                    newJobList.add(new MDeleteJob(oldId));
+                }
+            }
+        }
+
+        // User part
+        for (MDemandState demandState : this.demandStateManager.getAllValues()) {
+            Optional<MDemandState> demandStateOptional = rawOperator.demandStateManager.getById(demandState.getId());
+            boolean ifNeedSwitch = false;
+            String oldInstanceId = null;
+            if (demandStateOptional.isPresent()) {
+                MDemandState oldState = demandStateOptional.get();
+                oldInstanceId = oldState.getInstanceId();
+                if (!oldInstanceId.equals(oldState.getInstanceId())) {
+                    ifNeedSwitch = true;
+                }
+            } else {
+                ifNeedSwitch = true;
+            }
+
+            if (ifNeedSwitch) {
+                newJobList.add(new MSwitchJob(demandState.getId(), demandState.getInstanceId(), oldInstanceId));
+            }
+        }
+
+        // record the job list
+        this.jobList = newJobList;
+        return this.jobList.stream().mapToDouble(MBaseJob::cost).sum();
     }
 }
