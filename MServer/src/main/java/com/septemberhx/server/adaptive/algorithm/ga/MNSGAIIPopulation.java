@@ -3,16 +3,14 @@ import com.septemberhx.server.core.MServerOperator;
 
 import java.util.*;
 
+import static com.septemberhx.server.adaptive.algorithm.ga.MGAUtils.*;
+
 /**
  * @author SeptemberHX
  * @version 0.1
  * @date 2019/10/13
  */
 public class MNSGAIIPopulation extends MBaseGA {
-    private static final int DOMINANT = 1;
-    private static final int INFERIOR = 2;
-    private static final int NON_DOMINATED = 3;
-    private static Random LOCAL_RANDOM = new Random(100000000);
 
     public MNSGAIIPopulation(MServerOperator snapshotOperator) {
         super(snapshotOperator);
@@ -31,13 +29,13 @@ public class MNSGAIIPopulation extends MBaseGA {
             crowdingDistanceAssignment(paretoFront.get(i));
         }
 
-        while (currRound <= maxRound) {
+        while (currRound <= Configuration.NSGAII_MAX_ROUND) {
             List<MChromosome> nextG = new ArrayList<>();
             for (int i = 0; i < Configuration.POPULATION_SIZE; ++i) {
                 MChromosome parent1 = binaryTournamentSelection(this.population);
                 MChromosome parent2 = binaryTournamentSelection(this.population);
                 List<MChromosome> children = parent1.crossover(parent2);
-                if (MGAUtils.MUTATION_PROB_RAND.nextDouble() < this.mutationRate) {
+                if (MGAUtils.MUTATION_PROB_RAND.nextDouble() < Configuration.NSGAII_MUTATION_RATE) {
                     children.forEach(c -> {
                         c.mutation();
                         c.afterBorn();
@@ -82,76 +80,6 @@ public class MNSGAIIPopulation extends MBaseGA {
         }
     }
 
-    /**
-     * Calculate the domination rank of each chromosome
-     * Sort dominated chromosomes against crowding distance at each rank and return the result map
-     * @param populace all chromosomes
-     * @return Sorted map
-     */
-    private static Map<Integer, List<MChromosome>>  fastNonDominatedSort(final List<MChromosome> populace) {
-        for (MChromosome chromosome : populace) {
-            chromosome.reset();
-        }
-        for (int i = 0; i < populace.size() - 1; i++) {
-            for (int j = i + 1; j < populace.size() - 1; j++) {
-                switch (dominates(populace.get(i), populace.get(j))) {
-                    case DOMINANT:
-                        populace.get(i).setDominatedChromosome(populace.get(j));
-                        populace.get(j).incrementDominationCount(1);
-                        break;
-                    case INFERIOR:
-                        populace.get(i).incrementDominationCount(1);
-                        populace.get(j).setDominatedChromosome(populace.get(i));
-                        break;
-                    case NON_DOMINATED: break;
-                }
-            }
-            if (populace.get(i).getDominationCount() == 0) populace.get(i).setRank(1);
-        }
-
-        Map<Integer, List<MChromosome>> paretoFront = new HashMap<>();
-        List<MChromosome> leftList = populace;
-        int miniumCount;
-        int currRank = 1;
-        while ((miniumCount = getMiniumDominationCount(leftList)) != -1) {
-            List<MChromosome> targetList = new ArrayList<>();
-            List<MChromosome> nextList = new ArrayList<>();
-            for (MChromosome chromosome : leftList) {
-                if (chromosome.getDominationCount() == miniumCount) {
-                    chromosome.setRank(currRank);
-                    targetList.add(chromosome);
-                } else {
-                    nextList.add(chromosome);
-                }
-            }
-
-            paretoFront.put(currRank, targetList);
-            for (MChromosome target : targetList) {
-                for (MChromosome chromosome : target.getDominatedChromosomes()) {
-                    chromosome.incrementDominationCount(-1);
-                }
-            }
-
-            leftList = nextList;
-            ++currRank;
-        }
-
-        if (!leftList.isEmpty()) {
-            throw new RuntimeException("Your fastNonDominatedSort get wrong result!!!");
-        }
-        return paretoFront;
-    }
-
-    private static Integer getMiniumDominationCount(List<MChromosome> chromosomeList) {
-        int miniumCount = -1;
-        for (MChromosome chromosome : chromosomeList) {
-            if (miniumCount == -1 || miniumCount > chromosome.getDominationCount()) {
-                miniumCount = chromosome.getDominationCount();
-            }
-        }
-        return miniumCount;
-    }
-
     private static void crowdingDistanceAssignment(final List<MChromosome> nondominatedChromosomes) {
         int size = nondominatedChromosomes.size();
         for(int i = 0; i < 2; i++) {
@@ -176,25 +104,5 @@ public class MNSGAIIPopulation extends MBaseGA {
         chromosomes.sort((o1, o2) ->
                 -o1.getObjectiveValues().get(objectiveIndex).compareTo(o2.getObjectiveValues().get(objectiveIndex))
         );
-    }
-
-    private static int dominates(final MChromosome chromosome1, final MChromosome chromosome2) {
-        if(isDominant(chromosome1, chromosome2)) return DOMINANT;
-        else if(isDominant(chromosome2, chromosome1)) return INFERIOR;
-        else return NON_DOMINATED;
-    }
-
-    private static boolean isDominant(final MChromosome chromosome1, final MChromosome chromosome2) {
-        boolean isDominant = true;
-        boolean atLeastOneIsLarger = false;
-        for(int i = 0; i < 2; i++) {
-            if(chromosome1.getObjectiveValues().get(i) < chromosome2.getObjectiveValues().get(i)) {
-                isDominant = false;
-                break;
-            } else if (!atLeastOneIsLarger && (chromosome1.getObjectiveValues().get(i) > chromosome2.getObjectiveValues().get(i))) {
-                atLeastOneIsLarger = true;
-            }
-        }
-        return isDominant && atLeastOneIsLarger;
     }
 }

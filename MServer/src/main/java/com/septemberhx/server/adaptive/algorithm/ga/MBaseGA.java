@@ -22,9 +22,6 @@ public abstract class MBaseGA {
 
     MPopulation population;
 
-    int maxRound = 200;
-    double mutationRate = 0.25;
-
     public MBaseGA(MServerOperator snapshotOperator) {
         fixedNodeIdList = new ArrayList<>();
         fixedServiceIdList = new ArrayList<>();

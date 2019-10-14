@@ -30,13 +30,13 @@ public class MWSGAPopulation extends MBaseGA {
     public void evolve() {
         int currRound = 1;
         this.population.calcWSGAFitness();
-        while (currRound <= maxRound) {
+        while (currRound <= Configuration.WSGA_MAX_ROUND) {
             List<MChromosome> nextG = new ArrayList<>();
             while (nextG.size() < Configuration.POPULATION_SIZE) {
                 MChromosome parent1 = binaryTournamentSelection(this.population);
                 MChromosome parent2 = binaryTournamentSelection(this.population);
                 List<MChromosome> children = parent1.crossover(parent2);
-                if (MGAUtils.MUTATION_PROB_RAND.nextDouble() < this.mutationRate) {
+                if (MGAUtils.MUTATION_PROB_RAND.nextDouble() < Configuration.WSGA_MUTATION_RATE) {
                     children.forEach(c -> {
                         c.mutation();
                         c.afterBorn();
