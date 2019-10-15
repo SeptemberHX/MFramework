@@ -8,10 +8,7 @@ import com.septemberhx.server.base.model.MServerNode;
 import com.septemberhx.server.base.model.MService;
 import com.septemberhx.server.base.model.MServiceInstance;
 import com.septemberhx.server.base.model.MUser;
-import com.septemberhx.server.core.MServerNodeManager;
-import com.septemberhx.server.core.MServiceInstanceManager;
-import com.septemberhx.server.core.MServiceManager;
-import com.septemberhx.server.core.MUserManager;
+import com.septemberhx.server.core.*;
 
 import java.io.File;
 import java.io.FileReader;
@@ -23,6 +20,36 @@ import java.util.List;
  * @date 2019/9/27
  */
 public class MDataUtils {
+
+    private static String NODE_DATA_FILENAME = "node.json";
+    private static String CONNECTION_DATA_FILENAME = "connection.json";
+    private static String SERVICE_DATA_FILENAME = "service.json";
+    private static String USER_DATA_FILENAME = "user.json";
+
+    public static void loadDataFromDir(String dirPath) {
+        MServerNodeManager nodeManager = MDataUtils.loadNodeManager(
+                MDataUtils.joinPath(dirPath, NODE_DATA_FILENAME),
+                MDataUtils.joinPath(dirPath, CONNECTION_DATA_FILENAME)
+        );
+
+        MServiceManager serviceManager = MDataUtils.loadServiceManager(
+                MDataUtils.joinPath(dirPath, SERVICE_DATA_FILENAME)
+        );
+        serviceManager.verify();
+
+        MUserManager userManager = MDataUtils.loadUserManager(
+                MDataUtils.joinPath(dirPath, USER_DATA_FILENAME)
+        );
+        userManager.verify();
+
+        MSystemModel.getIns().setMSNManager(nodeManager);
+        MSystemModel.getIns().setServiceManager(serviceManager);
+        MSystemModel.getIns().setUserManager(userManager);
+    }
+
+    private static String joinPath(String dirPath, String fileName) {
+        return dirPath + "/" + fileName;
+    }
 
     public static MServiceManager loadServiceManager(String jsonFilePath) {
         File f = new File(jsonFilePath);

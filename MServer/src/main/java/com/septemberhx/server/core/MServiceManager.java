@@ -32,6 +32,12 @@ public class MServiceManager extends MObjectManager<MService> {
         return null;
     }
 
+    public void verify() {
+        for (MService service : this.getAllValues()) {
+            service.verify();
+        }
+    }
+
     public MServiceManager shallowClone() {
         MServiceManager cloneObject = new MServiceManager();
         Map<String, MService> shallowCloneObjMap = new HashMap<>(this.objectMap);

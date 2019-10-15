@@ -34,4 +34,20 @@ public class MUser extends MBaseObject {
                 ", id='" + id + '\'' +
                 '}';
     }
+
+    public void verify() {
+        for (MDemandChain chain : this.demandChainList) {
+            if (!chain.verify()) {
+                throw new RuntimeException("%s failed to verify demand chain list");
+            }
+
+            for (MUserDemand demand : chain.getDemandList()) {
+                if (!demand.getUserId().equals(this.id)) {
+                    throw new RuntimeException(
+                            String.format("%s|%s failed to be verified", this.id, demand.getId())
+                    );
+                }
+            }
+        }
+    }
 }

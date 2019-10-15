@@ -38,4 +38,10 @@ public class MUserManager extends MObjectManager<MUser> {
         }
         return resultList;
     }
+
+    public void verify() {
+        for (MUser user : this.getAllValues()) {
+            user.verify();
+        }
+    }
 }

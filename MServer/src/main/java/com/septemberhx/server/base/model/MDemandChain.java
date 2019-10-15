@@ -20,6 +20,15 @@ public class MDemandChain {
         this.demandMap = new HashMap<>();
     }
 
+    public boolean verify() {
+        for (String demandId : demandMap.keySet()) {
+            if (!demandMap.get(demandId).getId().equals(demandId)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public void addDemand(MUserDemand userDemand) {
         this.demandMap.put(userDemand.getId(), userDemand);
         this.demandIdList.add(userDemand.getId());

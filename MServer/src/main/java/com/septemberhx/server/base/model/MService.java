@@ -37,6 +37,24 @@ public class MService extends MBaseObject {
         this.artifactInfo = new MArchitectInfo();
     }
 
+    public void verify() {
+        for (String interfaceId : this.interfaceMap.keySet()) {
+            MServiceInterface serviceInterface = this.interfaceMap.get(interfaceId);
+
+            if (!serviceInterface.getServiceId().equals(this.id)) {
+                throw new RuntimeException(
+                        String.format("%s|%s failed to be verified", this.id, serviceInterface.getInterfaceId())
+                );
+            }
+
+            if (!serviceInterface.getInterfaceId().equals(interfaceId)) {
+                throw new RuntimeException(
+                        String.format("%s|%s failed to be verified", this.id, serviceInterface.getInterfaceId())
+                );
+            }
+        }
+    }
+
     public List<MServiceInterface> getInterfaceMetUserDemand(MUserDemand userDemand) {
         return this.interfaceMap.values().stream().filter(userDemand::isServiceInterfaceMet)
                 .collect(Collectors.toList());
