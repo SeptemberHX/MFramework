@@ -10,7 +10,7 @@ import lombok.Setter;
  * @date 2019/9/23
  *
  * This class describes the real-time state of the server node.
- * It will change over time.
+ * It will change over time and will be only changed by the monitors.
  * The id is the server node id.
  */
 @Getter

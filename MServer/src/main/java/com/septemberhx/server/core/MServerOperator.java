@@ -137,6 +137,48 @@ public class MServerOperator extends MObjectManager<MServerState> {
         this.generatedInterfaceList = this.serviceManager.getAllComInterfaces();
     }
 
+    public void printStatus() {
+        Map<String, List<MDemandState>> demandStateMap = new HashMap<>();
+        for (MDemandState demandState : this.demandStateManager.getAllValues()) {
+            if (!demandStateMap.containsKey(demandState.getInstanceId())) {
+                demandStateMap.put(demandState.getInstanceId(), new ArrayList<>());
+            }
+            demandStateMap.get(demandState.getInstanceId()).add(demandState);
+        }
+
+        System.out.println("=================== Instance Status ====================");
+        Map<String, List<MServiceInstance>> instanceMap = new HashMap<>();
+        for (MServiceInstance instance : this.instanceManager.getAllValues()) {
+            if (!instanceMap.containsKey(instance.getNodeId())) {
+                instanceMap.put(instance.getNodeId(), new ArrayList<>());
+            }
+            instanceMap.get(instance.getNodeId()).add(instance);
+        }
+
+        for (String nodeId : instanceMap.keySet()) {
+            System.out.println(">>>>>>>>>>>> Node: " + nodeId);
+            System.out.println(String.format("%s, left resource = %s", nodeId, this.nodeId2ResourceLeft.get(nodeId)));
+            System.out.println("|");
+            for (MServiceInstance instance : instanceMap.get(nodeId)) {
+                System.out.println(String.format("|--- %s, left cap = %d", instance.getId(), this.insId2LeftCap.get(instance.getId())));
+                System.out.println("   |");
+                for (MDemandState demandState : demandStateMap.get(instance.getId())) {
+                    System.out.println(String.format("   |--- %s", demandState.toString()));
+                }
+                System.out.println();
+            }
+        }
+
+        System.out.println("================== Job ===================");
+        for (MBaseJob baseJob : this.jobList) {
+            System.out.println(baseJob);
+        }
+    }
+
+    public List<MUserDemand> filterNotIn(List<MUserDemand> userDemands) {
+        return userDemands.stream().filter(d -> !this.demandStateManager.containsById(d.getId())).collect(Collectors.toList());
+    }
+
     public boolean ifNodeHasResForIns(String nodeId, String serviceId) {
         Optional<MService> serviceOptional = this.serviceManager.getById(serviceId);
         if (!serviceOptional.isPresent()) {
@@ -176,6 +218,7 @@ public class MServerOperator extends MObjectManager<MServerState> {
             this.nodeId2ResourceLeft.get(nodeId).assign(mService.getResource());
             this.insId2LeftCap.put(instance.getId(), mService.getMaxUserCap());
         });
+        this.addNewJob(new MDeployJob(nodeId, serviceId, instanceId));
         return instance;
     }
 
@@ -197,7 +240,7 @@ public class MServerOperator extends MObjectManager<MServerState> {
             this.insId2LeftCap.remove(instanceId);
         });
         this.instanceManager.delete(instanceId);
-
+        this.addNewJob(new MDeleteJob(instanceId));
         return userDemands;
     }
 
@@ -221,6 +264,8 @@ public class MServerOperator extends MObjectManager<MServerState> {
         for (MDemandState demandState : this.demandStateManager.getDemandStateByInstanceId(instanceId)) {
             demandState.setNodeId(targetNodeId);
         }
+
+        this.addNewJob(new MMoveJob(instanceId, targetNodeId));
         return true;
     }
 

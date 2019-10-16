@@ -6,6 +6,7 @@ import com.septemberhx.server.base.MPlannerResult;
 import com.septemberhx.server.base.model.*;
 import com.septemberhx.server.core.MServerOperator;
 import com.septemberhx.server.core.MSystemModel;
+import com.septemberhx.server.job.MBaseJob;
 import com.septemberhx.server.utils.MIDUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -55,10 +56,18 @@ public class MMinorAlgorithm implements MAlgorithmInterface {
             }
         }
 
+        // collect all user demands that have no status
+        for (MUser user : MSystemModel.getIns().getUserManager().getAllValues()) {
+            demandList.addAll(serverOperator.filterNotIn(user.getAllDemands()));
+        }
+
         // deal with all not good demands
         MDemandAssignHA.calc(demandList, serverOperator);
+        serverOperator.printStatus();
 
-        return null;
+        MPlannerResult plannerResult = new MPlannerResult();
+        plannerResult.addJobs(serverOperator.getJobList());
+        return plannerResult;
     }
 
     List<MUserDemand> replaceCompositionPart(List<MUserDemand> userDemands) {

@@ -40,4 +40,15 @@ public class MDemandState extends MBaseObject {
     public boolean isAssigned() {
         return this.instanceId != null && this.interfaceId != null && this.nodeId != null;
     }
+
+    @Override
+    public String toString() {
+        return "MDemandState{" +
+                "instanceId='" + instanceId + '\'' +
+                ", interfaceId='" + interfaceId + '\'' +
+                ", userId='" + userId + '\'' +
+                ", nodeId='" + nodeId + '\'' +
+                ", id='" + id + '\'' +
+                '}';
+    }
 }

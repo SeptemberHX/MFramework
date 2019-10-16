@@ -32,4 +32,13 @@ public class MSwitchJob extends MBaseJob {
             return 1.0;
         }
     }
+
+    @Override
+    public String toString() {
+        return "MSwitchJob{" +
+                "userDemandId='" + userDemandId + '\'' +
+                ", instanceId='" + instanceId + '\'' +
+                ", oldInstanceId='" + oldInstanceId + '\'' +
+                '}';
+    }
 }

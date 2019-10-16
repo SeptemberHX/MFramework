@@ -4,6 +4,7 @@ import com.septemberhx.common.base.MBaseObject;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -24,6 +25,15 @@ public class MUser extends MBaseObject {
             }
         }
         return null;
+    }
+
+    public List<MUserDemand> getAllDemands() {
+        List<MUserDemand> r = new ArrayList<>();
+        for (MDemandChain demandChain : this.demandChainList) {
+            List<MUserDemand> demandList = demandChain.getDemandList();
+            r.addAll(demandList);
+        }
+        return r;
     }
 
     @Override

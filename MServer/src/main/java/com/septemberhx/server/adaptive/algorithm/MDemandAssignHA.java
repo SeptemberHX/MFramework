@@ -43,7 +43,7 @@ public class MDemandAssignHA {
 
             // Step 2: try to satisfy each demand not meet
             Optional<MDemandState> demandStateOp = MSystemModel.getIns().getDemandStateManager().getById(userDemand.getId());
-            MDemandState demandState = demandStateOp.get();
+            MDemandState demandState = demandStateOp.orElse(null);
 
             // Step 2.1: try to find an exist instance
             boolean isSuccess = false;

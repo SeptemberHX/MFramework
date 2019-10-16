@@ -37,27 +37,24 @@ public class MResource {
 
     public boolean isEnough(MResource mResource) {
         return this.cpu >= mResource.cpu
-                && this.ram >= mResource.ram
-                && this.bandwidth >= mResource.bandwidth;
+                && this.ram >= mResource.ram;
     }
 
     public void assign(MResource mResource) {
         this.cpu = this.cpu - mResource.cpu;
         this.ram = this.ram - mResource.ram;
-        this.bandwidth = this.bandwidth - mResource.bandwidth;
     }
 
     public void free(MResource mResource) {
         this.cpu = this.cpu + mResource.cpu;
         this.ram = this.ram + mResource.ram;
-        this.bandwidth = this.bandwidth + this.bandwidth;
     }
 
     public MResource sub(MResource mResource) {
         return new MResource(
             this.cpu - mResource.cpu,
             this.ram - mResource.ram,
-            this.bandwidth - mResource.bandwidth
+            this.bandwidth
         );
     }
 
@@ -65,7 +62,7 @@ public class MResource {
         return new MResource(
             this.cpu + mResource.cpu,
             this.ram + mResource.ram,
-            this.bandwidth + mResource.bandwidth
+            this.bandwidth
         );
     }
 

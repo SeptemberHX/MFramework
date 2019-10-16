@@ -30,6 +30,7 @@ public class MBaseJob extends MBaseObject {
     public static Integer CBUILD = 1;
     public static Integer DEPLOY = 21;
     public static Integer DELETE = 21;
+    public static Integer MOVE = 21;
     public static Integer NOTIFY = 41;
 
     protected List<MBaseJob> subJobs = new ArrayList<>();
