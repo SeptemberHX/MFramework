@@ -32,11 +32,9 @@ public class MMOEADPopulation extends MBaseGA {
                 MChromosome father2 = this.population.getPopulace().get(B[j][MGAUtils.CROSSOVER_PROB_RAND.nextInt(Configuration.MOEAD_NEIGHBOR_SIZE)]);
                 List<MChromosome> children = father1.crossover(father2);
                 if (MGAUtils.MUTATION_PROB_RAND.nextDouble() < Configuration.MOEAD_MUTATION_RATE) {
-                    children.forEach(c -> {
-                        c.mutation();
-                        c.afterBorn();
-                    });
+                    children.forEach(MChromosome::mutation);
                 }
+                children.forEach(MChromosome::afterBorn);
 
                 MChromosome bestChild;
                 if (MGAUtils.dominates(children.get(0), children.get(1)) == MGAUtils.DOMINANT) {

@@ -8,20 +8,22 @@ import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 /**
  * @author SeptemberHX
  * @version 0.1
- * @date 2019/10/16
+ * @date 2019/10/17
  */
-public class MMinorTest {
+class MMajorTest {
 
     @Test
-    void calc() {
+    void wsga() {
         MAnalyser analyser = new MAnalyser();
         MAnalyserResult analyserResult = analyser.analyse(new ArrayList<>(), new ArrayList<>());
 
-        MMinorAlgorithm minorAlgorithm = new MMinorAlgorithm();
-        minorAlgorithm.calc(analyserResult);
+        MMajorAlgorithm mMajorAlgorithm = new MMajorAlgorithm(MMajorAlgorithm.GA_TYPE.WSGA);
+        mMajorAlgorithm.calc(analyserResult);
     }
 
     @BeforeEach

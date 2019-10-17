@@ -8,6 +8,10 @@ import java.util.List;
  * @author SeptemberHX
  * @version 0.1
  * @date 2019/10/4
+ *
+ * We do not try keep the mapping between user demand and instance due to the huge amount of user demand.
+ * It will decrease the performance of the evolution process.
+ * The demand mapping will be calculated after we calculate how many instances on each server nodes
  */
 public class MGene {
 

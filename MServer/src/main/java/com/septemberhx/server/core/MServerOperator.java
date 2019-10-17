@@ -196,11 +196,8 @@ public class MServerOperator extends MObjectManager<MServerState> {
     public MDemandState assignDemandToIns(MUserDemand userDemand, MServiceInstance instance, MDemandState oldState) {
         String oldInstanceId = null;
         if (oldState != null) {
-            if (this.insId2LeftCap.containsKey(oldState.getInstanceId())) {
-                this.insId2LeftCap.put(oldState.getInstanceId(), this.insId2LeftCap.get(oldState.getInstanceId()) + 1);
-                this.demandStateManager.deleteById(oldState.getId());
-                oldInstanceId = oldState.getInstanceId();
-            }
+            this.removeDemandState(oldState);
+            oldInstanceId = oldState.getInstanceId();
         }
         this.insId2LeftCap.put(instance.getId(), this.insId2LeftCap.getOrDefault(instance.getId(), 0) - 1);
         this.jobList.add(new MSwitchJob(userDemand.getId(), instance.getId(), oldInstanceId));
@@ -208,6 +205,13 @@ public class MServerOperator extends MObjectManager<MServerState> {
         MDemandState newDemandState = this.assignDemandToInterfaceOnSpecificInstance(userDemand, instance);
         this.demandStateManager.add(newDemandState);
         return newDemandState;
+    }
+
+    public void removeDemandState(MDemandState oldState) {
+        if (this.insId2LeftCap.containsKey(oldState.getInstanceId())) {
+            this.insId2LeftCap.put(oldState.getInstanceId(), this.insId2LeftCap.get(oldState.getInstanceId()) + 1);
+            this.demandStateManager.deleteById(oldState.getId());
+        }
     }
 
     public MServiceInstance addNewInstance(String serviceId, String nodeId, String instanceId) {
@@ -608,5 +612,15 @@ public class MServerOperator extends MObjectManager<MServerState> {
         // record the job list
         this.jobList = newJobList;
         return this.jobList.stream().mapToDouble(MBaseJob::cost).sum();
+    }
+
+    public Map<String, MDemandState> getDemandStateByInstanceIds(Set<String> instanceIdList) {
+        Map<String, MDemandState> r = new HashMap<>();
+        for (MDemandState demandState : this.demandStateManager.getAllValues()) {
+            if (instanceIdList.contains(demandState.getInstanceId())) {
+                r.put(demandState.getId(), demandState);
+            }
+        }
+        return r;
     }
 }

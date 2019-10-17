@@ -1,5 +1,9 @@
 package com.septemberhx.server.adaptive.algorithm;
 
+import com.septemberhx.server.adaptive.algorithm.ga.MBaseGA;
+import com.septemberhx.server.adaptive.algorithm.ga.MMOEADPopulation;
+import com.septemberhx.server.adaptive.algorithm.ga.MNSGAIIPopulation;
+import com.septemberhx.server.adaptive.algorithm.ga.MWSGAPopulation;
 import com.septemberhx.server.base.MAnalyserResult;
 import com.septemberhx.server.base.MPlannerResult;
 import com.septemberhx.server.core.MServerOperator;
@@ -19,7 +23,22 @@ import org.apache.logging.log4j.Logger;
  */
 public class MMajorAlgorithm implements MAlgorithmInterface {
 
+    public enum GA_TYPE {
+        WSGA,
+        NSGA_II,
+        MODE_A
+    }
+
     private static Logger logger = LogManager.getLogger(MMajorAlgorithm.class);
+    private GA_TYPE gaType = GA_TYPE.WSGA;
+
+    public MMajorAlgorithm(GA_TYPE type) {
+        this.gaType = type;
+    }
+
+    public MMajorAlgorithm() {
+        this.gaType = GA_TYPE.WSGA;
+    }
 
     @Override
     public MPlannerResult calc(MAnalyserResult data) {
@@ -39,8 +58,21 @@ public class MMajorAlgorithm implements MAlgorithmInterface {
         //    Part 3. Compose results of Part 1 and Part 2 together as one solution
         //
         // Only the instance placement will be directly changed by mutation/crossover
+        MBaseGA ga = this.getGAObject(serverOperator);
+        ga.evolve();
 
-        
         return null;
+    }
+
+    private MBaseGA getGAObject(MServerOperator operator) {
+        switch (this.gaType) {
+            case WSGA:
+                return new MWSGAPopulation(operator);
+            case MODE_A:
+                return new MMOEADPopulation(operator);
+            case NSGA_II:
+                return new MNSGAIIPopulation(operator);
+        }
+        return new MWSGAPopulation(operator);
     }
 }

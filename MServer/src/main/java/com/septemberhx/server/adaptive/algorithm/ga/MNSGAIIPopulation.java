@@ -36,11 +36,9 @@ public class MNSGAIIPopulation extends MBaseGA {
                 MChromosome parent2 = binaryTournamentSelection(this.population);
                 List<MChromosome> children = parent1.crossover(parent2);
                 if (MGAUtils.MUTATION_PROB_RAND.nextDouble() < Configuration.NSGAII_MUTATION_RATE) {
-                    children.forEach(c -> {
-                        c.mutation();
-                        c.afterBorn();
-                    });
+                    children.forEach(MChromosome::mutation);
                 }
+                children.forEach(MChromosome::afterBorn);
                 nextG.addAll(children);
             }
 

@@ -7,6 +7,8 @@ import com.septemberhx.server.utils.MIDUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,6 +28,18 @@ public class MDemandAssignHA {
     private static Logger logger = LogManager.getLogger(MDemandAssignHA.class);
 
     public static void calc(List<MUserDemand> userDemands, MServerOperator snapshotOperator) {
+        // sort the user demands by function id and sla
+        Collections.sort(userDemands, new Comparator<MUserDemand>() {
+            @Override
+            public int compare(MUserDemand o1, MUserDemand o2) {
+                if (o1.getFunctionId().equals(o2.getFunctionId())) {
+                    return -Integer.compare(o1.getSlaLevel(), o2.getSlaLevel());
+                } else {
+                    return o1.getFunctionId().compareTo(o2.getFunctionId());
+                }
+            }
+        });
+
         // deal with all not good demands
         for (MUserDemand userDemand : userDemands) {
             Optional<MUser> mUserOptional = MSystemModel.getIns().getUserManager().getById(userDemand.getUserId());

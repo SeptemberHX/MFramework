@@ -1,8 +1,6 @@
 package com.septemberhx.server.adaptive.algorithm.ga;
 
 import com.septemberhx.server.core.MServerOperator;
-import com.septemberhx.server.core.MSystemModel;
-import org.javatuples.Pair;
 
 import java.util.*;
 
@@ -23,7 +21,7 @@ public class MWSGAPopulation extends MBaseGA {
     }
 
     public void init(int populationSize, int maxRound) {
-        // todo: init the popolation
+
     }
 
     @Override
@@ -37,11 +35,9 @@ public class MWSGAPopulation extends MBaseGA {
                 MChromosome parent2 = binaryTournamentSelection(this.population);
                 List<MChromosome> children = parent1.crossover(parent2);
                 if (MGAUtils.MUTATION_PROB_RAND.nextDouble() < Configuration.WSGA_MUTATION_RATE) {
-                    children.forEach(c -> {
-                        c.mutation();
-                        c.afterBorn();
-                    });
+                    children.forEach(MChromosome::mutation);
                 }
+                children.forEach(MChromosome::afterBorn);
                 nextG.addAll(children);
             }
 
