@@ -1,6 +1,7 @@
 package com.septemberhx.server.adaptive.algorithm.ga;
 
 import com.septemberhx.server.core.MServerOperator;
+import com.septemberhx.server.core.MSystemModel;
 
 import java.util.*;
 
@@ -20,15 +21,27 @@ public class MWSGAPopulation extends MBaseGA {
         super(snapshotOperator);
     }
 
-    public void init(int populationSize, int maxRound) {
-
+    public void init() {
+        this.population = new MPopulation();
+        for (int i = 0; i < Configuration.POPULATION_SIZE; ++i) {
+            this.population.populace.add(MChromosome.randomInit(
+                    MBaseGA.fixedNodeIdList.size(),
+                    MBaseGA.fixedServiceIdList.size(),
+                    MSystemModel.getIns().getOperator(),
+                    10
+            ));
+        }
     }
 
     @Override
     public void evolve() {
+        this.init();
+
         int currRound = 1;
         this.population.calcWSGAFitness();
         while (currRound <= Configuration.WSGA_MAX_ROUND) {
+            logger.info("Round " + currRound);
+
             List<MChromosome> nextG = new ArrayList<>();
             while (nextG.size() < Configuration.POPULATION_SIZE) {
                 MChromosome parent1 = binaryTournamentSelection(this.population);
@@ -45,7 +58,12 @@ public class MWSGAPopulation extends MBaseGA {
             nextG.sort((o1, o2) -> -Double.compare(o1.getWSGAFitness(), o2.getWSGAFitness()));
             nextG = nextG.subList(0, Configuration.POPULATION_SIZE);
             this.population.setPopulace(nextG);
+            ++currRound;
+
+            logger.info("Best: " + this.population.getPopulace().get(0).getWSGAFitness());
         }
+
+        this.population.getPopulace().get(0).getCurrOperator().printStatus();
     }
 
     private static MChromosome binaryTournamentSelection(MPopulation population) {

@@ -52,6 +52,7 @@ public class MNSGAIIPopulation extends MBaseGA {
             }
             order(nextG);
             this.population.setPopulace(nextG.subList(0, Configuration.POPULATION_SIZE));
+            ++currRound;
         }
     }
 

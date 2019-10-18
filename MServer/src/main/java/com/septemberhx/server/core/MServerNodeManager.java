@@ -22,7 +22,7 @@ public class MServerNodeManager extends MObjectManager<MServerNode> {
     private MutableValueGraph<String, MNodeConnectionInfo> serverNodeGraph;
 
     public MServerNodeManager() {
-        this.serverNodeGraph = ValueGraphBuilder.directed().build();
+        this.serverNodeGraph = ValueGraphBuilder.directed().allowsSelfLoops(true).build();
     }
 
     public void addConnectionInfo(MNodeConnectionInfo info, String startNodeId, String endNodeId) {

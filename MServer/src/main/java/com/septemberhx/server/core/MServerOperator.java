@@ -5,6 +5,7 @@ import com.septemberhx.common.base.MClassFunctionPair;
 import com.septemberhx.common.base.MObjectManager;
 import com.septemberhx.common.bean.MCompositionRequest;
 import com.septemberhx.server.adaptive.MAdaptiveSystem;
+import com.septemberhx.server.adaptive.algorithm.ga.MBaseGA;
 import com.septemberhx.server.base.MNodeConnectionInfo;
 import com.septemberhx.server.base.model.*;
 import com.septemberhx.server.job.*;
@@ -29,6 +30,7 @@ public class MServerOperator extends MObjectManager<MServerState> {
     private Map<String, Set<String>> funcId2InsIdSet;
 
     // clone objects
+    @Getter
     private MDemandStateManager demandStateManager;
     private MServiceInstanceManager instanceManager;
 
@@ -45,6 +47,25 @@ public class MServerOperator extends MObjectManager<MServerState> {
         this.nodeId2ResourceLeft = new HashMap<>();
         this.funcId2InsIdSet = new HashMap<>();
         this.jobList = new ArrayList<>();
+    }
+
+    public static MServerOperator blankObject() {
+        MServerOperator serverOperator = new MServerOperator();
+        serverOperator.demandStateManager = new MDemandStateManager();
+        serverOperator.instanceManager = new MServiceInstanceManager();
+        serverOperator.serviceManager = MSystemModel.getIns().getServiceManager().shallowClone();
+
+        serverOperator.jobList.clear();
+        serverOperator.insId2LeftCap.clear();
+
+        serverOperator.nodeId2ResourceLeft.clear();
+        // get all resources for each node
+        for (MServerNode node : MSystemModel.getIns().getMSNManager().getAllValues()) {
+            serverOperator.nodeId2ResourceLeft.put(node.getId(), node.getResource());
+        }
+
+        serverOperator.generatedInterfaceList = serverOperator.serviceManager.getAllComInterfaces();
+        return serverOperator;
     }
 
     public MServerOperator shallowClone() {
@@ -73,6 +94,12 @@ public class MServerOperator extends MObjectManager<MServerState> {
         operator.serviceManager = this.serviceManager.shallowClone();
         operator.jobList = new ArrayList<>(this.jobList);
         operator.generatedInterfaceList = new ArrayList<>(this.generatedInterfaceList);
+
+        this.nodeId2ResourceLeft.clear();
+        // get all resources for each node
+        for (MServerNode node : MSystemModel.getIns().getMSNManager().getAllValues()) {
+            this.nodeId2ResourceLeft.put(node.getId(), node.getResource());
+        }
         return operator;
     }
 
@@ -162,7 +189,7 @@ public class MServerOperator extends MObjectManager<MServerState> {
             for (MServiceInstance instance : instanceMap.get(nodeId)) {
                 System.out.println(String.format("|--- %s, left cap = %d", instance.getId(), this.insId2LeftCap.get(instance.getId())));
                 System.out.println("   |");
-                for (MDemandState demandState : demandStateMap.get(instance.getId())) {
+                for (MDemandState demandState : demandStateMap.getOrDefault(instance.getId(), new ArrayList<>())) {
                     System.out.println(String.format("   |--- %s", demandState.toString()));
                 }
                 System.out.println();
@@ -208,7 +235,7 @@ public class MServerOperator extends MObjectManager<MServerState> {
     }
 
     public void removeDemandState(MDemandState oldState) {
-        if (this.insId2LeftCap.containsKey(oldState.getInstanceId())) {
+        if (this.demandStateManager.containsById(oldState.getId())) {
             this.insId2LeftCap.put(oldState.getInstanceId(), this.insId2LeftCap.get(oldState.getInstanceId()) + 1);
             this.demandStateManager.deleteById(oldState.getId());
         }
@@ -234,17 +261,22 @@ public class MServerOperator extends MObjectManager<MServerState> {
                     MSystemModel.getIns()
                             .getUserManager()
                             .getUserDemandByUserAndDemandId(demandState.getUserId(), demandState.getId()));
+            this.removeDemandState(demandState);
         }
 
         // remove instance data
         this.insId2LeftCap.remove(instanceId);
-        Optional<MService> serviceOptional = this.serviceManager.getById(instanceId);
+        MServiceInstance instance = this.instanceManager.getById(instanceId).get();
+        Optional<MService> serviceOptional = this.serviceManager.getById(instance.getServiceId());
         serviceOptional.ifPresent(mService -> {
-            this.nodeId2ResourceLeft.get(this.instanceManager.getById(instanceId).get().getNodeId()).free(mService.getResource());
+            String nodeId = this.instanceManager.getById(instanceId).get().getNodeId();
+            logger.info("Before resource release " + this.nodeId2ResourceLeft.get(nodeId));
+            this.nodeId2ResourceLeft.get(nodeId).free(mService.getResource());
+            logger.info("After resource release " + this.nodeId2ResourceLeft.get(nodeId));
             this.insId2LeftCap.remove(instanceId);
         });
         this.instanceManager.delete(instanceId);
-        this.addNewJob(new MDeleteJob(instanceId));
+        this.addNewJob(new MDeleteJob(instanceId, instance.getServiceId(), instance.getNodeId()));
         return userDemands;
     }
 
@@ -532,12 +564,11 @@ public class MServerOperator extends MObjectManager<MServerState> {
             for (MDemandChain demandChain : user.getDemandChainList()) {
                 double tDelay = 0;
                 double tTrans = 0;
-                String prevNodeId = nodeId;
                 for (MUserDemand demand : demandChain.getDemandList()) {
                     Optional<MDemandState> demandStateOptional = this.demandStateManager.getById(demand.getId());
                     if (demandStateOptional.isPresent()) {
                         MNodeConnectionInfo info = MSystemModel.getIns().getMSNManager()
-                                .getConnectionInfo(prevNodeId, demandStateOptional.get().getNodeId());
+                                .getConnectionInfo(nodeId, demandStateOptional.get().getNodeId());
 
                         MServiceInterface serviceInterface = this.serviceManager.getInterfaceById(demandStateOptional.get().getInterfaceId());
                         tDelay = info.getDelay();
@@ -546,13 +577,16 @@ public class MServerOperator extends MObjectManager<MServerState> {
                         tDelay = MAdaptiveSystem.UNAVAILABLE_TOLERANCE;
                         tTrans = MAdaptiveSystem.UNAVAILABLE_TRANSFORM_TIME;
                     }
-                    prevNodeId = demandStateOptional.get().getNodeId();
                     allScore += MAdaptiveSystem.ALPHA / (1 + tTrans) + (1 - MAdaptiveSystem.ALPHA) / (1 + tDelay);
                 }
             }
             chainCount += user.getDemandChainList().size();
         }
         return allScore / chainCount;
+    }
+
+    public double calcEvolutionCost() {
+        return this.jobList.stream().mapToDouble(MBaseJob::cost).sum();
     }
 
     public double calcEvolutionCost(MServerOperator rawOperator) {
@@ -584,7 +618,7 @@ public class MServerOperator extends MObjectManager<MServerState> {
             }
             for (String oldId : oldInstanceIdSet) {
                 if (!currInstanceIdSet.contains(oldId)) {
-                    newJobList.add(new MDeleteJob(oldId));
+                    newJobList.add(new MDeleteJob(oldId, null, null));
                 }
             }
         }
@@ -622,5 +656,114 @@ public class MServerOperator extends MObjectManager<MServerState> {
             }
         }
         return r;
+    }
+
+    /**
+     * Adjust the job list, and remove useless jobs.
+     * For example: For an ADD job and an REMOVE job of the same instance, we need to delete the ADD job
+     */
+    public void adjustJobList() {
+        Set<String> removeJobIdList = new HashSet<>();
+        Map<String, List<MBaseJob>> objectId2JobList = new HashMap<>();
+        Iterator<MBaseJob> jobIterator = this.jobList.iterator();
+        while (jobIterator.hasNext()) {
+            MBaseJob baseJob = jobIterator.next();
+            String objectId = null;
+            switch (baseJob.getType()) {
+                case DEPLOY:
+                    MDeployJob deployJob = (MDeployJob) baseJob;
+                    objectId = deployJob.getInstanceId();
+                    break;
+                case DELETE:
+                    MDeleteJob deleteJob = (MDeleteJob) baseJob;
+                    objectId = deleteJob.getInstanceId();
+                    break;
+                case MOVE:
+                    MMoveJob moveJob = (MMoveJob) baseJob;
+                    objectId = moveJob.getInstanceId();
+                    break;
+                case SWITCH:
+                    MSwitchJob switchJob = (MSwitchJob) baseJob;
+                    objectId = switchJob.getUserDemandId();
+                    break;
+                default:
+                    break;
+            }
+
+            if (objectId != null) {
+                if (!objectId2JobList.containsKey(objectId)) {
+                    objectId2JobList.put(objectId, new ArrayList<>());
+                }
+                objectId2JobList.get(objectId).add(baseJob);
+            }
+        }
+
+        for (String objectId : objectId2JobList.keySet()) {
+            if (objectId2JobList.get(objectId).size() <= 1) {
+                continue;
+            }
+
+            List<MBaseJob> currJobList = objectId2JobList.get(objectId);
+            MBaseJob lastJob = currJobList.get(currJobList.size() - 1);
+            switch (lastJob.getType()) {
+                case DEPLOY:
+                    for (int i = 0; i < currJobList.size() - 1; ++i) {
+                        removeJobIdList.add(currJobList.get(i).getId());
+                    }
+                    if (!this.instanceManager.containsById(((MDeployJob) lastJob).getInstanceId())) {
+                        removeJobIdList.add(lastJob.getId());
+                    }
+                    break;
+                case SWITCH:
+                    for (int i = 0; i < currJobList.size() - 1; ++i) {
+                        removeJobIdList.add(currJobList.get(i).getId());
+                    }
+                    break;
+                case DELETE:
+                    int i;
+                    for (i = currJobList.size() - 1; i >= 0; --i) {
+                        if (currJobList.get(i).getType() == MJobType.DEPLOY) {
+                            break;
+                        }
+                    }
+                    if (i >= 0) {
+                        for (; i < currJobList.size(); ++i) {
+                            removeJobIdList.add(currJobList.get(i).getId());
+                        }
+                    }
+                    break;
+                case MOVE:
+                    MDeployJob tmpDeployJob = null;
+                    for (int j = 0; j < currJobList.size(); ++j) {
+                        if (currJobList.get(j).getType() == MJobType.DEPLOY) {
+                            tmpDeployJob = (MDeployJob) currJobList.get(j);
+                            break;
+                        }
+                    }
+                    if (tmpDeployJob != null) {
+                        currJobList.forEach(j -> removeJobIdList.add(j.getId()));
+                        tmpDeployJob.setNodeId(((MMoveJob) lastJob).getTargetNodeId());
+                        this.jobList.add(tmpDeployJob);
+                    } else {
+                        for (int j = 0; j < currJobList.size() - 1; ++j) {
+                            removeJobIdList.add(currJobList.get(j).getId());
+                        }
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        this.jobList.removeIf(currJob -> removeJobIdList.contains(currJob.getId()));
+    }
+
+    public List<MServiceInstance> getAllInstances() {
+        return this.instanceManager.getAllValues();
+    }
+
+    public int getInstanceUserNumber(String instanceId) {
+        Optional<MService> serviceOptional = this.serviceManager.getById(this.getInstanceById(instanceId).getServiceId());
+        return serviceOptional.get().getMaxUserCap() - this.insId2LeftCap.get(instanceId);
     }
 }

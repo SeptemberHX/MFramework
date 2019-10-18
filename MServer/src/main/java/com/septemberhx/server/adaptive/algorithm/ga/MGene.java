@@ -56,4 +56,13 @@ public class MGene {
         this.geneIntArr[serviceIndex] -= 1;
         return true;
     }
+
+    public String toString() {
+        StringBuilder s = new StringBuilder();
+        for (Integer i : this.geneIntArr) {
+            s.append(i);
+            s.append(" ");
+        }
+        return s.toString();
+    }
 }

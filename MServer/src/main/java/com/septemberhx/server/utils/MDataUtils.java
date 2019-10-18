@@ -108,6 +108,14 @@ public class MDataUtils {
             List<MConnectionJson> nodeList = gson.fromJson(fileReader, new TypeToken<List<MConnectionJson>>() {}.getType());
             for (MConnectionJson info : nodeList) {
                 nodeManager.addConnectionInfo(info.getConnection(), info.getSuccessor(), info.getPredecessor());
+                nodeManager.addConnectionInfo(info.getConnection(), info.getPredecessor(), info.getSuccessor());
+            }
+
+            MNodeConnectionInfo selfConnection = new MNodeConnectionInfo();
+            selfConnection.setBandwidth(Long.MAX_VALUE);
+            selfConnection.setDelay(0);
+            for (MServerNode node : nodeManager.getAllValues()) {
+                nodeManager.addConnectionInfo(selfConnection, node.getId(), node.getId());
             }
         } catch (Exception e) {
             e.printStackTrace();

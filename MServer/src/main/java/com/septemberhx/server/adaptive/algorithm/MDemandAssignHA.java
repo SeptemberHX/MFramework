@@ -3,14 +3,12 @@ package com.septemberhx.server.adaptive.algorithm;
 import com.septemberhx.server.base.model.*;
 import com.septemberhx.server.core.MServerOperator;
 import com.septemberhx.server.core.MSystemModel;
+import com.septemberhx.server.job.MBaseJob;
 import com.septemberhx.server.utils.MIDUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * @author SeptemberHX
@@ -27,7 +25,9 @@ public class MDemandAssignHA {
 
     private static Logger logger = LogManager.getLogger(MDemandAssignHA.class);
 
-    public static void calc(List<MUserDemand> userDemands, MServerOperator snapshotOperator) {
+    public static List<MBaseJob> calc(List<MUserDemand> userDemands, MServerOperator snapshotOperator) {
+        int rawJobListSize = snapshotOperator.getJobList().size();
+
         // sort the user demands by function id and sla
         Collections.sort(userDemands, new Comparator<MUserDemand>() {
             @Override
@@ -97,5 +97,7 @@ public class MDemandAssignHA {
                 throw new RuntimeException("Demand cannot be satisfied! : " + userDemand.toString());
             }
         }
+
+        return snapshotOperator.getJobList().subList(rawJobListSize, snapshotOperator.getJobList().size());
     }
 }

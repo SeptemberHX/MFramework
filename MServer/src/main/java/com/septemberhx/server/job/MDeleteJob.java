@@ -10,11 +10,15 @@ import lombok.Getter;
 @Getter
 public class MDeleteJob extends MBaseJob {
     private String instanceId;
+    private String serviceId;
+    private String nodeId;
 
-    public MDeleteJob(String instanceId) {
+    public MDeleteJob(String instanceId, String serviceId, String nodeId) {
         this.instanceId = instanceId;
         this.type = MJobType.DELETE;
         this.priority = DELETE;
+        this.serviceId = serviceId;
+        this.nodeId = nodeId;
     }
 
     @Override

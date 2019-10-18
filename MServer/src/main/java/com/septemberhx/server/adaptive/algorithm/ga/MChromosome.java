@@ -4,14 +4,14 @@ import com.septemberhx.server.adaptive.algorithm.MDemandAssignHA;
 import com.septemberhx.server.base.model.*;
 import com.septemberhx.server.core.MServerOperator;
 import com.septemberhx.server.core.MSystemModel;
-import com.septemberhx.server.job.MBaseJob;
-import com.septemberhx.server.job.MDeployJob;
-import com.septemberhx.server.job.MJobType;
+import com.septemberhx.server.job.*;
+import com.septemberhx.server.utils.MIDUtils;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * @author SeptemberHX
@@ -20,12 +20,17 @@ import java.util.stream.Collectors;
  */
 public class MChromosome {
 
+    private static Logger logger = LogManager.getLogger(MChromosome.class);
+
     private MGene[] genes;
     private int geneLength;
     private MServerOperator rawOperator;
+
+    @Getter
     private MServerOperator currOperator;
     private boolean ifDemandsAssigned = false;
     private List<MUserDemand> unSolvedDemandList = new ArrayList<>();
+    private Random initRandom = new Random(1234567890);
 
     private double fitness = -1;
     private double cost = -1;
@@ -47,14 +52,74 @@ public class MChromosome {
     @Setter
     private int rank;
 
-    public MChromosome(int nodeSize, int serviceSize, MServerOperator rawOperator) {
+    public static MChromosome randomInit(int nodeSize, int serviceSize, MServerOperator rawOperator, int maxInstanceNum) {
+        MChromosome r = new MChromosome(nodeSize, serviceSize, rawOperator);
+
+        // random init genes
+        for (int n = 0; n < r.genes.length; ++n) {
+            String nodeId = MBaseGA.fixedNodeIdList.get(n);
+            Optional<MServerNode> nodeOpt = MSystemModel.getIns().getMSNManager().getById(nodeId);
+
+            // the cloud server is not in the random init list;
+            if (nodeOpt.isPresent() && nodeOpt.get().getNodeType() == ServerNodeType.CLOUD) continue;
+
+            int iCount = maxInstanceNum;
+            while (iCount-- > 0) {
+                int sIndex = r.initRandom.nextInt(r.geneLength);
+                String serviceId = MBaseGA.fixedServiceIdList.get(sIndex);
+
+                if (r.currOperator.ifNodeHasResForIns(nodeId, serviceId)) {
+                    r.currOperator.addNewInstance(serviceId, nodeId, MIDUtils.generateInstanceId(
+                            nodeId, serviceId, r.currOperator.getInstanceIdListOnNodeOfService(nodeId, serviceId)
+                    ));
+                    r.genes[n].addInstance(sIndex);
+                } else {
+                    break;
+                }
+            }
+        }
+
+        r.unSolvedDemandList = MSystemModel.getIns().getUserManager().getAllUserDemands();
+        r.assignDemands();
+
+        if (!r.verify()) {
+            throw new RuntimeException("Illegal random init result");
+        }
+
+        return r;
+    }
+
+    public boolean verify() {
+        for (int n = 0; n < this.genes.length; ++n) {
+            String nodeId = MBaseGA.fixedNodeIdList.get(n);
+            for (int s = 0; s < this.geneLength; ++s) {
+                String serviceId = MBaseGA.fixedServiceIdList.get(s);
+
+                if (this.genes[n].getGeneIntArr()[s]
+                        != this.currOperator.getInstanceIdListOnNodeOfService(nodeId, serviceId).size()) {
+                    logger.error("Genes is not consistent with the solution");
+                    return false;
+                }
+            }
+        }
+
+        if (MSystemModel.getIns().getUserManager().getAllUserDemands().size()
+                != this.currOperator.getDemandStateManager().getAllValues().size()) {
+            return false;
+        }
+
+        return true;
+    }
+
+    private MChromosome(int nodeSize, int serviceSize, MServerOperator rawOperator) {
         this.genes = new MGene[nodeSize];
         this.geneLength = serviceSize;
         for (int i = 0; i < nodeSize; ++i) {
             this.genes[i] = new MGene(serviceSize);
         }
         this.rawOperator = rawOperator;
-        this.currOperator = rawOperator.shallowClone();
+        this.currOperator = MServerOperator.blankObject();
+        this.reset();
     }
 
     public MChromosome(MGene[] genes, int geneLength, MServerOperator rawOperator) {
@@ -62,6 +127,7 @@ public class MChromosome {
         this.geneLength = geneLength;
         this.rawOperator = rawOperator;
         this.currOperator = rawOperator.shallowClone();
+        this.reset();
     }
 
     public List<MChromosome> crossover(MChromosome other) {
@@ -81,16 +147,40 @@ public class MChromosome {
             childGene2[i] = childGenes.get(1);
         }
 
+        logger.debug("Crossover: " + startIndex + "-" + endIndex);
+        logger.debug("p1");
+        this.printGenes();
+        logger.debug("p2");
+        other.printGenes();
+
+        logger.debug("c1-raw");
+        for (MGene gene : childGene1) {
+            System.out.println(gene.toString());
+        }
+
+        logger.debug("c2-raw");
+        for (MGene gene : childGene2) {
+            System.out.println(gene.toString());
+        }
+
+
         // for the crossover on each node, the demand-instance mapping should be considered carefully
         // The exist mapping should be kept if possible, or mark as need-to-solved
         List<MChromosome> resultList = new ArrayList<>();
         MChromosome child1 = new MChromosome(childGene1, this.geneLength, this.rawOperator);
         child1.currOperator = this.currOperator.shallowClone();
-        child1.initGenes(this, other, startIndex, endIndex);
+        child1.initCrossoverGenes(this, other, startIndex, endIndex);
 
         MChromosome child2 = new MChromosome(childGene2, this.geneLength, this.rawOperator);
         child2.currOperator = other.currOperator.shallowClone();
-        child2.initGenes(other, this, startIndex, endIndex);
+        child2.initCrossoverGenes(other, this, startIndex, endIndex);
+
+        logger.debug("c1");
+        child1.printGenes();
+
+        logger.debug("c2");
+        child2.printGenes();
+
         resultList.add(child1);
         resultList.add(child2);
         return resultList;
@@ -98,6 +188,7 @@ public class MChromosome {
 
     public void mutation() {
         double mutationType = MGAUtils.MUTATION_SELECT_RAND.nextDouble();
+        logger.debug("Mutation rate: " + mutationType);
         if (mutationType < 0.33) {              // add a new instance
             this.addOneInstance();
         } else if (mutationType < 0.66) {       // delete an exist instance
@@ -107,76 +198,133 @@ public class MChromosome {
         }
     }
 
-    private void deleteOneInstance() {
-        int nodeIndex = MGAUtils.MUTATION_SELECT_RAND.nextInt(this.genes.length);
-        List<Integer> indicsWithInstance = new ArrayList<>();
-        for (int i = 0; i < this.geneLength; ++i) {
-            if (this.genes[nodeIndex].getGeneIntArr()[i] > 0) {
-                indicsWithInstance.add(i);
-            }
+    public void printGenes() {
+        for (MGene gene : this.genes) {
+            System.out.println(gene.toString());
         }
-        int serviceIndex = indicsWithInstance.get(MGAUtils.MUTATION_SELECT_RAND.nextInt(indicsWithInstance.size()));
+    }
+
+    private void deleteOneInstance() {
+        List<MServiceInstance> allInstance = this.currOperator.getAllInstances();
+        MServiceInstance randomInstance = allInstance.get(MGAUtils.MUTATION_SELECT_RAND.nextInt(allInstance.size()));
+        int nodeIndex = MBaseGA.fixedNodeId2Index.get(randomInstance.getNodeId());
+        int serviceIndex = MBaseGA.fixedServiceId2Index.get(randomInstance.getServiceId());
         this.genes[nodeIndex].deleteInstance(serviceIndex);
 
         // re-assign user demands on this instance
-        String serviceId = MWSGAPopulation.fixedServiceIdList.get(serviceIndex);
-        List<MServiceInstance> instanceList = this.currOperator.getInstancesOfService(serviceId);
-        int instanceIndex = MGAUtils.MUTATION_SELECT_RAND.nextInt(instanceList.size());
-        String targetInstanceId = instanceList.get(instanceIndex).getId();
-        List<MUserDemand> userDemands = this.currOperator.deleteInstance(targetInstanceId);
-        MDemandAssignHA.calc(userDemands, this.currOperator);
+        List<MUserDemand> userDemands = this.currOperator.deleteInstance(randomInstance.getId());
+        this.unSolvedDemandList.addAll(userDemands);
     }
 
     private void addOneInstance() {
-        int nodeIndex = MGAUtils.MUTATION_SELECT_RAND.nextInt(this.genes.length);
-        int serviceIndex = MGAUtils.MUTATION_SELECT_RAND.nextInt(this.geneLength);
+        if (this.unSolvedDemandList.size() == 0) {
+            return;
+        }
+
+        int nodeIndex, serviceIndex;
+        String nodeId, serviceId;
+        do {
+            nodeIndex = MGAUtils.MUTATION_SELECT_RAND.nextInt(this.genes.length);
+            serviceIndex = MGAUtils.MUTATION_SELECT_RAND.nextInt(this.geneLength);
+            nodeId = MBaseGA.fixedNodeIdList.get(nodeIndex);
+            serviceId = MBaseGA.fixedServiceIdList.get(serviceIndex);
+        } while (!this.currOperator.ifNodeHasResForIns(nodeId, serviceId));
+        this.currOperator.addNewInstance(serviceId, nodeId, MIDUtils.generateInstanceId(nodeId, serviceId, this.currOperator.getInstanceIdListOnNodeOfService(nodeId, serviceId)));
         this.genes[nodeIndex].addInstance(serviceIndex);
     }
 
     public void afterBorn() {
         this.assignDemands();
+        if (!this.verify()) {
+            throw new RuntimeException("Illegal new-born result");
+        }
     }
 
     private void moveOneInstance() {
         String instanceId, targetNodeId;
+        int fromNodeIndex, toNodeIndex, serviceIndex;
+        List<MServiceInstance> allInstance = this.currOperator.getAllInstances();
         do {
-            int fromNodeIndex = MGAUtils.MUTATION_SELECT_RAND.nextInt(this.genes.length);
-            int toNodeIndex = MGAUtils.MUTATION_SELECT_RAND.nextInt(this.genes.length);
-
-            List<Integer> indicsWithInstance = new ArrayList<>();
-            for (int i = 0; i < this.geneLength; ++i) {
-                if (this.genes[fromNodeIndex].getGeneIntArr()[i] > 0) {
-                    indicsWithInstance.add(i);
-                }
-            }
-            int serviceIndex = indicsWithInstance.get(MGAUtils.MUTATION_SELECT_RAND.nextInt(indicsWithInstance.size()));
-            this.genes[fromNodeIndex].deleteInstance(serviceIndex);
-            this.genes[toNodeIndex].addInstance(serviceIndex);
+            MServiceInstance randomInstance = allInstance.get(MGAUtils.MUTATION_SELECT_RAND.nextInt(allInstance.size()));
+            fromNodeIndex = MBaseGA.fixedNodeId2Index.get(randomInstance.getNodeId());
+            serviceIndex = MBaseGA.fixedServiceId2Index.get(randomInstance.getServiceId());
+            toNodeIndex = MGAUtils.MUTATION_SELECT_RAND.nextInt(this.genes.length);
+            if (fromNodeIndex == toNodeIndex) return;
 
             // re-assign user demands on this instance
-            String serviceId = MWSGAPopulation.fixedServiceIdList.get(serviceIndex);
-            List<MServiceInstance> instanceList = this.currOperator.getInstancesOfService(serviceId);
-            int instanceIndex = MGAUtils.MUTATION_SELECT_RAND.nextInt(instanceList.size());
-            instanceId = instanceList.get(instanceIndex).getId();
             targetNodeId = MWSGAPopulation.fixedNodeIdList.get(toNodeIndex);
+            instanceId = randomInstance.getId();
         } while (!this.currOperator.moveInstance(instanceId, targetNodeId));
+        this.genes[fromNodeIndex].deleteInstance(serviceIndex);
+        this.genes[toNodeIndex].addInstance(serviceIndex);
     }
 
     /**
      * In this function, we will assign demands to instances, and "save" non-feasible solution
      */
     private void assignDemands() {
-        MDemandAssignHA.calc(this.unSolvedDemandList, currOperator);
-        for (MBaseJob job : currOperator.getJobList()) {
+        List<MBaseJob> newJobList = MDemandAssignHA.calc(this.unSolvedDemandList, currOperator);
+        for (MBaseJob job : newJobList) {
             if (job.getType() == MJobType.DEPLOY) {
                 MDeployJob deployJob = (MDeployJob) job;
-                int nodeIndex = MWSGAPopulation.fixedNodeId2Index.get(deployJob.getServiceId());
-                int serviceIndex = MWSGAPopulation.fixedServiceId2Index.get(deployJob.getNodeId());
+                int nodeIndex = MWSGAPopulation.fixedNodeId2Index.get(deployJob.getNodeId());
+                int serviceIndex = MWSGAPopulation.fixedServiceId2Index.get(deployJob.getServiceId());
+                this.genes[nodeIndex].addInstance(serviceIndex);
+            } else if (job.getType() == MJobType.DELETE) {
+                MDeleteJob deleteJob = (MDeleteJob) job;
+                int nodeIndex = MWSGAPopulation.fixedNodeId2Index.get(deleteJob.getServiceId());
+                int serviceIndex = MWSGAPopulation.fixedServiceId2Index.get(deleteJob.getNodeId());
                 this.genes[nodeIndex].addInstance(serviceIndex);
             }
         }
         this.ifDemandsAssigned = true;
         this.unSolvedDemandList.clear();
+
+        this.currOperator.adjustJobList();  // remove useless jobs
+
+        // For deploy job. Some times the deployed instance will not used. So we will delete it
+        List<MBaseJob> jobList = this.currOperator.getJobList();
+        Iterator<MBaseJob> jobIterator = jobList.iterator();
+        List<MServiceInstance> emptyInstanceList = new ArrayList<>();
+        while (jobIterator.hasNext()) {
+            MBaseJob currJob = jobIterator.next();
+            if (currJob.getType() == MJobType.DEPLOY) {
+                MDeployJob deployJob = (MDeployJob) currJob;
+                if (this.currOperator.getInstanceById(deployJob.getInstanceId()) == null) {
+                    jobIterator.remove();
+                    continue;
+                }
+
+                if (this.currOperator.getInstanceUserNumber(deployJob.getInstanceId()) == 0) {
+                    MServiceInstance instance = this.currOperator.getInstanceById(((MDeployJob) currJob).getInstanceId());
+                    emptyInstanceList.add(instance);
+                    jobIterator.remove();
+                }
+
+                // if the job try to deploy an instance that exists before, we will remove it
+                if (this.rawOperator.getInstanceById(deployJob.getInstanceId()) != null) {
+                    jobIterator.remove();
+                }
+            } else if (currJob.getType() == MJobType.DELETE) {
+                // if the job tries to remove an instance that not exists before, we will remove it
+                if (this.rawOperator.getInstanceById(((MDeleteJob) currJob).getInstanceId()) == null) {
+                    jobIterator.remove();
+                }
+            } else if (currJob.getType() == MJobType.MOVE) {
+                // if the job tries to move an instance to the same node, we will remove it
+                MMoveJob moveJob = (MMoveJob) currJob;
+                if (this.rawOperator.getInstanceById(moveJob.getInstanceId()).getNodeId().equals(moveJob.getTargetNodeId())) {
+                    jobIterator.remove();
+                }
+            }
+        }
+
+        for (MServiceInstance instance : emptyInstanceList) {
+            this.currOperator.deleteInstance(instance.getId());
+            int nodeIndex = MBaseGA.fixedNodeId2Index.get(instance.getNodeId());
+            int serviceIndex = MBaseGA.fixedServiceId2Index.get(instance.getServiceId());
+            this.genes[nodeIndex].deleteInstance(serviceIndex);
+        }
     }
 
     /**
@@ -185,7 +333,7 @@ public class MChromosome {
      * @param cFromIndex
      * @param cToIndex
      */
-    private List<MUserDemand> initGenes(MChromosome firstParent, MChromosome crossoverParent, int cFromIndex, int cToIndex) {
+    private void initCrossoverGenes(MChromosome firstParent, MChromosome crossoverParent, int cFromIndex, int cToIndex) {
         // we will first check whether this solution consumes more resource than the available resource on the node
         // if it happens, an instance will be deleted randomly
         // when crossover happens, we also need to make sure that the instance id is exactly the same as the parents
@@ -205,17 +353,20 @@ public class MChromosome {
             // get the instance list of the crossover parent from the crossover part
             //      and delete all the demands on the instances
             List<MServiceInstance> instanceList = new ArrayList<>();
-            for (int serviceIndex = cFromIndex; serviceIndex < cToIndex; ++serviceIndex) {
+            for (int serviceIndex = cFromIndex; serviceIndex <= cToIndex; ++serviceIndex) {
                 String serviceId = MWSGAPopulation.fixedServiceIdList.get(serviceIndex);
                 List<String> idList = this.currOperator.getInstanceIdListOnNodeOfService(nodeId, serviceId);
                 for (String instanceId : idList) {
                     this.currOperator.deleteInstance(instanceId);
                 }
-                instanceList.addAll(serviceId2InstanceList.get(serviceId));
+
+                if (serviceId2InstanceList.containsKey(serviceId)) {
+                    instanceList.addAll(serviceId2InstanceList.get(serviceId));
+                }
             }
 
             // add instances of the crossover parent from the crossover part randomly
-            Collections.shuffle(instanceList);
+//            Collections.shuffle(instanceList);
             int i = 0;
             for (; i < instanceList.size(); ++i) {
                 if (this.currOperator.ifNodeHasResForIns(nodeId, instanceList.get(i).getServiceId())) {
@@ -232,7 +383,7 @@ public class MChromosome {
         }
 
         // please remember, we still need to set the demands back to the instances that are deployed successfully
-        return this.dealWithMappingCrossover(firstParent, crossoverParent, cFromIndex, cToIndex);
+        this.unSolvedDemandList.addAll(this.dealWithMappingCrossover(firstParent, crossoverParent, cFromIndex, cToIndex));
     }
 
     /**
@@ -248,11 +399,12 @@ public class MChromosome {
 
         List<MUserDemand> child1UnSolvedStateList = new ArrayList<>();
         for (String demandId : oldStates.keySet()) {
+            MDemandState oldState = oldStates.get(demandId);
+            MUserDemand demand = MSystemModel.getIns().getUserManager().getUserDemandByUserAndDemandId(
+                    oldState.getUserId(), oldState.getId()
+            );
             if (otherOldStates.containsKey(demandId)) {
-                MDemandState oldState = oldStates.get(demandId);
-                MUserDemand demand = MSystemModel.getIns().getUserManager().getUserDemandByUserAndDemandId(
-                        oldState.getUserId(), oldState.getId()
-                );
+
                 MServiceInstance instance = this.currOperator.getInstanceById(otherOldStates.get(demandId).getInstanceId());
                 if (instance != null) {
                     this.currOperator.assignDemandToIns(demand, instance, oldState);
@@ -260,6 +412,8 @@ public class MChromosome {
                     this.currOperator.removeDemandState(oldState);
                     child1UnSolvedStateList.add(demand);
                 }
+            } else {
+                child1UnSolvedStateList.add(demand);
             }
         }
         return child1UnSolvedStateList;
@@ -291,7 +445,8 @@ public class MChromosome {
 
     public double getCost() {
         if (this.cost < 0) {
-            this.cost = this.currOperator.calcEvolutionCost(this.rawOperator);
+//            this.cost = this.currOperator.calcEvolutionCost(this.rawOperator);
+            this.cost = this.currOperator.calcEvolutionCost();
         }
         return this.cost;
     }
