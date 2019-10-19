@@ -35,6 +35,10 @@ public class MResource {
         this.bandwidth = o.bandwidth;
     }
 
+    public MResource deepClone() {
+        return new MResource(this);
+    }
+
     public boolean isEnough(MResource mResource) {
         return this.cpu >= mResource.cpu
                 && this.ram >= mResource.ram;

@@ -70,7 +70,7 @@ public class MChromosome {
 
                 if (r.currOperator.ifNodeHasResForIns(nodeId, serviceId)) {
                     r.currOperator.addNewInstance(serviceId, nodeId, MIDUtils.generateInstanceId(
-                            nodeId, serviceId, r.currOperator.getInstanceIdListOnNodeOfService(nodeId, serviceId)
+                            nodeId, serviceId
                     ));
                     r.genes[n].addInstance(sIndex);
                 } else {
@@ -106,6 +106,10 @@ public class MChromosome {
         if (MSystemModel.getIns().getUserManager().getAllUserDemands().size()
                 != this.currOperator.getDemandStateManager().getAllValues().size()) {
             return false;
+        }
+
+        if (!this.currOperator.verify()) {
+            throw new RuntimeException("Inconsistent left resource");
         }
 
         return true;
@@ -229,7 +233,7 @@ public class MChromosome {
             nodeId = MBaseGA.fixedNodeIdList.get(nodeIndex);
             serviceId = MBaseGA.fixedServiceIdList.get(serviceIndex);
         } while (!this.currOperator.ifNodeHasResForIns(nodeId, serviceId));
-        this.currOperator.addNewInstance(serviceId, nodeId, MIDUtils.generateInstanceId(nodeId, serviceId, this.currOperator.getInstanceIdListOnNodeOfService(nodeId, serviceId)));
+        this.currOperator.addNewInstance(serviceId, nodeId, MIDUtils.generateInstanceId(nodeId, serviceId));
         this.genes[nodeIndex].addInstance(serviceIndex);
     }
 
@@ -320,7 +324,11 @@ public class MChromosome {
         }
 
         for (MServiceInstance instance : emptyInstanceList) {
-            this.currOperator.deleteInstance(instance.getId());
+            if (this.rawOperator.getInstanceById(instance.getId()) != null) {
+                this.currOperator.deleteInstance(instance.getId());
+            } else {
+                this.currOperator.deleteInstance(instance.getId(), false);
+            }
             int nodeIndex = MBaseGA.fixedNodeId2Index.get(instance.getNodeId());
             int serviceIndex = MBaseGA.fixedServiceId2Index.get(instance.getServiceId());
             this.genes[nodeIndex].deleteInstance(serviceIndex);
@@ -337,6 +345,8 @@ public class MChromosome {
         // we will first check whether this solution consumes more resource than the available resource on the node
         // if it happens, an instance will be deleted randomly
         // when crossover happens, we also need to make sure that the instance id is exactly the same as the parents
+
+        logger.debug("Check if the left resource is consistent in operator before initCrossoverGenes: " + this.currOperator.verify());
 
         for (int nodeIndex = 0; nodeIndex < this.genes.length; ++nodeIndex) {
             String nodeId = MWSGAPopulation.fixedNodeIdList.get(nodeIndex);
@@ -381,6 +391,7 @@ public class MChromosome {
                 this.genes[nodeIndex].deleteInstance(MWSGAPopulation.fixedServiceId2Index.get(instanceList.get(i).getServiceId()));
             }
         }
+        logger.debug("Check if the left resource is consistent in operator after initCrossoverGenes: " + this.currOperator.verify());
 
         // please remember, we still need to set the demands back to the instances that are deployed successfully
         this.unSolvedDemandList.addAll(this.dealWithMappingCrossover(firstParent, crossoverParent, cFromIndex, cToIndex));

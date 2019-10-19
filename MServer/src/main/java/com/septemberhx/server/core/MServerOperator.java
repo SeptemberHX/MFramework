@@ -61,7 +61,7 @@ public class MServerOperator extends MObjectManager<MServerState> {
         serverOperator.nodeId2ResourceLeft.clear();
         // get all resources for each node
         for (MServerNode node : MSystemModel.getIns().getMSNManager().getAllValues()) {
-            serverOperator.nodeId2ResourceLeft.put(node.getId(), node.getResource());
+            serverOperator.nodeId2ResourceLeft.put(node.getId(), node.getResource().deepClone());
         }
 
         serverOperator.generatedInterfaceList = serverOperator.serviceManager.getAllComInterfaces();
@@ -79,7 +79,7 @@ public class MServerOperator extends MObjectManager<MServerState> {
         operator.insId2LeftCap = new HashMap<>(this.insId2LeftCap);
         Map<String, MResource> nodeId2ResourceLeftClone = new HashMap<>();
         for (String nodeId : this.nodeId2ResourceLeft.keySet()) {
-            nodeId2ResourceLeftClone.put(nodeId, new MResource(this.nodeId2ResourceLeft.get(nodeId)));
+            nodeId2ResourceLeftClone.put(nodeId, this.nodeId2ResourceLeft.get(nodeId).deepClone());
         }
         operator.nodeId2ResourceLeft = nodeId2ResourceLeftClone;
 
@@ -95,11 +95,6 @@ public class MServerOperator extends MObjectManager<MServerState> {
         operator.jobList = new ArrayList<>(this.jobList);
         operator.generatedInterfaceList = new ArrayList<>(this.generatedInterfaceList);
 
-        this.nodeId2ResourceLeft.clear();
-        // get all resources for each node
-        for (MServerNode node : MSystemModel.getIns().getMSNManager().getAllValues()) {
-            this.nodeId2ResourceLeft.put(node.getId(), node.getResource());
-        }
         return operator;
     }
 
@@ -151,7 +146,7 @@ public class MServerOperator extends MObjectManager<MServerState> {
         this.nodeId2ResourceLeft.clear();
         // get all resources for each node
         for (MServerNode node : MSystemModel.getIns().getMSNManager().getAllValues()) {
-            this.nodeId2ResourceLeft.put(node.getId(), node.getResource());
+            this.nodeId2ResourceLeft.put(node.getId(), node.getResource().deepClone());
         }
         // and sub the used resources
         for (MServerState serverState : this.objectMap.values()) {
@@ -254,6 +249,10 @@ public class MServerOperator extends MObjectManager<MServerState> {
     }
 
     public List<MUserDemand> deleteInstance(String instanceId) {
+        return this.deleteInstance(instanceId, true);
+    }
+
+    public List<MUserDemand> deleteInstance(String instanceId, boolean ifAddJob) {
         // collect user demands on this instance
         List<MUserDemand> userDemands = new ArrayList<>();
         for (MDemandState demandState : this.demandStateManager.getDemandStateByInstanceId(instanceId)) {
@@ -273,10 +272,11 @@ public class MServerOperator extends MObjectManager<MServerState> {
             logger.info("Before resource release " + this.nodeId2ResourceLeft.get(nodeId));
             this.nodeId2ResourceLeft.get(nodeId).free(mService.getResource());
             logger.info("After resource release " + this.nodeId2ResourceLeft.get(nodeId));
-            this.insId2LeftCap.remove(instanceId);
         });
         this.instanceManager.delete(instanceId);
-        this.addNewJob(new MDeleteJob(instanceId, instance.getServiceId(), instance.getNodeId()));
+        if (ifAddJob) {
+            this.addNewJob(new MDeleteJob(instanceId, instance.getServiceId(), instance.getNodeId()));
+        }
         return userDemands;
     }
 
@@ -765,5 +765,52 @@ public class MServerOperator extends MObjectManager<MServerState> {
     public int getInstanceUserNumber(String instanceId) {
         Optional<MService> serviceOptional = this.serviceManager.getById(this.getInstanceById(instanceId).getServiceId());
         return serviceOptional.get().getMaxUserCap() - this.insId2LeftCap.get(instanceId);
+    }
+
+    public boolean verify() {
+        Map<String, MResource> rLeft = new HashMap<>();
+
+        // get all resources for each node
+        for (MServerNode node : MSystemModel.getIns().getMSNManager().getAllValues()) {
+            rLeft.put(node.getId(), node.getResource().deepClone());
+        }
+        // and sub the used resources
+        for (MServerState serverState : this.objectMap.values()) {
+            Optional<MServerNode> nodeOptional = MSystemModel.getIns().getMSNManager().getById(serverState.getId());
+            nodeOptional.ifPresent(serverNode ->
+                    rLeft.put(serverState.getId(), serverNode.getResource().sub(serverState.getResource()))
+            );
+        }
+        // and sub all the resources consumed by instances
+        for (MServiceInstance instance : this.getAllInstances()) {
+            Optional<MService> serviceOptional = this.serviceManager.getById(instance.getServiceId());
+            if (!serviceOptional.isPresent()) {
+                logger.debug("No such service: " + instance.getServiceId());
+                return false;
+            }
+
+            serviceOptional.ifPresent(s -> rLeft.get(instance.getNodeId()).assign(s.getResource()));
+        }
+
+        if (rLeft.size() != this.nodeId2ResourceLeft.size()) {
+            logger.debug("Size not the same");
+            return false;
+        }
+
+        for (String nodeId : rLeft.keySet()) {
+            if (!this.nodeId2ResourceLeft.containsKey(nodeId)) {
+                logger.debug("No such nodeId key: " + nodeId);
+                return false;
+            }
+
+            if (!this.nodeId2ResourceLeft.get(nodeId).equals(rLeft.get(nodeId))) {
+                this.printStatus();
+                logger.debug("nodeId: " + nodeId + " has inconsistent resource");
+                logger.debug("In leftR: " + this.nodeId2ResourceLeft.get(nodeId));
+                logger.debug("It should be " + rLeft.get(nodeId));
+                return false;
+            }
+        }
+        return true;
     }
 }

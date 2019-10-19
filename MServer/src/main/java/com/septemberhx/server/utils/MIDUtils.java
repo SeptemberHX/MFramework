@@ -20,21 +20,8 @@ public class MIDUtils {
      * @param idList: current id lists of given service on target node
      * @return String
      */
-    public static String generateInstanceId(String nodeId, String serviceId, List<String> idList) {
-        List<Integer> idNoList = new ArrayList<>();
-        for (String instanceId : idList) {
-            String[] splitR = instanceId.split("_");
-            idNoList.add(Integer.valueOf(splitR[splitR.length - 1]));
-        }
-        Collections.sort(idNoList);
-        int targetNo = 0;
-        for (; targetNo != idNoList.size(); ++targetNo) {
-            if (targetNo != idNoList.get(targetNo)) {
-                break;
-            }
-        }
-
-        return String.format("%s_%s_%04d", nodeId, serviceId, targetNo);
+    public static String generateInstanceId(String nodeId, String serviceId) {
+        return String.format("%s_%s_%s", nodeId, serviceId, UUID.randomUUID());
     }
 
     public static String getNodeIdFromInstanceId(String instanceId) {
