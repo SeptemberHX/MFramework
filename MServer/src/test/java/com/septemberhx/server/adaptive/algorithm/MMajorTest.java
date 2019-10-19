@@ -8,8 +8,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 /**
  * @author SeptemberHX
  * @version 0.1
@@ -23,6 +21,24 @@ class MMajorTest {
         MAnalyserResult analyserResult = analyser.analyse(new ArrayList<>(), new ArrayList<>());
 
         MMajorAlgorithm mMajorAlgorithm = new MMajorAlgorithm(MMajorAlgorithm.GA_TYPE.WSGA);
+        mMajorAlgorithm.calc(analyserResult);
+    }
+
+    @Test
+    void nsga_ii() {
+        MAnalyser analyser = new MAnalyser();
+        MAnalyserResult analyserResult = analyser.analyse(new ArrayList<>(), new ArrayList<>());
+
+        MMajorAlgorithm mMajorAlgorithm = new MMajorAlgorithm(MMajorAlgorithm.GA_TYPE.NSGA_II);
+        mMajorAlgorithm.calc(analyserResult);
+    }
+
+    @Test
+    void moea_d() {
+        MAnalyser analyser = new MAnalyser();
+        MAnalyserResult analyserResult = analyser.analyse(new ArrayList<>(), new ArrayList<>());
+
+        MMajorAlgorithm mMajorAlgorithm = new MMajorAlgorithm(MMajorAlgorithm.GA_TYPE.MODE_A);
         mMajorAlgorithm.calc(analyserResult);
     }
 

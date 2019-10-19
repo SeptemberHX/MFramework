@@ -389,13 +389,19 @@ public class MChromosome {
             }
 
             // add instances of the crossover parent from the crossover part
+            // it may leads to insufficient resource, so we shuffle the list and remove not deployed instances
             int i = 0;
+            Collections.shuffle(instanceList, MGAUtils.CROSSOVER_POINT_RAND);
             for (; i < instanceList.size(); ++i) {
                 if (this.currOperator.ifNodeHasResForIns(nodeId, instanceList.get(i).getServiceId())) {
                     this.currOperator.addNewInstance(instanceList.get(i).getServiceId(), nodeId, instanceList.get(i).getId());
                 } else {
-                    throw new RuntimeException("No enough resource during initCrossoverGenes");
+                    break;
                 }
+            }
+
+            for (; i < instanceList.size(); ++i) {
+                this.genes[nodeIndex].deleteInstance(MBaseGA.fixedServiceId2Index.get(instanceList.get(i).getServiceId()));
             }
         }
 

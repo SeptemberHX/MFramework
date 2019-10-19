@@ -2,6 +2,8 @@ package com.septemberhx.server.job;
 
 import lombok.Getter;
 
+import java.util.UUID;
+
 /**
  * @author SeptemberHX
  * @version 0.1
@@ -16,6 +18,7 @@ public class MMoveJob extends MBaseJob {
         this.instanceId = instanceId;
         this.targetNodeId = targetNodeId;
         this.type = MJobType.MOVE;
+        this.id = type.toString() + "_" + UUID.randomUUID().toString();
         this.priority = MOVE;
     }
 }

@@ -1,6 +1,7 @@
 package com.septemberhx.server.adaptive.algorithm.ga;
 
 import com.septemberhx.server.core.MServerOperator;
+import com.septemberhx.server.core.MSystemModel;
 
 import java.util.*;
 
@@ -17,8 +18,22 @@ public class MMOEADPopulation extends MBaseGA {
         super(serverOperator);
     }
 
+    public void init() {
+        this.population = new MPopulation();
+        for (int i = 0; i < Configuration.POPULATION_SIZE; ++i) {
+            this.population.populace.add(MChromosome.randomInit(
+                    MBaseGA.fixedNodeIdList.size(),
+                    MBaseGA.fixedServiceIdList.size(),
+                    MSystemModel.getIns().getOperator(),
+                    10
+            ));
+        }
+    }
+
     @Override
     public void evolve() {
+        this.init();
+
         List<MChromosome> P_EP = new ArrayList<>();
         this.population.calcNSGAIIFitness();
         double[][] weightVectors = generateWeightVectors(Configuration.POPULATION_SIZE);
@@ -59,6 +74,7 @@ public class MMOEADPopulation extends MBaseGA {
         }
 
         // the result: P_EP
+        P_EP.get(0).getCurrOperator().printStatus();
     }
 
     private static double[] getRefrencePoint(MPopulation population) {

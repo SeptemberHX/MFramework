@@ -1,5 +1,6 @@
 package com.septemberhx.server.adaptive.algorithm.ga;
 import com.septemberhx.server.core.MServerOperator;
+import com.septemberhx.server.core.MSystemModel;
 
 import java.util.*;
 
@@ -16,12 +17,22 @@ public class MNSGAIIPopulation extends MBaseGA {
         super(snapshotOperator);
     }
 
-    public void init(int populationSize, int maxRound) {
-
+    public void init() {
+        this.population = new MPopulation();
+        for (int i = 0; i < Configuration.POPULATION_SIZE; ++i) {
+            this.population.populace.add(MChromosome.randomInit(
+                    MBaseGA.fixedNodeIdList.size(),
+                    MBaseGA.fixedServiceIdList.size(),
+                    MSystemModel.getIns().getOperator(),
+                    10
+            ));
+        }
     }
 
     @Override
     public void evolve() {
+        this.init();
+
         int currRound = 1;
         this.population.calcNSGAIIFitness();
         Map<Integer, List<MChromosome>> paretoFront = fastNonDominatedSort(this.population.getPopulace());
@@ -30,6 +41,8 @@ public class MNSGAIIPopulation extends MBaseGA {
         }
 
         while (currRound <= Configuration.NSGAII_MAX_ROUND) {
+            logger.info("Round " + currRound);
+
             List<MChromosome> nextG = new ArrayList<>();
             for (int i = 0; i < Configuration.POPULATION_SIZE; ++i) {
                 MChromosome parent1 = binaryTournamentSelection(this.population);
@@ -47,13 +60,16 @@ public class MNSGAIIPopulation extends MBaseGA {
             }
             nextG.addAll(this.population.getPopulace());
             paretoFront = fastNonDominatedSort(nextG);
-            for (int i = 0; i < paretoFront.size(); ++i) {
+            for (int i = 1; i < paretoFront.size(); ++i) {  // the pareto level starts from 1
                 crowdingDistanceAssignment(paretoFront.get(i));
             }
             order(nextG);
             this.population.setPopulace(nextG.subList(0, Configuration.POPULATION_SIZE));
             ++currRound;
+
+            logger.info("Best: " + this.population.getPopulace().get(0).getWSGAFitness());
         }
+        this.population.getPopulace().get(0).getCurrOperator().printStatus();
     }
 
     private static void order(List<MChromosome> chromosomeList) {

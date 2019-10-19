@@ -4,6 +4,8 @@ import com.septemberhx.server.utils.MIDUtils;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.UUID;
+
 /**
  * @author SeptemberHX
  * @version 0.1
@@ -18,6 +20,7 @@ public class MSwitchJob extends MBaseJob {
 
     public MSwitchJob(String userDemandId, String instanceId, String oldInstanceId) {
         this.type = MJobType.SWITCH;
+        this.id = type.toString() + "_" + UUID.randomUUID().toString();
         this.userDemandId = userDemandId;
         this.instanceId = instanceId;
         this.oldInstanceId = oldInstanceId;

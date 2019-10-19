@@ -814,4 +814,14 @@ public class MServerOperator extends MObjectManager<MServerState> {
         }
         return true;
     }
+
+    public int getSwitchJobSize() {
+        int i = 0;
+        for (MBaseJob job : this.jobList) {
+            if (job.getType() == MJobType.SWITCH) {
+                ++i;
+            }
+        }
+        return i;
+    }
 }
