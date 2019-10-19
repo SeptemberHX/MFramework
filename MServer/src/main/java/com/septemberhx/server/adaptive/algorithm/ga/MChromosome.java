@@ -90,6 +90,10 @@ public class MChromosome {
     }
 
     public boolean verify() {
+        if (!Configuration.DEBUG_MODE) {
+            return true;
+        }
+
         for (int n = 0; n < this.genes.length; ++n) {
             String nodeId = MBaseGA.fixedNodeIdList.get(n);
             for (int s = 0; s < this.geneLength; ++s) {
@@ -151,20 +155,22 @@ public class MChromosome {
             childGene2[i] = childGenes.get(1);
         }
 
-        logger.debug("Crossover: " + startIndex + "-" + endIndex);
-        logger.debug("p1");
-        this.printGenes();
-        logger.debug("p2");
-        other.printGenes();
+        if (Configuration.DEBUG_MODE) {
+            logger.debug("Crossover: " + startIndex + "-" + endIndex);
+            logger.debug("p1");
+            this.printGenes();
+            logger.debug("p2");
+            other.printGenes();
 
-        logger.debug("c1-raw");
-        for (MGene gene : childGene1) {
-            System.out.println(gene.toString());
-        }
+            logger.debug("c1-raw");
+            for (MGene gene : childGene1) {
+                System.out.println(gene.toString());
+            }
 
-        logger.debug("c2-raw");
-        for (MGene gene : childGene2) {
-            System.out.println(gene.toString());
+            logger.debug("c2-raw");
+            for (MGene gene : childGene2) {
+                System.out.println(gene.toString());
+            }
         }
 
 
@@ -179,11 +185,13 @@ public class MChromosome {
         child2.currOperator = other.currOperator.shallowClone();
         child2.initCrossoverGenes(other, this, startIndex, endIndex);
 
-        logger.debug("c1");
-        child1.printGenes();
+        if (Configuration.DEBUG_MODE) {
+            logger.debug("c1");
+            child1.printGenes();
 
-        logger.debug("c2");
-        child2.printGenes();
+            logger.debug("c2");
+            child2.printGenes();
+        }
 
         resultList.add(child1);
         resultList.add(child2);
@@ -192,7 +200,10 @@ public class MChromosome {
 
     public void mutation() {
         double mutationType = MGAUtils.MUTATION_SELECT_RAND.nextDouble();
-        logger.debug("Mutation rate: " + mutationType);
+
+        if (Configuration.DEBUG_MODE) {
+            logger.debug("Mutation rate: " + mutationType);
+        }
         if (mutationType < 0.33) {              // add a new instance
             this.addOneInstance();
         } else if (mutationType < 0.66) {       // delete an exist instance
@@ -346,7 +357,9 @@ public class MChromosome {
         // if it happens, an instance will be deleted randomly
         // when crossover happens, we also need to make sure that the instance id is exactly the same as the parents
 
-        logger.debug("Check if the left resource is consistent in operator before initCrossoverGenes: " + this.currOperator.verify());
+        if (Configuration.DEBUG_MODE) {
+            logger.debug("Check if the left resource is consistent in operator before initCrossoverGenes: " + this.currOperator.verify());
+        }
 
         for (int nodeIndex = 0; nodeIndex < this.genes.length; ++nodeIndex) {
             String nodeId = MWSGAPopulation.fixedNodeIdList.get(nodeIndex);
@@ -375,23 +388,20 @@ public class MChromosome {
                 }
             }
 
-            // add instances of the crossover parent from the crossover part randomly
-//            Collections.shuffle(instanceList);
+            // add instances of the crossover parent from the crossover part
             int i = 0;
             for (; i < instanceList.size(); ++i) {
                 if (this.currOperator.ifNodeHasResForIns(nodeId, instanceList.get(i).getServiceId())) {
                     this.currOperator.addNewInstance(instanceList.get(i).getServiceId(), nodeId, instanceList.get(i).getId());
                 } else {
-                    break;
+                    throw new RuntimeException("No enough resource during initCrossoverGenes");
                 }
             }
-
-            // and remove those which are not able to be deployed due to the limit of the resource
-            for (; i < instanceList.size(); ++i) {
-                this.genes[nodeIndex].deleteInstance(MWSGAPopulation.fixedServiceId2Index.get(instanceList.get(i).getServiceId()));
-            }
         }
-        logger.debug("Check if the left resource is consistent in operator after initCrossoverGenes: " + this.currOperator.verify());
+
+        if (Configuration.DEBUG_MODE) {
+            logger.debug("Check if the left resource is consistent in operator after initCrossoverGenes: " + this.currOperator.verify());
+        }
 
         // please remember, we still need to set the demands back to the instances that are deployed successfully
         this.unSolvedDemandList.addAll(this.dealWithMappingCrossover(firstParent, crossoverParent, cFromIndex, cToIndex));
@@ -427,6 +437,13 @@ public class MChromosome {
                 child1UnSolvedStateList.add(demand);
             }
         }
+
+        if (Configuration.DEBUG_MODE) {
+            Set<String> oldStateIdSet = oldStates.keySet();
+            oldStateIdSet.removeAll(otherOldStates.keySet());
+            logger.debug("Check if unSolvedStateList size is right after dealWithMappingCrossover: " + (oldStateIdSet.size() == child1UnSolvedStateList.size()));
+        }
+
         return child1UnSolvedStateList;
     }
 

@@ -1,6 +1,7 @@
 package com.septemberhx.server.core;
 
 import com.septemberhx.common.base.MArchitectInfo;
+import com.septemberhx.common.base.MBaseObject;
 import com.septemberhx.common.base.MClassFunctionPair;
 import com.septemberhx.common.base.MObjectManager;
 import com.septemberhx.common.bean.MCompositionRequest;
@@ -177,11 +178,11 @@ public class MServerOperator extends MObjectManager<MServerState> {
             instanceMap.get(instance.getNodeId()).add(instance);
         }
 
-        for (String nodeId : instanceMap.keySet()) {
+        for (String nodeId : MSystemModel.getIns().getMSNManager().getAllValues().stream().map(MBaseObject::getId).collect(Collectors.toList())) {
             System.out.println(">>>>>>>>>>>> Node: " + nodeId);
             System.out.println(String.format("%s, left resource = %s", nodeId, this.nodeId2ResourceLeft.get(nodeId)));
             System.out.println("|");
-            for (MServiceInstance instance : instanceMap.get(nodeId)) {
+            for (MServiceInstance instance : instanceMap.getOrDefault(nodeId, new ArrayList<>())) {
                 System.out.println(String.format("|--- %s, left cap = %d", instance.getId(), this.insId2LeftCap.get(instance.getId())));
                 System.out.println("   |");
                 for (MDemandState demandState : demandStateMap.getOrDefault(instance.getId(), new ArrayList<>())) {
@@ -269,9 +270,9 @@ public class MServerOperator extends MObjectManager<MServerState> {
         Optional<MService> serviceOptional = this.serviceManager.getById(instance.getServiceId());
         serviceOptional.ifPresent(mService -> {
             String nodeId = this.instanceManager.getById(instanceId).get().getNodeId();
-            logger.info("Before resource release " + this.nodeId2ResourceLeft.get(nodeId));
+//            logger.info("Before resource release " + this.nodeId2ResourceLeft.get(nodeId));
             this.nodeId2ResourceLeft.get(nodeId).free(mService.getResource());
-            logger.info("After resource release " + this.nodeId2ResourceLeft.get(nodeId));
+//            logger.info("After resource release " + this.nodeId2ResourceLeft.get(nodeId));
         });
         this.instanceManager.delete(instanceId);
         if (ifAddJob) {

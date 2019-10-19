@@ -6,6 +6,9 @@ package com.septemberhx.server.adaptive.algorithm.ga;
  * @date 2019/10/14
  */
 public class Configuration {
+
+    public static boolean DEBUG_MODE = false;
+
     public static int POPULATION_SIZE = 20;
     public static int MOEAD_NEIGHBOR_SIZE = 20;
 
