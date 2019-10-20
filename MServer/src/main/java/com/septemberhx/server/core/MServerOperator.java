@@ -6,6 +6,7 @@ import com.septemberhx.common.base.MClassFunctionPair;
 import com.septemberhx.common.base.MObjectManager;
 import com.septemberhx.common.bean.MCompositionRequest;
 import com.septemberhx.server.adaptive.MAdaptiveSystem;
+import com.septemberhx.server.adaptive.algorithm.ga.Configuration;
 import com.septemberhx.server.adaptive.algorithm.ga.MBaseGA;
 import com.septemberhx.server.base.MNodeConnectionInfo;
 import com.septemberhx.server.base.model.*;
@@ -183,7 +184,7 @@ public class MServerOperator extends MObjectManager<MServerState> {
             System.out.println(String.format("%s, left resource = %s", nodeId, this.nodeId2ResourceLeft.get(nodeId)));
             System.out.println("|");
             for (MServiceInstance instance : instanceMap.getOrDefault(nodeId, new ArrayList<>())) {
-                System.out.println(String.format("|--- %s, left cap = %d", instance.getId(), this.insId2LeftCap.get(instance.getId())));
+                System.out.println(String.format("|--- %s, left cap = %d, service = %s", instance.getId(), this.insId2LeftCap.get(instance.getId()), instance.getServiceId()));
                 System.out.println("   |");
                 for (MDemandState demandState : demandStateMap.getOrDefault(instance.getId(), new ArrayList<>())) {
                     System.out.println(String.format("   |--- %s", demandState.toString()));
@@ -238,12 +239,31 @@ public class MServerOperator extends MObjectManager<MServerState> {
     }
 
     public MServiceInstance addNewInstance(String serviceId, String nodeId, String instanceId) {
-        MServiceInstance instance = new MServiceInstance(null, nodeId, null, null, instanceId, null, null, serviceId);
-        this.instanceManager.add(instance);
+
+        if (Configuration.DEBUG_MODE) {
+            if (!this.verify()) {
+                logger.error("Failed to verify before addNewInstance");
+            }
+            logger.info("Before addNewInstance: " + this.nodeId2ResourceLeft.get(nodeId));
+        }
+
         Optional<MService> serviceOptional = this.serviceManager.getById(serviceId);
+
+        MServiceInstance instance = new MServiceInstance(null, nodeId, null, null, instanceId, null, serviceOptional.get().getServiceName(), serviceId);
+        this.instanceManager.add(instance);
         serviceOptional.ifPresent(mService -> {
             this.nodeId2ResourceLeft.get(nodeId).assign(mService.getResource());
             this.insId2LeftCap.put(instance.getId(), mService.getMaxUserCap());
+
+            if (Configuration.DEBUG_MODE) {
+                logger.info("After addNewInstance: " + this.nodeId2ResourceLeft.get(nodeId));
+                logger.info("Target service: " + mService.getResource());
+                if (!this.verify()) {
+                    logger.error("Failed to verify after addNewInstance");
+                    logger.debug(instance);
+                    logger.debug(mService);
+                }
+            }
         });
         this.addNewJob(new MDeployJob(nodeId, serviceId, instanceId));
         return instance;
@@ -254,8 +274,17 @@ public class MServerOperator extends MObjectManager<MServerState> {
     }
 
     public List<MUserDemand> deleteInstance(String instanceId, boolean ifAddJob) {
+
+        if (Configuration.DEBUG_MODE) {
+            if (!this.verify()) {
+                logger.error("Failed to verify before deleteInstance");
+            }
+        }
+
         // collect user demands on this instance
         List<MUserDemand> userDemands = new ArrayList<>();
+//        if (!this.instanceManager.containsById(instanceId)) return userDemands;
+
         for (MDemandState demandState : this.demandStateManager.getDemandStateByInstanceId(instanceId)) {
             userDemands.add(
                     MSystemModel.getIns()
@@ -266,18 +295,31 @@ public class MServerOperator extends MObjectManager<MServerState> {
 
         // remove instance data
         this.insId2LeftCap.remove(instanceId);
-        MServiceInstance instance = this.instanceManager.getById(instanceId).get();
+        MServiceInstance instance = this.getInstanceById(instanceId);
         Optional<MService> serviceOptional = this.serviceManager.getById(instance.getServiceId());
+
+        if (!serviceOptional.isPresent()) {
+            logger.error(instance);
+        }
+
         serviceOptional.ifPresent(mService -> {
             String nodeId = this.instanceManager.getById(instanceId).get().getNodeId();
-//            logger.info("Before resource release " + this.nodeId2ResourceLeft.get(nodeId));
+            logger.info("Before resource release " + this.nodeId2ResourceLeft.get(nodeId));
             this.nodeId2ResourceLeft.get(nodeId).free(mService.getResource());
-//            logger.info("After resource release " + this.nodeId2ResourceLeft.get(nodeId));
+            logger.info("After resource release " + this.nodeId2ResourceLeft.get(nodeId));
         });
         this.instanceManager.delete(instanceId);
         if (ifAddJob) {
             this.addNewJob(new MDeleteJob(instanceId, instance.getServiceId(), instance.getNodeId()));
         }
+
+        if (Configuration.DEBUG_MODE) {
+            if (!this.verify()) {
+                logger.error("Failed to verify after deleteInstance");
+                logger.debug(instance);
+            }
+        }
+
         return userDemands;
     }
 
@@ -299,10 +341,17 @@ public class MServerOperator extends MObjectManager<MServerState> {
 
         // change user demands on this instance
         for (MDemandState demandState : this.demandStateManager.getDemandStateByInstanceId(instanceId)) {
-            demandState.setNodeId(targetNodeId);
+            MDemandState newState = new MDemandState(
+                    demandState.getId(),
+                    demandState.getInstanceId(),
+                    demandState.getInterfaceId(),
+                    demandState.getUserId(),
+                    targetNodeId
+            );
+            this.demandStateManager.replace(newState);
         }
 
-        this.addNewJob(new MMoveJob(instanceId, targetNodeId));
+        this.addNewJob(new MMoveJob(instanceId, targetNodeId, instance.getNodeId(), instance.getServiceId()));
         return true;
     }
 
@@ -327,6 +376,22 @@ public class MServerOperator extends MObjectManager<MServerState> {
             if (!this.ifInstanceHasCap(instance.getId(), 1)) {
                 continue;
             }
+            // todo: Calculate a functionId2InstanceId map in reInit(). So we don't need to search it in this part
+            Optional<MService> serviceOptional = this.serviceManager.getById(instance.getServiceId());
+            serviceOptional.ifPresent(mService -> {
+                if (mService.getInterfaceMetUserDemand(userDemand).size() > 0) {
+                    resultList.add(instance);
+                }
+            });
+        }
+        return resultList;
+    }
+
+    public List<MServiceInstance> getInstancesCanMet(String nodeId, MUserDemand userDemand) {
+        List<MServiceInstance> instanceList = this.getInstancesOnNode(nodeId);
+        List<MServiceInstance> resultList = new ArrayList<>();
+        for (MServiceInstance instance : instanceList) {
+
             // todo: Calculate a functionId2InstanceId map in reInit(). So we don't need to search it in this part
             Optional<MService> serviceOptional = this.serviceManager.getById(instance.getServiceId());
             serviceOptional.ifPresent(mService -> {
@@ -424,7 +489,8 @@ public class MServerOperator extends MObjectManager<MServerState> {
     // ------------------- Composition Part --------------------
     public void compositeService(MService service1, MServiceInterface interface1, MService service2, MServiceInterface interface2) {
         // interfaceId contains serviceName
-        String serviceId = MIDUtils.generateServiceId(String.format("%s__%s", interface1.getInterfaceId(), interface2.getInterfaceId()));
+        String serviceId = MIDUtils.generateServiceId(String.format("%s__%s", interface1.getInterfaceId(), interface2.getInterfaceId()),
+                String.format("%s_%s", service1.getRId(), service2.getRId()));
         String serviceName = serviceId;
         String functionName = String.format("%s__%s", interface1.getFullFuncName(), interface2.getFullFuncName());
         MServiceInterface newInterface = new MServiceInterface();
@@ -687,6 +753,10 @@ public class MServerOperator extends MObjectManager<MServerState> {
                     MSwitchJob switchJob = (MSwitchJob) baseJob;
                     objectId = switchJob.getUserDemandId();
                     break;
+                case ADJUST:
+                    MAdjustJob adjustJob = (MAdjustJob) baseJob;
+                    objectId = adjustJob.getInstanceId();
+                    break;
                 default:
                     break;
             }
@@ -721,17 +791,7 @@ public class MServerOperator extends MObjectManager<MServerState> {
                     }
                     break;
                 case DELETE:
-                    int i;
-                    for (i = currJobList.size() - 1; i >= 0; --i) {
-                        if (currJobList.get(i).getType() == MJobType.DEPLOY) {
-                            break;
-                        }
-                    }
-                    if (i >= 0) {
-                        for (; i < currJobList.size(); ++i) {
-                            removeJobIdList.add(currJobList.get(i).getId());
-                        }
-                    }
+                    currJobList.forEach(j -> removeJobIdList.add(j.getId()));
                     break;
                 case MOVE:
                     MDeployJob tmpDeployJob = null;
@@ -744,11 +804,24 @@ public class MServerOperator extends MObjectManager<MServerState> {
                     if (tmpDeployJob != null) {
                         currJobList.forEach(j -> removeJobIdList.add(j.getId()));
                         tmpDeployJob.setNodeId(((MMoveJob) lastJob).getTargetNodeId());
+                        tmpDeployJob.newId();
                         this.jobList.add(tmpDeployJob);
-                    } else {
-                        for (int j = 0; j < currJobList.size() - 1; ++j) {
-                            removeJobIdList.add(currJobList.get(j).getId());
+                    }
+                    break;
+                case ADJUST:
+                    int j;
+                    MDeployJob tDeployJob = null;
+                    for (j = currJobList.size() - 1; j >= 0; --j) {
+                        if (currJobList.get(j).getType() == MJobType.DEPLOY) {
+                            tDeployJob = (MDeployJob) currJobList.get(j);
+                            break;
                         }
+                    }
+                    if (tDeployJob != null) {
+                        currJobList.forEach(job -> removeJobIdList.add(job.getId()));
+                        tDeployJob.setServiceId(((MAdjustJob) lastJob).getTargetServiceId());
+                        tDeployJob.newId();
+                        this.jobList.add(tDeployJob);
                     }
                     break;
                 default:
@@ -806,12 +879,31 @@ public class MServerOperator extends MObjectManager<MServerState> {
 
             if (!this.nodeId2ResourceLeft.get(nodeId).equals(rLeft.get(nodeId))) {
                 this.printStatus();
-                logger.debug("nodeId: " + nodeId + " has inconsistent resource");
-                logger.debug("In leftR: " + this.nodeId2ResourceLeft.get(nodeId));
-                logger.debug("It should be " + rLeft.get(nodeId));
+                logger.warn("nodeId: " + nodeId + " has inconsistent resource");
+                logger.warn("In leftR: " + this.nodeId2ResourceLeft.get(nodeId));
+                logger.warn("It should be " + rLeft.get(nodeId));
                 return false;
             }
         }
+
+        for (MDemandState demandState : this.demandStateManager.getAllValues()) {
+            if (!this.instanceManager.containsById(demandState.getInstanceId())) {
+                logger.warn("Demand state assigned to non-exist instance: " + demandState.getInstanceId());
+                return false;
+            }
+        }
+
+        for (MServiceInstance instance : this.instanceManager.getAllValues()) {
+            int userDemandsSize = this.demandStateManager.getDemandStatesOnInstance(instance.getId()).size();
+            int serviceCap = this.getServiceById(instance.getServiceId()).getMaxUserCap();
+
+            if (this.insId2LeftCap.get(instance.getId()) != serviceCap - userDemandsSize) {
+                this.printStatus();
+                logger.warn("Instance " + instance.getId() + " has inconsistent capability");
+                return false;
+            }
+        }
+
         return true;
     }
 
@@ -823,5 +915,82 @@ public class MServerOperator extends MObjectManager<MServerState> {
             }
         }
         return i;
+    }
+
+    public boolean checkIfCanAdjust(MServiceInstance randomInstance, MService targetS) {
+        MResource leftR = this.nodeId2ResourceLeft.get(randomInstance.getNodeId());
+        Optional<MService> serviceOptional = this.serviceManager.getById(randomInstance.getServiceId());
+        MResource oldR = serviceOptional.get().getResource();
+        MResource newR = targetS.getResource();
+        return leftR.isEnough(newR.sub(oldR));
+    }
+
+    public List<MUserDemand> adjustInstance(String instanceId, MService targetS) {
+
+        logger.info("DemandManager size: " + this.demandStateManager.getAllValues().size() + " before adjustInstance");
+        logger.info("Raw instance left capability before adjustInstance: " + this.insId2LeftCap.get(instanceId));
+
+        List<MUserDemand> unSolvedDemands = new ArrayList<>();
+
+        // because of the reference existing in other solutions, we make a copy
+        MServiceInstance randomInstance = this.getInstanceById(instanceId).deepClone();
+        MResource leftR = this.nodeId2ResourceLeft.get(randomInstance.getNodeId());
+
+        Optional<MService> serviceOptional = this.serviceManager.getById(randomInstance.getServiceId());
+        MResource oldR = serviceOptional.get().getResource();
+        MResource newR = targetS.getResource();
+
+        int freeDemandSize = serviceOptional.get().getMaxUserCap() - targetS.getMaxUserCap();
+        this.insId2LeftCap.put(instanceId, this.insId2LeftCap.get(instanceId) - freeDemandSize);
+        if (freeDemandSize < 0) {   // high resource with high capability
+            randomInstance.setServiceId(targetS.getId());
+        } else {    // low resource with low capability
+            // todo: remove sla not meet user demands
+            randomInstance.setServiceId(targetS.getId());
+            List<MDemandState> demandStateList = this.demandStateManager.getDemandStatesOnInstance(instanceId);
+            Collections.shuffle(demandStateList, random);
+            for (int i = 0; i < freeDemandSize && i < demandStateList.size(); ++i) {
+                this.removeDemandState(demandStateList.get(i));
+                MUserDemand userDemand = MSystemModel.getIns().getUserManager().getUserDemandByUserAndDemandId(
+                        demandStateList.get(i).getUserId(),
+                        demandStateList.get(i).getId()
+                );
+                unSolvedDemands.add(userDemand);
+            }
+        }
+
+        // once adjust an instance, the instance will not be itself anymore. It is a new instance.
+        this.instanceManager.delete(instanceId);
+        logger.info("Demand state size after delete raw instance: " + this.demandStateManager.getAllValues().size());
+
+        randomInstance.setId(MIDUtils.generateInstanceId(randomInstance.getNodeId(), randomInstance.getServiceId()));
+        this.instanceManager.add(randomInstance);
+
+        logger.info("Raw instance left capability after adjust: " + this.insId2LeftCap.get(instanceId));
+
+        this.insId2LeftCap.put(randomInstance.getId(), this.insId2LeftCap.get(instanceId));
+        this.insId2LeftCap.remove(instanceId);
+
+        logger.info("New adjust instance left capability after adjust: " + this.insId2LeftCap.get(randomInstance.getId()) + ", id: " + randomInstance.getId());
+        logger.info("Size of demands on this instance: " + this.demandStateManager.getDemandStatesOnInstance(instanceId).size());
+        for (MDemandState demandState : this.demandStateManager.getDemandStatesOnInstance(instanceId)) {
+            MDemandState newState = new MDemandState(
+                    demandState.getId(),
+                    randomInstance.getId(),
+                    demandState.getInterfaceId(),
+                    demandState.getUserId(),
+                    demandState.getNodeId()
+            );
+            this.demandStateManager.replace(newState);
+        }
+        logger.info("Size of demands on this new adjust instance: " + this.demandStateManager.getDemandStatesOnInstance(randomInstance.getId()).size());
+
+        this.addNewJob(new MAdjustJob(randomInstance.getId(), targetS.getRId(), serviceOptional.get().getId(), targetS.getId(), randomInstance.getNodeId()));
+        leftR.free(oldR);
+        leftR.assign(newR);
+
+        logger.info("DemandManager size: " + this.demandStateManager.getAllValues().size() + " after adjustInstance");
+        logger.info("Unsolved demands size: " + unSolvedDemands.size());
+        return unSolvedDemands;
     }
 }

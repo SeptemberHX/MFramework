@@ -30,8 +30,30 @@ public class MServiceInstance extends MBaseObject {
         this.serviceId = serviceId;
     }
 
+    public MServiceInstance deepClone() {
+        return new MServiceInstance(
+                this.parentIdMap,
+                this.nodeId,
+                this.ip,
+                this.port,
+                this.id,
+                this.mObjectIdSet,
+                this.serviceName,
+                this.serviceId
+        );
+    }
+
     @Override
     public String toString() {
-        return super.toString();
+        return "MServiceInstance{" +
+                "parentIdMap=" + parentIdMap +
+                ", nodeId='" + nodeId + '\'' +
+                ", ip='" + ip + '\'' +
+                ", port=" + port +
+                ", mObjectIdSet=" + mObjectIdSet +
+                ", serviceName='" + serviceName + '\'' +
+                ", serviceId='" + serviceId + '\'' +
+                ", id='" + id + '\'' +
+                '}';
     }
 }

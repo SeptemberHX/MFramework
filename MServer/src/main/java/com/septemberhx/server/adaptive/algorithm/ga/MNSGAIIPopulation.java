@@ -47,11 +47,31 @@ public class MNSGAIIPopulation extends MBaseGA {
             for (int i = 0; i < Configuration.POPULATION_SIZE; ++i) {
                 MChromosome parent1 = binaryTournamentSelection(this.population);
                 MChromosome parent2 = binaryTournamentSelection(this.population);
+
+                if (Configuration.DEBUG_MODE) {
+                    if (!parent1.verify()) {
+                        logger.error(parent1.getId() + " failed to verify before crossover");
+                    }
+                    if (!parent2.verify()) {
+                        logger.error(parent2.getId() + " failed to verify before crossover");
+                    }
+                }
+
                 List<MChromosome> children = parent1.crossover(parent2);
                 if (MGAUtils.MUTATION_PROB_RAND.nextDouble() < Configuration.NSGAII_MUTATION_RATE) {
                     children.forEach(MChromosome::mutation);
                 }
                 children.forEach(MChromosome::afterBorn);
+
+                if (Configuration.DEBUG_MODE) {
+                    if (!parent1.verify()) {
+                        logger.error(parent1.getId() + " failed to verify after crossover");
+                    }
+                    if (!parent2.verify()) {
+                        logger.error(parent2.getId() + " failed to verify after crossover");
+                    }
+                }
+
                 nextG.addAll(children);
             }
 

@@ -19,12 +19,15 @@ import java.util.stream.Collectors;
 @Getter
 public class MService extends MBaseObject {
     private boolean generated;
-    private String serviceName;                     // Service Name
+    private String serviceName;                     // Service Name, it should be unique
     private String gitUrl;                          // the git repo url
     private Map<String, MServiceInterface> interfaceMap;  // interface list
     private MResource resource;
     private Integer maxUserCap;
     private MArchitectInfo artifactInfo;
+    private String rId;                             // same service will have different rId if require different resources
+                                                    // and it should be ordered. Small stands for low resources, low sla
+                                                    // Big stands for high resources, high sla
 
     public MService(String id, String name, String gitUrl, Map<String, MServiceInterface> interfaceMap) {
         this.generated = false;
@@ -91,6 +94,7 @@ public class MService extends MBaseObject {
                 ", maxUserCap=" + maxUserCap +
                 ", artifactInfo=" + artifactInfo +
                 ", id='" + id + '\'' +
+                ", rId='" + rId + '\'' +
                 '}';
     }
 }

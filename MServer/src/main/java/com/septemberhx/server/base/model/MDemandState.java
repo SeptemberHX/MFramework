@@ -13,7 +13,6 @@ import lombok.Setter;
  * The ID of this class is the ID of the user demand.
  */
 @Getter
-@Setter
 public class MDemandState extends MBaseObject {
     private String instanceId;  // the id of the service instance that the demand is served at
     private String interfaceId; // the id of the interface this demand is actually served at
@@ -31,7 +30,7 @@ public class MDemandState extends MBaseObject {
         this.nodeId = serviceInstance.getNodeId();
     }
 
-    public void clean() {
+    private void clean() {
         this.instanceId = null;
         this.interfaceId = null;
         this.nodeId = null;
@@ -50,5 +49,27 @@ public class MDemandState extends MBaseObject {
                 ", nodeId='" + nodeId + '\'' +
                 ", id='" + id + '\'' +
                 '}';
+    }
+
+    private MDemandState() {
+        this.clean();
+    }
+
+    public MDemandState deepClone() {
+        MDemandState r = new MDemandState();
+        r.id = this.id;
+        r.userId = this.userId;
+        r.instanceId = this.instanceId;
+        r.interfaceId = this.interfaceId;
+        r.nodeId = this.nodeId;
+        return r;
+    }
+
+    public MDemandState(String id, String instanceId, String interfaceId, String userId, String nodeId) {
+        this.id = id;
+        this.instanceId = instanceId;
+        this.interfaceId = interfaceId;
+        this.userId = userId;
+        this.nodeId = nodeId;
     }
 }

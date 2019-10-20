@@ -6,6 +6,7 @@ public enum MJobType {
     DEPLOY,
     DELETE,
     MOVE,
+    ADJUST,
 
     NOTIFY,
     SPLIT,

@@ -33,4 +33,8 @@ public class MDeployJob extends MBaseJob {
         }
         return new MDeployPodRequest(id, nodeId, pod);
     }
+
+    public void newId() {
+        this.id = type.toString() + "_" + UUID.randomUUID().toString();
+    }
 }

@@ -92,6 +92,10 @@ public class MServiceInstanceManager extends MObjectManager<MServiceInstance> {
         this.serviceId2InsIdSet.get(serviceInstance.getServiceId()).add(serviceInstance.getId());
     }
 
+    public void replace(MServiceInstance serviceInstance) {
+        this.objectMap.put(serviceInstance.getId(), serviceInstance);
+    }
+
     public List<MServiceInstance> getInstancesOnNode(String nodeId) {
         List<MServiceInstance> resultList = new ArrayList<>();
         if (this.nodeId2InsIdSet.containsKey(nodeId)) {

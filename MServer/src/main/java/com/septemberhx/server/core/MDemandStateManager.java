@@ -70,4 +70,8 @@ public class MDemandStateManager extends MObjectManager<MDemandState> {
     public List<MDemandState> getDemandStatesOnInstance(String instanceId) {
         return this.objectMap.values().stream().filter(s -> s.getInstanceId().equals(instanceId)).collect(Collectors.toList());
     }
+
+    public void replace(MDemandState newState) {
+        this.objectMap.put(newState.getId(), newState);
+    }
 }

@@ -52,6 +52,12 @@ public class MChromosome {
     @Setter
     private int rank;
 
+    @Getter
+    @Setter
+    private int id;
+
+    static int nextId = 0;
+
     public static MChromosome randomInit(int nodeSize, int serviceSize, MServerOperator rawOperator, int maxInstanceNum) {
         MChromosome r = new MChromosome(nodeSize, serviceSize, rawOperator);
 
@@ -101,14 +107,18 @@ public class MChromosome {
 
                 if (this.genes[n].getGeneIntArr()[s]
                         != this.currOperator.getInstanceIdListOnNodeOfService(nodeId, serviceId).size()) {
-                    logger.error("Genes is not consistent with the solution");
+                    logger.error("Genes is not consistent with the solution: " + nodeId + ", " + serviceId);
+                    this.printGenes();
+                    this.currOperator.printStatus();
                     return false;
                 }
             }
         }
 
-        if (MSystemModel.getIns().getUserManager().getAllUserDemands().size()
-                != this.currOperator.getDemandStateManager().getAllValues().size()) {
+        int s1 = MSystemModel.getIns().getUserManager().getAllUserDemands().size();
+        int s2 = this.currOperator.getDemandStateManager().getAllValues().size();
+        if (s1 != s2) {
+            logger.error("Demand size not match, in System model: " + s1 + ", in result: " + s2);
             return false;
         }
 
@@ -128,6 +138,9 @@ public class MChromosome {
         this.rawOperator = rawOperator;
         this.currOperator = MServerOperator.blankObject();
         this.reset();
+
+        this.id = nextId;
+        ++nextId;
     }
 
     public MChromosome(MGene[] genes, int geneLength, MServerOperator rawOperator) {
@@ -136,6 +149,9 @@ public class MChromosome {
         this.rawOperator = rawOperator;
         this.currOperator = rawOperator.shallowClone();
         this.reset();
+
+        this.id = nextId;
+        ++nextId;
     }
 
     public List<MChromosome> crossover(MChromosome other) {
@@ -156,13 +172,13 @@ public class MChromosome {
         }
 
         if (Configuration.DEBUG_MODE) {
-            logger.debug("Crossover: " + startIndex + "-" + endIndex);
-            logger.debug("p1");
+            logger.debug("Crossover: " + this.id + " and " + other.id + ", " + startIndex + "-" + endIndex);
+            logger.debug("p1: " + this.id);
             this.printGenes();
-            logger.debug("p2");
+            logger.debug("p2: " + other.id);
             other.printGenes();
 
-            logger.debug("c1-raw");
+            logger.debug("c1-raw: ");
             for (MGene gene : childGene1) {
                 System.out.println(gene.toString());
             }
@@ -186,10 +202,10 @@ public class MChromosome {
         child2.initCrossoverGenes(other, this, startIndex, endIndex);
 
         if (Configuration.DEBUG_MODE) {
-            logger.debug("c1");
+            logger.debug("child1: " + child1.id);
             child1.printGenes();
 
-            logger.debug("c2");
+            logger.debug("child2: " + child2.id);
             child2.printGenes();
         }
 
@@ -202,12 +218,19 @@ public class MChromosome {
         double mutationType = MGAUtils.MUTATION_SELECT_RAND.nextDouble();
 
         if (Configuration.DEBUG_MODE) {
-            logger.debug("Mutation rate: " + mutationType);
+            if (!this.currOperator.verify()) {
+                logger.error(this.id + " Verify failed before mutation");
+            }
         }
-        if (mutationType < 0.33) {              // add a new instance
+        if (Configuration.DEBUG_MODE) {
+            logger.debug(this.id + ", " + "Mutation rate: " + mutationType);
+        }
+        if (mutationType < 0.25) {              // add a new instance
             this.addOneInstance();
-        } else if (mutationType < 0.66) {       // delete an exist instance
+        } else if (mutationType < 0.5) {       // delete an exist instance
             this.deleteOneInstance();
+        } else if (mutationType < 0.75) {
+            this.adjustOneInstance();
         } else {                                // move an instance to other node
             this.moveOneInstance();
         }
@@ -216,6 +239,37 @@ public class MChromosome {
     public void printGenes() {
         for (MGene gene : this.genes) {
             System.out.println(gene.toString());
+        }
+    }
+
+    private void adjustOneInstance() {
+        if (Configuration.DEBUG_MODE) {
+            if (!this.currOperator.verify()) {
+                logger.error("Verify failed before adjusting");
+            }
+        }
+
+        List<MServiceInstance> allInstance = this.currOperator.getAllInstances();
+        MServiceInstance randomInstance = allInstance.get(MGAUtils.MUTATION_SELECT_RAND.nextInt(allInstance.size()));
+
+        List<MService> allSList = this.currOperator.getServiceManager().getAllServicesByServiceName(randomInstance.getServiceName());
+        int nodeIndex = MBaseGA.fixedNodeId2Index.get(randomInstance.getNodeId());
+        int serviceIndex = MBaseGA.fixedServiceId2Index.get(randomInstance.getServiceId());
+        MService targetS = allSList.get(MGAUtils.MUTATION_SELECT_RAND.nextInt(allSList.size()));
+
+        if (targetS.getId().equals(randomInstance.getServiceId())) return;
+        if (!this.currOperator.checkIfCanAdjust(randomInstance, targetS)) return;
+
+        int newServiceIndex = MBaseGA.fixedServiceId2Index.get(targetS.getId());
+        List<MUserDemand> userDemands = this.currOperator.adjustInstance(randomInstance.getId(), targetS);
+        this.genes[nodeIndex].deleteInstance(serviceIndex);
+        this.genes[nodeIndex].addInstance(newServiceIndex);
+        this.unSolvedDemandList.addAll(userDemands);
+
+        if (Configuration.DEBUG_MODE) {
+            if (!this.currOperator.verify()) {
+                logger.error("Verify failed after adjusting");
+            }
         }
     }
 
@@ -278,7 +332,12 @@ public class MChromosome {
      * In this function, we will assign demands to instances, and "save" non-feasible solution
      */
     private void assignDemands() {
+        logger.info(this.id + " unsolved demand size: " + this.unSolvedDemandList);
+        logger.info(this.id + " solved demand size: " + this.currOperator.getDemandStateManager().getAllValues().size() + " before assignDemands");
+
         List<MBaseJob> newJobList = MDemandAssignHA.calc(this.unSolvedDemandList, currOperator);
+        logger.info(this.id + " solved demand size: " + this.currOperator.getDemandStateManager().getAllValues().size() + " after MDemandAssignHA");
+
         for (MBaseJob job : newJobList) {
             if (job.getType() == MJobType.DEPLOY) {
                 MDeployJob deployJob = (MDeployJob) job;
@@ -287,9 +346,23 @@ public class MChromosome {
                 this.genes[nodeIndex].addInstance(serviceIndex);
             } else if (job.getType() == MJobType.DELETE) {
                 MDeleteJob deleteJob = (MDeleteJob) job;
-                int nodeIndex = MWSGAPopulation.fixedNodeId2Index.get(deleteJob.getServiceId());
-                int serviceIndex = MWSGAPopulation.fixedServiceId2Index.get(deleteJob.getNodeId());
-                this.genes[nodeIndex].addInstance(serviceIndex);
+                int nodeIndex = MWSGAPopulation.fixedNodeId2Index.get(deleteJob.getNodeId());
+                int serviceIndex = MWSGAPopulation.fixedServiceId2Index.get(deleteJob.getServiceId());
+                this.genes[nodeIndex].deleteInstance(serviceIndex);
+            } else if (job.getType() == MJobType.ADJUST) {
+                MAdjustJob adjustJob = (MAdjustJob) job;
+                int nodeIndex = MBaseGA.fixedNodeId2Index.get(adjustJob.getNodeId());
+                int fServiceIndex = MBaseGA.fixedServiceId2Index.get(adjustJob.getRawServiceId());
+                int tServiceIndex = MBaseGA.fixedServiceId2Index.get(adjustJob.getTargetServiceId());
+                this.genes[nodeIndex].deleteInstance(fServiceIndex);
+                this.genes[nodeIndex].addInstance(tServiceIndex);
+            } else if (job.getType() == MJobType.MOVE) {
+                MMoveJob moveJob = (MMoveJob) job;
+                int fNodeIndex = MBaseGA.fixedNodeId2Index.get(moveJob.getRawNodeId());
+                int tNodeIndex = MBaseGA.fixedNodeId2Index.get(moveJob.getTargetNodeId());
+                int serviceIndex = MBaseGA.fixedServiceId2Index.get(moveJob.getServiceId());
+                this.genes[fNodeIndex].deleteInstance(serviceIndex);
+                this.genes[tNodeIndex].addInstance(serviceIndex);
             }
         }
         this.ifDemandsAssigned = true;
@@ -311,7 +384,7 @@ public class MChromosome {
                 }
 
                 if (this.currOperator.getInstanceUserNumber(deployJob.getInstanceId()) == 0) {
-                    MServiceInstance instance = this.currOperator.getInstanceById(((MDeployJob) currJob).getInstanceId());
+                    MServiceInstance instance = this.currOperator.getInstanceById(deployJob.getInstanceId());
                     emptyInstanceList.add(instance);
                     jobIterator.remove();
                 }
@@ -334,7 +407,9 @@ public class MChromosome {
             }
         }
 
+        logger.info(this.id + " solved demand size: " + this.currOperator.getDemandStateManager().getAllValues().size() + " before delete empty instance");
         for (MServiceInstance instance : emptyInstanceList) {
+            logger.info("Delete empty instance: " + instance.getId());
             if (this.rawOperator.getInstanceById(instance.getId()) != null) {
                 this.currOperator.deleteInstance(instance.getId());
             } else {
@@ -344,6 +419,8 @@ public class MChromosome {
             int serviceIndex = MBaseGA.fixedServiceId2Index.get(instance.getServiceId());
             this.genes[nodeIndex].deleteInstance(serviceIndex);
         }
+
+        logger.info(this.id + " solved demand size: " + this.currOperator.getDemandStateManager().getAllValues().size() + " after assignDemands");
     }
 
     /**
@@ -358,7 +435,11 @@ public class MChromosome {
         // when crossover happens, we also need to make sure that the instance id is exactly the same as the parents
 
         if (Configuration.DEBUG_MODE) {
-            logger.debug("Check if the left resource is consistent in operator before initCrossoverGenes: " + this.currOperator.verify());
+            if (!this.currOperator.verify()) {
+                logger.error(this.id + "Check if the left resource is consistent in operator before initCrossoverGenes failed");
+                this.printGenes();
+                this.currOperator.printStatus();
+            }
         }
 
         for (int nodeIndex = 0; nodeIndex < this.genes.length; ++nodeIndex) {
@@ -381,6 +462,10 @@ public class MChromosome {
                 List<String> idList = this.currOperator.getInstanceIdListOnNodeOfService(nodeId, serviceId);
                 for (String instanceId : idList) {
                     this.currOperator.deleteInstance(instanceId);
+
+                    if (Configuration.DEBUG_MODE) {
+                        logger.info(this.id + " delete an instance of " + serviceId + ", index of " + serviceIndex + " on node index " + nodeIndex);
+                    }
                 }
 
                 if (serviceId2InstanceList.containsKey(serviceId)) {
@@ -395,6 +480,10 @@ public class MChromosome {
             for (; i < instanceList.size(); ++i) {
                 if (this.currOperator.ifNodeHasResForIns(nodeId, instanceList.get(i).getServiceId())) {
                     this.currOperator.addNewInstance(instanceList.get(i).getServiceId(), nodeId, instanceList.get(i).getId());
+
+                    if (Configuration.DEBUG_MODE) {
+                        logger.info(this.id + " add an instance of " + instanceList.get(i).getServiceId() + ", index of " + MBaseGA.fixedServiceId2Index.get(instanceList.get(i).getServiceId()) + ", id: " + instanceList.get(i).getId());
+                    }
                 } else {
                     break;
                 }
@@ -406,7 +495,17 @@ public class MChromosome {
         }
 
         if (Configuration.DEBUG_MODE) {
-            logger.debug("Check if the left resource is consistent in operator after initCrossoverGenes: " + this.currOperator.verify());
+            if (!this.currOperator.verify()) {
+                logger.error(this.id + " Check if the left resource is consistent in operator after initCrossoverGenes failed");
+                logger.error("==============> Checking parents");
+                if (!firstParent.verify()) {
+                    logger.error(firstParent.id + " check failed");
+                }
+                if (!crossoverParent.verify()) {
+                    logger.error(crossoverParent.id + " check failed");
+                }
+                logger.error("==============> Checking parents ends");
+            }
         }
 
         // please remember, we still need to set the demands back to the instances that are deployed successfully

@@ -36,8 +36,8 @@ public class MIDUtils {
     }
 
     // The serviceName should be unique
-    public static String generateServiceId(String serviceName) {
-        return serviceName;
+    public static String generateServiceId(String serviceName, String rId) {
+        return serviceName + "_" + rId;
     }
 
     public static String generateInterfaceId(String serviceId, String interfaceName) {

@@ -92,6 +92,36 @@ public class MDemandAssignHA {
                 }
             }
 
+            // step 2.3: try to adjust instance resources higher
+            if (!isSuccess) {
+                for (MServerNode serverNode : serverNodeList) {
+                    List<MServiceInstance> targetInstanceList = snapshotOperator.getInstancesCanMet(serverNode.getId(), userDemand);
+                    for (MServiceInstance instance : targetInstanceList) {
+                        MService oldS = snapshotOperator.getServiceById(instance.getServiceId());
+                        List<MService> targetServiceList = snapshotOperator.getServiceManager().getHighRIdOfServiceOrdered(oldS);
+
+                        for (MService tService : targetServiceList) {
+                            if (snapshotOperator.checkIfCanAdjust(instance, tService)) {
+                                List<MUserDemand> userDemandList = snapshotOperator.adjustInstance(instance.getId(), tService);
+                                snapshotOperator.assignDemandToIns(userDemand, instance, demandState);
+                                if (userDemandList.size() != 0) {
+                                    throw new RuntimeException("High RId with low capability: " + tService.getId() + " and " + oldS.getId());
+                                }
+                                isSuccess = true;
+                                break;
+                            }
+                        }
+
+                        if (isSuccess) {
+                            break;
+                        }
+                    }
+
+                    if (isSuccess) {
+                        break;
+                    }
+                }
+            }
             if (!isSuccess) {
                 throw new RuntimeException("Demand cannot be satisfied! : " + userDemand.toString());
             }

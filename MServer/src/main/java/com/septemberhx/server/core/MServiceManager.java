@@ -6,10 +6,7 @@ import com.septemberhx.server.base.model.MServiceInstance;
 import com.septemberhx.server.base.model.MServiceInterface;
 import lombok.Setter;
 
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -84,5 +81,15 @@ public class MServiceManager extends MObjectManager<MService> {
             }
         });
         return resultList;
+    }
+
+    public List<MService> getHighRIdOfServiceOrdered(MService service) {
+        return this.getAllValues().stream().filter(s ->
+                s.getServiceName().equals(service.getServiceName()) && (s.getRId().compareTo(service.getRId()) < 0)
+        ).sorted(Comparator.comparing(MService::getRId)).collect(Collectors.toList());
+    }
+
+    public List<MService> getAllServicesByServiceName(String serviceName) {
+        return this.getAllValues().stream().filter(s -> s.getServiceName().equals(serviceName)).collect(Collectors.toList());
     }
 }

@@ -13,12 +13,16 @@ import java.util.UUID;
 public class MMoveJob extends MBaseJob {
     private String instanceId;
     private String targetNodeId;
+    private String rawNodeId;
+    private String serviceId;
 
-    public MMoveJob(String instanceId, String targetNodeId) {
+    public MMoveJob(String instanceId, String targetNodeId, String rawNodeId, String serviceId) {
         this.instanceId = instanceId;
         this.targetNodeId = targetNodeId;
         this.type = MJobType.MOVE;
         this.id = type.toString() + "_" + UUID.randomUUID().toString();
         this.priority = MOVE;
+        this.rawNodeId = rawNodeId;
+        this.serviceId = serviceId;
     }
 }
