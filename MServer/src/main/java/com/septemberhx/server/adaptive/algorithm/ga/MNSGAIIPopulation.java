@@ -87,7 +87,7 @@ public class MNSGAIIPopulation extends MBaseGA {
             this.population.setPopulace(nextG.subList(0, Configuration.POPULATION_SIZE));
             ++currRound;
 
-            logger.info("Best: " + this.population.getPopulace().get(0).getWSGAFitness());
+            logger.info("Best: " + this.population.getPopulace().get(0).getObjectiveValues());
         }
         this.population.getPopulace().get(0).getCurrOperator().printStatus();
     }

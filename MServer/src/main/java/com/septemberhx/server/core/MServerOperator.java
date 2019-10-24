@@ -656,6 +656,123 @@ public class MServerOperator extends MObjectManager<MServerState> {
         return this.jobList.stream().mapToDouble(MBaseJob::cost).sum();
     }
 
+    public double calcEvolutionCost_v2(MServerOperator rawOperator) {
+        List<MServiceInstance> allInstance = rawOperator.getAllInstances();
+
+        // classify all instances by node id and service name
+        Map<String, Map<String, List<MServiceInstance>>> nodeId2ServiceName2Instance = new HashMap<>();
+        for (MServiceInstance instance : allInstance) {
+            if (!nodeId2ServiceName2Instance.containsKey(instance.getNodeId())) {
+                nodeId2ServiceName2Instance.put(instance.getNodeId(), new HashMap<>());
+            }
+
+            if (!nodeId2ServiceName2Instance.get(instance.getNodeId()).containsKey(instance.getServiceName())) {
+                nodeId2ServiceName2Instance.get(instance.getNodeId()).put(instance.getServiceName(), new ArrayList<>());
+            }
+            nodeId2ServiceName2Instance.get(instance.getNodeId()).get(instance.getServiceName()).add(instance);
+        }
+
+        // do the same with current instance list
+        List<MServiceInstance> allInstanceNow = this.getAllInstances();
+        Map<String, Map<String, List<MServiceInstance>>> nId2SName2InstNow = new HashMap<>();
+        for (MServiceInstance instance : allInstanceNow) {
+            if (!nId2SName2InstNow.containsKey(instance.getNodeId())) {
+                nId2SName2InstNow.put(instance.getNodeId(), new HashMap<>());
+            }
+
+            if (!nId2SName2InstNow.get(instance.getNodeId()).containsKey(instance.getServiceName())) {
+                nId2SName2InstNow.get(instance.getNodeId()).put(instance.getServiceName(), new ArrayList<>());
+            }
+            nId2SName2InstNow.get(instance.getNodeId()).get(instance.getServiceName()).add(instance);
+        }
+
+
+        // move operation is remove & add & switch
+        int deploy_num = 0;
+        int remove_num = 0;
+        int adjust_num = 0;
+        int switch_num = 0;
+
+        // composition is compile new service & deploy
+        // split is remove & deploy
+        int composition_num = 0;
+
+        for (MServerNode node : MSystemModel.getIns().getMSNManager().getAllValues()) {
+            String nodeId = node.getId();
+
+            Set<String> serviceNameSet = new HashSet<>();
+            if (nId2SName2InstNow.containsKey(nodeId)) {
+                serviceNameSet.addAll(nId2SName2InstNow.get(nodeId).keySet());
+            }
+
+            if (nodeId2ServiceName2Instance.containsKey(nodeId)) {
+                serviceNameSet.addAll(nodeId2ServiceName2Instance.get(nodeId).keySet());
+            }
+
+            for (String serviceName : serviceNameSet) {
+                int negative_sum = 0;
+                int passive_sum = 0;
+
+                Map<String, Integer> serviceId2NumNow = new HashMap<>();
+                for (MServiceInstance serviceInstance : nId2SName2InstNow.getOrDefault(nodeId, new HashMap<>()).getOrDefault(serviceName, new ArrayList<>())) {
+                    if (!serviceId2NumNow.containsKey(serviceInstance.getServiceId())) {
+                        serviceId2NumNow.put(serviceInstance.getServiceId(), 0);
+                    }
+                    serviceId2NumNow.put(serviceInstance.getServiceId(), 1 + serviceId2NumNow.get(serviceInstance.getServiceId()));
+                }
+
+                Map<String, Integer> serviceId2NumOld = new HashMap<>();
+                for (MServiceInstance serviceInstance : nodeId2ServiceName2Instance.getOrDefault(nodeId, new HashMap<>()).getOrDefault(serviceName, new ArrayList<>())) {
+                    if (!serviceId2NumOld.containsKey(serviceInstance.getServiceId())) {
+                        serviceId2NumOld.put(serviceInstance.getServiceId(), 0);
+                    }
+                    serviceId2NumOld.put(serviceInstance.getServiceId(), 1 + serviceId2NumOld.get(serviceInstance.getServiceId()));
+                }
+
+                Set<String> serviceIdSet = new HashSet<>();
+                serviceIdSet.addAll(serviceId2NumNow.keySet());
+                serviceIdSet.addAll(serviceId2NumOld.keySet());
+                for (String serviceId : serviceIdSet) {
+                    int t = serviceId2NumNow.get(serviceId) - serviceId2NumOld.getOrDefault(serviceId, 0);
+                    if (t >= 0) {
+                        passive_sum += t;
+                    } else {
+                        negative_sum += t;
+                    }
+                }
+
+                int sumT = passive_sum + negative_sum;
+                if (sumT >= 0) {
+                    deploy_num += sumT;
+                    adjust_num += -negative_sum;
+                } else {
+                    remove_num += -sumT;
+                    adjust_num += passive_sum;
+                }
+            }
+        }
+
+        for (MDemandState demandState : this.demandStateManager.getAllValues()) {
+            Optional<MDemandState> demandStateOptional = rawOperator.getDemandStateManager().getById(demandState.getId());
+            if (demandStateOptional.isPresent()) {
+                if (!demandState.getNodeId().equals(demandStateOptional.get().getNodeId())) {
+                    switch_num += 1;
+                }
+            } else {
+                switch_num += 1;
+            }
+        }
+
+        for (MService service : this.serviceManager.getAllValues()) {
+            if (!rawOperator.getServiceManager().containsById(service.getId()) && service.isGenerated()) {
+                composition_num += 1;
+            }
+        }
+
+        return deploy_num * MBaseJob.COST_DEPLOY + remove_num * MBaseJob.COST_REMOVE + adjust_num * MBaseJob.COST_ADJUST
+                + switch_num * MBaseJob.COST_SWITCH + composition_num * MBaseJob.COST_COMPOSITION;
+    }
+
     public double calcEvolutionCost(MServerOperator rawOperator) {
         List<MBaseJob> newJobList = new ArrayList<>();
 

@@ -579,7 +579,7 @@ public class MChromosome {
     public double getCost() {
         if (this.cost < 0) {
 //            this.cost = this.currOperator.calcEvolutionCost(this.rawOperator);
-            this.cost = this.currOperator.calcEvolutionCost();
+            this.cost = this.currOperator.calcEvolutionCost_v2(rawOperator);
         }
         return this.cost;
     }

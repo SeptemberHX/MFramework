@@ -34,6 +34,12 @@ public class MBaseJob extends MBaseObject {
     public static Integer MOVE = 21;
     public static Integer NOTIFY = 41;
 
+    public static Double COST_DEPLOY = 65.0;
+    public static Double COST_REMOVE = 12.0;
+    public static Double COST_ADJUST = 77.0;
+    public static Double COST_SWITCH = 0.8;
+    public static Double COST_COMPOSITION = 100.0;
+
     protected List<MBaseJob> subJobs = new ArrayList<>();
 
     public MBaseJob() {
