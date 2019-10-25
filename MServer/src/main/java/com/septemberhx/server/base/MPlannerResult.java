@@ -1,6 +1,7 @@
 package com.septemberhx.server.base;
 
 
+import com.septemberhx.server.core.MServerOperator;
 import com.septemberhx.server.job.MBaseJob;
 import com.septemberhx.server.job.MJobManager;
 import lombok.Getter;
@@ -31,6 +32,8 @@ public class MPlannerResult {
       Job manager which is used to manage all jobs in the plan due to the relationship between jobs.
      */
     private MJobManager jobManager;
+
+    private MServerOperator serverOperator;
 
     public MPlannerResult() {
         this.jobIdList = new ArrayList<>();

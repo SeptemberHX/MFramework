@@ -12,7 +12,7 @@ import java.util.*;
 public class MObjectManager<T extends MBaseObject> {
 
     protected Map<String, T> objectMap;
-    protected Logger logger = LogManager.getLogger(this.getClass());
+    protected static Logger logger = LogManager.getLogger("MObjectManager");
 
     public MObjectManager() {
         this.objectMap = new HashMap<>();

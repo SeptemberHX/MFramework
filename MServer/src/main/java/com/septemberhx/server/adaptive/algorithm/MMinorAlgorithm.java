@@ -67,6 +67,7 @@ public class MMinorAlgorithm implements MAlgorithmInterface {
 
         MPlannerResult plannerResult = new MPlannerResult();
         plannerResult.addJobs(serverOperator.getJobList());
+        plannerResult.setServerOperator(serverOperator);
         return plannerResult;
     }
 

@@ -12,6 +12,7 @@ import com.septemberhx.server.core.*;
 
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.util.List;
 
 /**
@@ -138,6 +139,33 @@ public class MDataUtils {
             e.printStackTrace();
         }
         return insManager;
+    }
+
+    public static void saveServerOperatorToFile(MServerOperator serverOperator, String jsonFilePath) {
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        String jsonStr = gson.toJson(serverOperator);
+
+        try {
+            FileWriter fw = new FileWriter(jsonFilePath);
+            fw.write(jsonStr);
+            fw.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static MServerOperator loadServerOperator(String jsonFilePath) {
+        File f = new File(jsonFilePath);
+        MServerOperator serverOperator = new MServerOperator();
+        try {
+            FileReader fileReader = new FileReader(f);
+
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            serverOperator = gson.fromJson(fileReader, MServerOperator.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return serverOperator;
     }
 
     public static void main(String[] args) {

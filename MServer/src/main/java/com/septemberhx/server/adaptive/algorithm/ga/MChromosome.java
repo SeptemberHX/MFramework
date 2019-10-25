@@ -332,11 +332,13 @@ public class MChromosome {
      * In this function, we will assign demands to instances, and "save" non-feasible solution
      */
     private void assignDemands() {
-        logger.info(this.id + " unsolved demand size: " + this.unSolvedDemandList);
-        logger.info(this.id + " solved demand size: " + this.currOperator.getDemandStateManager().getAllValues().size() + " before assignDemands");
-
         List<MBaseJob> newJobList = MDemandAssignHA.calc(this.unSolvedDemandList, currOperator);
-        logger.info(this.id + " solved demand size: " + this.currOperator.getDemandStateManager().getAllValues().size() + " after MDemandAssignHA");
+
+        if (Configuration.DEBUG_MODE) {
+            logger.info(this.id + " unsolved demand size: " + this.unSolvedDemandList);
+            logger.info(this.id + " solved demand size: " + this.currOperator.getDemandStateManager().getAllValues().size() + " before assignDemands");
+            logger.info(this.id + " solved demand size: " + this.currOperator.getDemandStateManager().getAllValues().size() + " after MDemandAssignHA");
+        }
 
         for (MBaseJob job : newJobList) {
             if (job.getType() == MJobType.DEPLOY) {
@@ -407,9 +409,13 @@ public class MChromosome {
             }
         }
 
-        logger.info(this.id + " solved demand size: " + this.currOperator.getDemandStateManager().getAllValues().size() + " before delete empty instance");
+        if (Configuration.DEBUG_MODE)
+            logger.info(this.id + " solved demand size: " + this.currOperator.getDemandStateManager().getAllValues().size() + " before delete empty instance");
+        
         for (MServiceInstance instance : emptyInstanceList) {
-            logger.info("Delete empty instance: " + instance.getId());
+            if (Configuration.DEBUG_MODE)
+                logger.info("Delete empty instance: " + instance.getId());
+
             if (this.rawOperator.getInstanceById(instance.getId()) != null) {
                 this.currOperator.deleteInstance(instance.getId());
             } else {
@@ -420,7 +426,8 @@ public class MChromosome {
             this.genes[nodeIndex].deleteInstance(serviceIndex);
         }
 
-        logger.info(this.id + " solved demand size: " + this.currOperator.getDemandStateManager().getAllValues().size() + " after assignDemands");
+        if (Configuration.DEBUG_MODE)
+            logger.info(this.id + " solved demand size: " + this.currOperator.getDemandStateManager().getAllValues().size() + " after assignDemands");
     }
 
     /**

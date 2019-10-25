@@ -304,9 +304,13 @@ public class MServerOperator extends MObjectManager<MServerState> {
 
         serviceOptional.ifPresent(mService -> {
             String nodeId = this.instanceManager.getById(instanceId).get().getNodeId();
-            logger.info("Before resource release " + this.nodeId2ResourceLeft.get(nodeId));
+            if (Configuration.DEBUG_MODE) {
+                logger.info("Before resource release " + this.nodeId2ResourceLeft.get(nodeId));
+            }
             this.nodeId2ResourceLeft.get(nodeId).free(mService.getResource());
-            logger.info("After resource release " + this.nodeId2ResourceLeft.get(nodeId));
+            if (Configuration.DEBUG_MODE) {
+                logger.info("After resource release " + this.nodeId2ResourceLeft.get(nodeId));
+            }
         });
         this.instanceManager.delete(instanceId);
         if (ifAddJob) {
@@ -1062,9 +1066,23 @@ public class MServerOperator extends MObjectManager<MServerState> {
         if (freeDemandSize < 0) {   // high resource with high capability
             randomInstance.setServiceId(targetS.getId());
         } else {    // low resource with low capability
-            // todo: remove sla not meet user demands
+            // remove sla not meet user demands
             randomInstance.setServiceId(targetS.getId());
             List<MDemandState> demandStateList = this.demandStateManager.getDemandStatesOnInstance(instanceId);
+            Iterator<MDemandState> demandStateIterator = demandStateList.iterator();
+            while (demandStateIterator.hasNext()){
+                MDemandState demandState = demandStateIterator.next();
+                MUserDemand userDemand = MSystemModel.getIns().getUserManager().getUserDemandByUserAndDemandId(
+                        demandState.getUserId(),
+                        demandState.getId()
+                );
+                if (!targetS.checkIfMeetDemand(userDemand)) {
+                    this.removeDemandState(demandState);
+                    demandStateIterator.remove();
+                    unSolvedDemands.add(userDemand);
+                }
+            }
+
             Collections.shuffle(demandStateList, random);
             for (int i = 0; i < freeDemandSize && i < demandStateList.size(); ++i) {
                 this.removeDemandState(demandStateList.get(i));
