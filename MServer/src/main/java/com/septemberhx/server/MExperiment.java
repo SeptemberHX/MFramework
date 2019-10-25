@@ -44,8 +44,8 @@ public class MExperiment {
     }
 
     public static void main(String[] args) {
-//        calcPrevSystemState("D:\\Workspace\\gitlab\\mdata\\Lab2\\TestData", "D:\\Workspace\\gitlab\\mdata\\Lab2\\TestData\\prev_system.json");
-        test("D:\\Workspace\\gitlab\\mdata\\Lab2\\TestData");
+        calcPrevSystemState("D:\\Workspace\\gitlab\\mdata\\Lab2\\ExperimentData", "D:\\Workspace\\gitlab\\mdata\\Lab2\\ExperimentData\\prev_system.json");
+//        test("D:\\Workspace\\gitlab\\mdata\\Lab2\\TestData");
     }
 
 }
