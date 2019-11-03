@@ -228,6 +228,14 @@ public class MServerOperator extends MObjectManager<MServerState> {
 
         MDemandState newDemandState = this.assignDemandToInterfaceOnSpecificInstance(userDemand, instance);
         this.demandStateManager.add(newDemandState);
+
+        if (Configuration.DEBUG_MODE) {
+            logger.info("Assign demand " + userDemand.getId() + " to " + instance.getId());
+            if (!this.verify()) {
+                logger.error("Verify failed after assign demand to instance");
+            }
+        }
+
         return newDemandState;
     }
 
@@ -737,7 +745,7 @@ public class MServerOperator extends MObjectManager<MServerState> {
                 serviceIdSet.addAll(serviceId2NumNow.keySet());
                 serviceIdSet.addAll(serviceId2NumOld.keySet());
                 for (String serviceId : serviceIdSet) {
-                    int t = serviceId2NumNow.get(serviceId) - serviceId2NumOld.getOrDefault(serviceId, 0);
+                    int t = serviceId2NumNow.getOrDefault(serviceId, 0) - serviceId2NumOld.getOrDefault(serviceId, 0);
                     if (t >= 0) {
                         passive_sum += t;
                     } else {
@@ -1048,8 +1056,10 @@ public class MServerOperator extends MObjectManager<MServerState> {
 
     public List<MUserDemand> adjustInstance(String instanceId, MService targetS) {
 
-        logger.info("DemandManager size: " + this.demandStateManager.getAllValues().size() + " before adjustInstance");
-        logger.info("Raw instance left capability before adjustInstance: " + this.insId2LeftCap.get(instanceId));
+        if (Configuration.DEBUG_MODE) {
+            logger.info("DemandManager size: " + this.demandStateManager.getAllValues().size() + " before adjustInstance");
+            logger.info("Raw instance left capability before adjustInstance: " + this.insId2LeftCap.get(instanceId));
+        }
 
         List<MUserDemand> unSolvedDemands = new ArrayList<>();
 
@@ -1096,18 +1106,25 @@ public class MServerOperator extends MObjectManager<MServerState> {
 
         // once adjust an instance, the instance will not be itself anymore. It is a new instance.
         this.instanceManager.delete(instanceId);
-        logger.info("Demand state size after delete raw instance: " + this.demandStateManager.getAllValues().size());
+        if (Configuration.DEBUG_MODE) {
+            logger.info("Demand state size after delete raw instance: " + this.demandStateManager.getAllValues().size());
+        }
 
         randomInstance.setId(MIDUtils.generateInstanceId(randomInstance.getNodeId(), randomInstance.getServiceId()));
         this.instanceManager.add(randomInstance);
 
-        logger.info("Raw instance left capability after adjust: " + this.insId2LeftCap.get(instanceId));
+        if (Configuration.DEBUG_MODE) {
+            logger.info("Raw instance left capability after adjust: " + this.insId2LeftCap.get(instanceId));
+        }
 
         this.insId2LeftCap.put(randomInstance.getId(), this.insId2LeftCap.get(instanceId));
         this.insId2LeftCap.remove(instanceId);
 
-        logger.info("New adjust instance left capability after adjust: " + this.insId2LeftCap.get(randomInstance.getId()) + ", id: " + randomInstance.getId());
-        logger.info("Size of demands on this instance: " + this.demandStateManager.getDemandStatesOnInstance(instanceId).size());
+        if (Configuration.DEBUG_MODE) {
+            logger.info("New adjust instance left capability after adjust: " + this.insId2LeftCap.get(randomInstance.getId()) + ", id: " + randomInstance.getId());
+            logger.info("Size of demands on this instance: " + this.demandStateManager.getDemandStatesOnInstance(instanceId).size());
+        }
+
         for (MDemandState demandState : this.demandStateManager.getDemandStatesOnInstance(instanceId)) {
             MDemandState newState = new MDemandState(
                     demandState.getId(),
@@ -1118,14 +1135,19 @@ public class MServerOperator extends MObjectManager<MServerState> {
             );
             this.demandStateManager.replace(newState);
         }
-        logger.info("Size of demands on this new adjust instance: " + this.demandStateManager.getDemandStatesOnInstance(randomInstance.getId()).size());
+
+        if (Configuration.DEBUG_MODE) {
+            logger.info("Size of demands on this new adjust instance: " + this.demandStateManager.getDemandStatesOnInstance(randomInstance.getId()).size());
+        }
 
         this.addNewJob(new MAdjustJob(randomInstance.getId(), targetS.getRId(), serviceOptional.get().getId(), targetS.getId(), randomInstance.getNodeId()));
         leftR.free(oldR);
         leftR.assign(newR);
 
-        logger.info("DemandManager size: " + this.demandStateManager.getAllValues().size() + " after adjustInstance");
-        logger.info("Unsolved demands size: " + unSolvedDemands.size());
+        if (Configuration.DEBUG_MODE) {
+            logger.info("DemandManager size: " + this.demandStateManager.getAllValues().size() + " after adjustInstance");
+            logger.info("Unsolved demands size: " + unSolvedDemands.size());
+        }
         return unSolvedDemands;
     }
 }

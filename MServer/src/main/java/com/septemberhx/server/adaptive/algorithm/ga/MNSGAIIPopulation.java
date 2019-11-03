@@ -13,8 +13,8 @@ import static com.septemberhx.server.adaptive.algorithm.ga.MGAUtils.*;
  */
 public class MNSGAIIPopulation extends MBaseGA {
 
-    public MNSGAIIPopulation(MServerOperator snapshotOperator) {
-        super(snapshotOperator);
+    public MNSGAIIPopulation(MServerOperator snapshotOperator, MServerOperator rawOperator) {
+        super(snapshotOperator, rawOperator);
     }
 
     public void init() {
@@ -23,14 +23,14 @@ public class MNSGAIIPopulation extends MBaseGA {
             this.population.populace.add(MChromosome.randomInit(
                     MBaseGA.fixedNodeIdList.size(),
                     MBaseGA.fixedServiceIdList.size(),
-                    MSystemModel.getIns().getOperator(),
+                    this.rawOperator,
                     10
             ));
         }
     }
 
     @Override
-    public void evolve() {
+    public MServerOperator evolve() {
         this.init();
 
         int currRound = 1;
@@ -90,6 +90,7 @@ public class MNSGAIIPopulation extends MBaseGA {
             logger.info("Best: " + this.population.getPopulace().get(0).getObjectiveValues());
         }
         this.population.getPopulace().get(0).getCurrOperator().printStatus();
+        return this.population.getPopulace().get(0).getCurrOperator();
     }
 
     private static void order(List<MChromosome> chromosomeList) {

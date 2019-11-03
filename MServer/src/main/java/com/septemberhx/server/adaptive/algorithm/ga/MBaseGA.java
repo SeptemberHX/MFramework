@@ -23,11 +23,14 @@ public abstract class MBaseGA {
     static Map<String, Integer> fixedNodeId2Index;
     static Map<String, Integer> fixedServiceId2Index;
 
+    MServerOperator rawOperator;
+
     Logger logger = LogManager.getLogger(this.getClass());
 
     MPopulation population;
 
-    public MBaseGA(MServerOperator snapshotOperator) {
+    public MBaseGA(MServerOperator snapshotOperator, MServerOperator rawOperator) {
+        this.rawOperator = rawOperator;
         fixedNodeIdList = new ArrayList<>();
         fixedServiceIdList = new ArrayList<>();
 
@@ -51,5 +54,5 @@ public abstract class MBaseGA {
         }
     }
 
-    public abstract void evolve();
+    public abstract MServerOperator evolve();
 }

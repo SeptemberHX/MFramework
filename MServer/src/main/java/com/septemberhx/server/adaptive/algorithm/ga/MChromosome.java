@@ -409,12 +409,21 @@ public class MChromosome {
             }
         }
 
+        // delete un-necessary instances
+        for (MServiceInstance instance : this.currOperator.getAllInstances()) {
+            if (this.rawOperator.getInstanceById(instance.getId()) == null
+                    && this.currOperator.getInstanceUserNumber(instance.getId()) == 0
+                    && !emptyInstanceList.contains(instance)) {
+                emptyInstanceList.add(instance);
+            }
+        }
+
         if (Configuration.DEBUG_MODE)
             logger.info(this.id + " solved demand size: " + this.currOperator.getDemandStateManager().getAllValues().size() + " before delete empty instance");
         
         for (MServiceInstance instance : emptyInstanceList) {
             if (Configuration.DEBUG_MODE)
-                logger.info("Delete empty instance: " + instance.getId());
+                logger.info(this.getId() + " Delete empty instance: " + instance.getId());
 
             if (this.rawOperator.getInstanceById(instance.getId()) != null) {
                 this.currOperator.deleteInstance(instance.getId());

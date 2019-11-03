@@ -14,8 +14,8 @@ import static com.septemberhx.server.adaptive.algorithm.ga.MGAUtils.fastNonDomin
  */
 public class MMOEADPopulation extends MBaseGA {
 
-    public MMOEADPopulation(MServerOperator serverOperator) {
-        super(serverOperator);
+    public MMOEADPopulation(MServerOperator serverOperator, MServerOperator rawOperator) {
+        super(serverOperator, rawOperator);
     }
 
     public void init() {
@@ -24,14 +24,14 @@ public class MMOEADPopulation extends MBaseGA {
             this.population.populace.add(MChromosome.randomInit(
                     MBaseGA.fixedNodeIdList.size(),
                     MBaseGA.fixedServiceIdList.size(),
-                    MSystemModel.getIns().getOperator(),
+                    this.rawOperator,
                     10
             ));
         }
     }
 
     @Override
-    public void evolve() {
+    public MServerOperator evolve() {
         this.init();
 
         List<MChromosome> P_EP = new ArrayList<>();
@@ -75,6 +75,7 @@ public class MMOEADPopulation extends MBaseGA {
 
         // the result: P_EP
         P_EP.get(0).getCurrOperator().printStatus();
+        return P_EP.get(0).getCurrOperator();
     }
 
     private static double[] getRefrencePoint(MPopulation population) {

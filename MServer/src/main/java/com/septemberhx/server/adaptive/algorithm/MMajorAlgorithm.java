@@ -41,12 +41,12 @@ public class MMajorAlgorithm implements MAlgorithmInterface {
     }
 
     @Override
-    public MPlannerResult calc(MAnalyserResult data) {
+    public MPlannerResult calc(MAnalyserResult data, MServerOperator rawOperator) {
         // First, init operator
         MServerOperator serverOperator = MSystemModel.getIns().getOperator();
         serverOperator.reInit();
         // Then, do the composition job behind initialization. It will modify system model by operator
-        MCompositionAlgorithmInCommon.doCompositionPart(data.getCallGraph());
+//        MCompositionAlgorithmInCommon.doCompositionPart(data.getCallGraph());
         // DO NOT CHANGE THE ORDER ABOVE.
 
         // Due to the huge amount of the user demands, it's not likely to put demand-instance mapping in the result of
@@ -58,21 +58,23 @@ public class MMajorAlgorithm implements MAlgorithmInterface {
         //    Part 3. Compose results of Part 1 and Part 2 together as one solution
         //
         // Only the instance placement will be directly changed by mutation/crossover
-        MBaseGA ga = this.getGAObject(serverOperator);
-        ga.evolve();
+        MBaseGA ga = this.getGAObject(serverOperator, rawOperator);
+        MServerOperator operator = ga.evolve();
 
-        return null;
+        MPlannerResult plannerResult = new MPlannerResult();
+        plannerResult.setServerOperator(operator);
+        return plannerResult;
     }
 
-    private MBaseGA getGAObject(MServerOperator operator) {
+    private MBaseGA getGAObject(MServerOperator operator, MServerOperator rawOperator) {
         switch (this.gaType) {
             case WSGA:
-                return new MWSGAPopulation(operator);
+                return new MWSGAPopulation(operator, rawOperator);
             case MODE_A:
-                return new MMOEADPopulation(operator);
+                return new MMOEADPopulation(operator, rawOperator);
             case NSGA_II:
-                return new MNSGAIIPopulation(operator);
+                return new MNSGAIIPopulation(operator, rawOperator);
         }
-        return new MWSGAPopulation(operator);
+        return new MWSGAPopulation(operator, rawOperator);
     }
 }

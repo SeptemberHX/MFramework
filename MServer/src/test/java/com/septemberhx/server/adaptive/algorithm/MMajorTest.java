@@ -2,6 +2,7 @@ package com.septemberhx.server.adaptive.algorithm;
 
 import com.septemberhx.server.adaptive.MAnalyser;
 import com.septemberhx.server.base.MAnalyserResult;
+import com.septemberhx.server.core.MServerOperator;
 import com.septemberhx.server.utils.MDataUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,7 +22,7 @@ class MMajorTest {
         MAnalyserResult analyserResult = analyser.analyse(new ArrayList<>(), new ArrayList<>());
 
         MMajorAlgorithm mMajorAlgorithm = new MMajorAlgorithm(MMajorAlgorithm.GA_TYPE.WSGA);
-        mMajorAlgorithm.calc(analyserResult);
+        mMajorAlgorithm.calc(analyserResult, new MServerOperator());
     }
 
     @Test
@@ -30,7 +31,7 @@ class MMajorTest {
         MAnalyserResult analyserResult = analyser.analyse(new ArrayList<>(), new ArrayList<>());
 
         MMajorAlgorithm mMajorAlgorithm = new MMajorAlgorithm(MMajorAlgorithm.GA_TYPE.NSGA_II);
-        mMajorAlgorithm.calc(analyserResult);
+        mMajorAlgorithm.calc(analyserResult, new MServerOperator());
     }
 
     @Test
@@ -39,11 +40,11 @@ class MMajorTest {
         MAnalyserResult analyserResult = analyser.analyse(new ArrayList<>(), new ArrayList<>());
 
         MMajorAlgorithm mMajorAlgorithm = new MMajorAlgorithm(MMajorAlgorithm.GA_TYPE.MODE_A);
-        mMajorAlgorithm.calc(analyserResult);
+        mMajorAlgorithm.calc(analyserResult, new MServerOperator());
     }
 
     @BeforeEach
     void setUp() {
-        MDataUtils.loadDataFromDir("D:\\Workspace\\gitlab\\mdata\\Lab2\\TestData");
+        MDataUtils.loadDataFromDir("D:\\Workspace\\gitlab\\mdata\\Lab2\\TestData", true);
     }
 }

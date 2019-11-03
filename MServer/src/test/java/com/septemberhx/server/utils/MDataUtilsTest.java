@@ -13,6 +13,6 @@ class MDataUtilsTest {
 
     @Test
     void loadDataFromDir() {
-        MDataUtils.loadDataFromDir("D:\\Workspace\\gitlab\\mdata\\Lab2\\TestData");
+        MDataUtils.loadDataFromDir("D:\\Workspace\\gitlab\\mdata\\Lab2\\TestData", true);
     }
 }

@@ -17,8 +17,8 @@ public class MWSGAPopulation extends MBaseGA {
     public static Double P_SCORE = 0.5;
     public static Double P_COST = 0.5;
 
-    public MWSGAPopulation(MServerOperator snapshotOperator) {
-        super(snapshotOperator);
+    public MWSGAPopulation(MServerOperator snapshotOperator, MServerOperator rawOperator) {
+        super(snapshotOperator, rawOperator);
     }
 
     public void init() {
@@ -27,14 +27,14 @@ public class MWSGAPopulation extends MBaseGA {
             this.population.populace.add(MChromosome.randomInit(
                     MBaseGA.fixedNodeIdList.size(),
                     MBaseGA.fixedServiceIdList.size(),
-                    MSystemModel.getIns().getOperator(),
+                    this.rawOperator,
                     10
             ));
         }
     }
 
     @Override
-    public void evolve() {
+    public MServerOperator evolve() {
         this.init();
 
         int currRound = 1;
@@ -64,6 +64,7 @@ public class MWSGAPopulation extends MBaseGA {
         }
 
         this.population.getPopulace().get(0).getCurrOperator().printStatus();
+        return this.population.getPopulace().get(0).getCurrOperator();
     }
 
     private static MChromosome binaryTournamentSelection(MPopulation population) {

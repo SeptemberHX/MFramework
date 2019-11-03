@@ -24,7 +24,7 @@ public class MMinorAlgorithm implements MAlgorithmInterface {
     private static Logger logger = LogManager.getLogger(MMinorAlgorithm.class);
 
     @Override
-    public MPlannerResult calc(MAnalyserResult data) {
+    public MPlannerResult calc(MAnalyserResult data, MServerOperator rawOperator) {
         // First, init operator
         MServerOperator serverOperator = MSystemModel.getIns().getOperator();
         serverOperator.reInit();

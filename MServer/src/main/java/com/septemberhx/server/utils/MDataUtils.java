@@ -25,9 +25,10 @@ public class MDataUtils {
     private static String NODE_DATA_FILENAME = "node.json";
     private static String CONNECTION_DATA_FILENAME = "connection.json";
     private static String SERVICE_DATA_FILENAME = "service.json";
-    private static String USER_DATA_FILENAME = "user.json";
+    private static String USER_PREV_DATA_FILENAME = "demand_prev.json";
+    private static String USER_NEXT_DATA_FILENAME = "demand_curr.json";
 
-    public static void loadDataFromDir(String dirPath) {
+    public static void loadDataFromDir(String dirPath, boolean prev) {
         MServerNodeManager nodeManager = MDataUtils.loadNodeManager(
                 MDataUtils.joinPath(dirPath, NODE_DATA_FILENAME),
                 MDataUtils.joinPath(dirPath, CONNECTION_DATA_FILENAME)
@@ -38,8 +39,12 @@ public class MDataUtils {
         );
         serviceManager.verify();
 
+        String userFileName = USER_PREV_DATA_FILENAME;
+        if (!prev) {
+            userFileName = USER_NEXT_DATA_FILENAME;
+        }
         MUserManager userManager = MDataUtils.loadUserManager(
-                MDataUtils.joinPath(dirPath, USER_DATA_FILENAME)
+                MDataUtils.joinPath(dirPath, userFileName)
         );
         userManager.verify();
 
