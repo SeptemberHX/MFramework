@@ -48,7 +48,9 @@ public class MServerNodeManager extends MObjectManager<MServerNode> {
         List<EndpointPair<String>> edgeList = new ArrayList<>(this.serverNodeGraph.incidentEdges(serverNodeId));
         List<MServerNode> successorList = new ArrayList<>();
         for (EndpointPair<String> edge : edgeList) {
-            successorList.add(this.objectMap.get(edge.nodeV()));
+            if (!edge.nodeV().equals(serverNodeId)) {
+                successorList.add(this.objectMap.get(edge.nodeV()));
+            }
         }
         Collections.sort(successorList, (o1, o2) -> {
             Optional<MNodeConnectionInfo> cIOption1 = serverNodeGraph.edgeValue(serverNodeId, o1.getId());

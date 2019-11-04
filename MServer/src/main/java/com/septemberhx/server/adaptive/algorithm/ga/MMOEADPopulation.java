@@ -75,6 +75,7 @@ public class MMOEADPopulation extends MBaseGA {
 
         // the result: P_EP
         P_EP.get(0).getCurrOperator().printStatus();
+        logger.info(P_EP.get(0).getObjectiveValues());
         return P_EP.get(0).getCurrOperator();
     }
 

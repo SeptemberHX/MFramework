@@ -3,6 +3,7 @@ package com.septemberhx.server;
 import com.septemberhx.server.adaptive.MAnalyser;
 import com.septemberhx.server.adaptive.algorithm.MMajorAlgorithm;
 import com.septemberhx.server.adaptive.algorithm.MMinorAlgorithm;
+import com.septemberhx.server.adaptive.algorithm.ga.Configuration;
 import com.septemberhx.server.base.MAnalyserResult;
 import com.septemberhx.server.base.MPlannerResult;
 import com.septemberhx.server.core.MServerOperator;
@@ -28,13 +29,15 @@ public class MExperiment {
 
         MMinorAlgorithm minorAlgorithm = new MMinorAlgorithm();
         MPlannerResult result = minorAlgorithm.calc(analyserResult, MSystemModel.getIns().getOperator().shallowClone());
-
+        if (!result.getServerOperator().verify()) {
+            throw new RuntimeException("Error in calcPrevSystemState");
+        }
         // save the previous data into file
         // we will dump MServerOperator into json file
         MDataUtils.saveServerOperatorToFile(result.getServerOperator(), prevSystemFilePath);
     }
 
-    public static void test(String dataDirPath) {
+    public static void runExperiment(String dataDirPath, MMajorAlgorithm.GA_TYPE gaType) {
         MDataUtils.loadDataFromDir(dataDirPath, false);
 
         // You should consider which part of the data is needed to load into the system
@@ -44,14 +47,32 @@ public class MExperiment {
         MAnalyser analyser = new MAnalyser();
         MAnalyserResult analyserResult = analyser.analyse(new ArrayList<>(), new ArrayList<>());
 
-        MMajorAlgorithm mMajorAlgorithm = new MMajorAlgorithm(MMajorAlgorithm.GA_TYPE.WSGA);
+        MMajorAlgorithm mMajorAlgorithm = new MMajorAlgorithm(gaType);
         mMajorAlgorithm.calc(analyserResult, serverOperator);
 
     }
 
     public static void main(String[] args) {
+        System.out.println("====== Start with data: " + args[0] + " with algorithm " + args[1] + " with max-round " + args[2]);
 //        calcPrevSystemState("D:\\Workspace\\gitlab\\mdata\\Lab2\\ExperimentData", "D:\\Workspace\\gitlab\\mdata\\Lab2\\ExperimentData\\prev_system.json");
-        test("D:\\Workspace\\gitlab\\mdata\\Lab2\\ExperimentData");
+        MMajorAlgorithm.GA_TYPE gaType = MMajorAlgorithm.GA_TYPE.WSGA;
+        switch (args[1]) {
+            case "wsga":
+                gaType = MMajorAlgorithm.GA_TYPE.WSGA;
+                Configuration.WSGA_MAX_ROUND = Integer.parseInt(args[2]);
+                break;
+            case "nsgaii":
+                gaType = MMajorAlgorithm.GA_TYPE.NSGA_II;
+                Configuration.NSGAII_MAX_ROUND = Integer.parseInt(args[2]);
+                break;
+            case "moead":
+                gaType = MMajorAlgorithm.GA_TYPE.MODE_A;
+                Configuration.MOEAD_MAX_ROUND = Integer.parseInt(args[2]);
+                break;
+            default:
+                break;
+        }
+        runExperiment(args[0], gaType);
     }
 
 }

@@ -587,7 +587,8 @@ public class MChromosome {
 
     public double getFitness() {
         if (this.fitness < 0) {
-            this.fitness = this.currOperator.calcScore();
+//            this.fitness = this.currOperator.calcScore();
+            this.fitness = this.currOperator.calcScore_v2();
         }
         return this.fitness;
     }
@@ -600,6 +601,7 @@ public class MChromosome {
         return this.cost;
     }
 
+    // small is better
     public double getWSGAFitness() {
         double score = this.getFitness();
         double cost = this.getCost();

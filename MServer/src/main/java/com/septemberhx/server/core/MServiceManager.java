@@ -85,7 +85,7 @@ public class MServiceManager extends MObjectManager<MService> {
 
     public List<MService> getHighRIdOfServiceOrdered(MService service) {
         return this.getAllValues().stream().filter(s ->
-                s.getServiceName().equals(service.getServiceName()) && (s.getRId().compareTo(service.getRId()) < 0)
+                s.getServiceName().equals(service.getServiceName()) && (s.getRId().compareTo(service.getRId()) > 0)
         ).sorted(Comparator.comparing(MService::getRId)).collect(Collectors.toList());
     }
 

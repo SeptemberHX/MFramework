@@ -49,6 +49,11 @@ public class MServerOperator extends MObjectManager<MServerState> {
         this.nodeId2ResourceLeft = new HashMap<>();
         this.funcId2InsIdSet = new HashMap<>();
         this.jobList = new ArrayList<>();
+
+        this.demandStateManager = new MDemandStateManager();
+        this.instanceManager = new MServiceInstanceManager();
+        this.serviceManager = new MServiceManager();
+        this.generatedInterfaceList = new ArrayList<>();
     }
 
     public static MServerOperator blankObject() {
@@ -185,18 +190,18 @@ public class MServerOperator extends MObjectManager<MServerState> {
             System.out.println("|");
             for (MServiceInstance instance : instanceMap.getOrDefault(nodeId, new ArrayList<>())) {
                 System.out.println(String.format("|--- %s, left cap = %d, service = %s", instance.getId(), this.insId2LeftCap.get(instance.getId()), instance.getServiceId()));
-                System.out.println("   |");
-                for (MDemandState demandState : demandStateMap.getOrDefault(instance.getId(), new ArrayList<>())) {
-                    System.out.println(String.format("   |--- %s", demandState.toString()));
-                }
-                System.out.println();
+//                System.out.println("   |");
+//                for (MDemandState demandState : demandStateMap.getOrDefault(instance.getId(), new ArrayList<>())) {
+//                    System.out.println(String.format("   |--- %s", demandState.toString()));
+//                }
+//                System.out.println();
             }
         }
 
-        System.out.println("================== Job ===================");
-        for (MBaseJob baseJob : this.jobList) {
-            System.out.println(baseJob);
-        }
+//        System.out.println("================== Job ===================");
+//        for (MBaseJob baseJob : this.jobList) {
+//            System.out.println(baseJob);
+//        }
     }
 
     public List<MUserDemand> filterNotIn(List<MUserDemand> userDemands) {
@@ -229,12 +234,12 @@ public class MServerOperator extends MObjectManager<MServerState> {
         MDemandState newDemandState = this.assignDemandToInterfaceOnSpecificInstance(userDemand, instance);
         this.demandStateManager.add(newDemandState);
 
-        if (Configuration.DEBUG_MODE) {
-            logger.info("Assign demand " + userDemand.getId() + " to " + instance.getId());
-            if (!this.verify()) {
-                logger.error("Verify failed after assign demand to instance");
-            }
-        }
+//        if (Configuration.DEBUG_MODE) {
+//            logger.info("Assign demand " + userDemand.getId() + " to " + instance.getId());
+//            if (!this.verify()) {
+//                logger.error("Verify failed after assign demand to instance");
+//            }
+//        }
 
         return newDemandState;
     }
@@ -657,6 +662,36 @@ public class MServerOperator extends MObjectManager<MServerState> {
                         tTrans = MAdaptiveSystem.UNAVAILABLE_TRANSFORM_TIME;
                     }
                     allScore += MAdaptiveSystem.ALPHA / (1 + tTrans) + (1 - MAdaptiveSystem.ALPHA) / (1 + tDelay);
+                }
+            }
+            chainCount += user.getDemandChainList().size();
+        }
+        return allScore / chainCount;
+    }
+
+    public double calcScore_v2() {
+        List<MUser> userList = MSystemModel.getIns().getUserManager().getAllValues();
+        double allScore = 0;
+        Long chainCount = 0L;
+        for (MUser user : userList) {
+            String nodeId = MSystemModel.getIns().getMSNManager().getClosestNodeId(user.getPosition());
+            for (MDemandChain demandChain : user.getDemandChainList()) {
+                double tDelay = 0;
+                double tTrans = 0;
+                for (MUserDemand demand : demandChain.getDemandList()) {
+                    Optional<MDemandState> demandStateOptional = this.demandStateManager.getById(demand.getId());
+                    if (demandStateOptional.isPresent()) {
+                        MNodeConnectionInfo info = MSystemModel.getIns().getMSNManager()
+                                .getConnectionInfo(nodeId, demandStateOptional.get().getNodeId());
+
+                        MServiceInterface serviceInterface = this.serviceManager.getInterfaceById(demandStateOptional.get().getInterfaceId());
+                        tDelay = info.getDelay();
+                        tTrans = (double) (serviceInterface.getInDataSize() + serviceInterface.getOutDataSize()) / info.getBandwidth();
+                    } else {
+                        tDelay = MAdaptiveSystem.UNAVAILABLE_TOLERANCE;
+                        tTrans = MAdaptiveSystem.UNAVAILABLE_TRANSFORM_TIME;
+                    }
+                    allScore += MAdaptiveSystem.ALPHA * tTrans + (1 - MAdaptiveSystem.ALPHA) * tDelay;
                 }
             }
             chainCount += user.getDemandChainList().size();

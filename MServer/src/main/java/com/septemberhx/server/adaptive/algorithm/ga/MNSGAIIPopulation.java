@@ -3,6 +3,9 @@ import com.septemberhx.server.core.MServerOperator;
 import com.septemberhx.server.core.MSystemModel;
 
 import java.util.*;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static com.septemberhx.server.adaptive.algorithm.ga.MGAUtils.*;
 
@@ -13,20 +16,47 @@ import static com.septemberhx.server.adaptive.algorithm.ga.MGAUtils.*;
  */
 public class MNSGAIIPopulation extends MBaseGA {
 
+    private ExecutorService fixedThreadPool;
+
     public MNSGAIIPopulation(MServerOperator snapshotOperator, MServerOperator rawOperator) {
         super(snapshotOperator, rawOperator);
+        int maxThread = Math.min(50, Runtime.getRuntime().availableProcessors());
+        this.fixedThreadPool = Executors.newFixedThreadPool(maxThread);
+
     }
 
     public void init() {
         this.population = new MPopulation();
+        CountDownLatch firstLatch = new CountDownLatch(Configuration.POPULATION_SIZE);
         for (int i = 0; i < Configuration.POPULATION_SIZE; ++i) {
-            this.population.populace.add(MChromosome.randomInit(
-                    MBaseGA.fixedNodeIdList.size(),
-                    MBaseGA.fixedServiceIdList.size(),
-                    this.rawOperator,
-                    10
-            ));
+            this.fixedThreadPool.execute(new Runnable() {
+                @Override
+                public void run() {
+                    population.populace.add(MChromosome.randomInit(
+                            MBaseGA.fixedNodeIdList.size(),
+                            MBaseGA.fixedServiceIdList.size(),
+                            rawOperator,
+                            10
+                    ));
+                    firstLatch.countDown();
+                }
+            });
         }
+
+        try {
+            firstLatch.await();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+//        this.population = new MPopulation();
+//        for (int i = 0; i < Configuration.POPULATION_SIZE; ++i) {
+//            this.population.populace.add(MChromosome.randomInit(
+//                    MBaseGA.fixedNodeIdList.size(),
+//                    MBaseGA.fixedServiceIdList.size(),
+//                    this.rawOperator,
+//                    10
+//            ));
+//        }
     }
 
     @Override
@@ -44,35 +74,45 @@ public class MNSGAIIPopulation extends MBaseGA {
             logger.info("Round " + currRound);
 
             List<MChromosome> nextG = new ArrayList<>();
+            CountDownLatch firstLatch = new CountDownLatch(Configuration.POPULATION_SIZE);
             for (int i = 0; i < Configuration.POPULATION_SIZE; ++i) {
-                MChromosome parent1 = binaryTournamentSelection(this.population);
-                MChromosome parent2 = binaryTournamentSelection(this.population);
+                this.fixedThreadPool.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        MChromosome parent1 = binaryTournamentSelection(population);
+                        MChromosome parent2 = binaryTournamentSelection(population);
 
-                if (Configuration.DEBUG_MODE) {
-                    if (!parent1.verify()) {
-                        logger.error(parent1.getId() + " failed to verify before crossover");
-                    }
-                    if (!parent2.verify()) {
-                        logger.error(parent2.getId() + " failed to verify before crossover");
-                    }
-                }
+                        if (Configuration.DEBUG_MODE) {
+                            if (!parent1.verify()) {
+                                logger.error(parent1.getId() + " failed to verify before crossover");
+                            }
+                            if (!parent2.verify()) {
+                                logger.error(parent2.getId() + " failed to verify before crossover");
+                            }
+                        }
 
-                List<MChromosome> children = parent1.crossover(parent2);
-                if (MGAUtils.MUTATION_PROB_RAND.nextDouble() < Configuration.NSGAII_MUTATION_RATE) {
-                    children.forEach(MChromosome::mutation);
-                }
-                children.forEach(MChromosome::afterBorn);
+                        List<MChromosome> children = parent1.crossover(parent2);
+                        if (MGAUtils.MUTATION_PROB_RAND.nextDouble() < Configuration.NSGAII_MUTATION_RATE) {
+                            children.forEach(MChromosome::mutation);
+                        }
+                        children.forEach(MChromosome::afterBorn);
 
-                if (Configuration.DEBUG_MODE) {
-                    if (!parent1.verify()) {
-                        logger.error(parent1.getId() + " failed to verify after crossover");
+                        if (Configuration.DEBUG_MODE) {
+                            if (!parent1.verify()) {
+                                logger.error(parent1.getId() + " failed to verify after crossover");
+                            }
+                            if (!parent2.verify()) {
+                                logger.error(parent2.getId() + " failed to verify after crossover");
+                            }
+                        }
+                        nextG.addAll(children);
                     }
-                    if (!parent2.verify()) {
-                        logger.error(parent2.getId() + " failed to verify after crossover");
-                    }
-                }
-
-                nextG.addAll(children);
+                });
+            }
+            try {
+                firstLatch.await();
+            } catch (Exception e) {
+                e.printStackTrace();
             }
 
             for (MChromosome child : nextG) {
