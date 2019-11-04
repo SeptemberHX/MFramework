@@ -106,6 +106,7 @@ public class MNSGAIIPopulation extends MBaseGA {
                             }
                         }
                         nextG.addAll(children);
+                        firstLatch.countDown();
                     }
                 });
             }
