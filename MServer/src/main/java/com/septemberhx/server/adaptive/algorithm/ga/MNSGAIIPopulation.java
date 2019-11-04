@@ -131,6 +131,8 @@ public class MNSGAIIPopulation extends MBaseGA {
             logger.info("Best: " + this.population.getPopulace().get(0).getObjectiveValues());
         }
         this.population.getPopulace().get(0).getCurrOperator().printStatus();
+
+        this.fixedThreadPool.shutdown();
         return this.population.getPopulace().get(0).getCurrOperator();
     }
 

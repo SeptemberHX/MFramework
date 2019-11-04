@@ -119,6 +119,7 @@ public class MWSGAPopulation extends MBaseGA {
         }
 
         this.population.getPopulace().get(0).getCurrOperator().printStatus();
+        this.fixedThreadPool.shutdown();
         return this.population.getPopulace().get(0).getCurrOperator();
     }
 

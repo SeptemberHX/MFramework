@@ -4,6 +4,9 @@ import com.septemberhx.server.core.MServerOperator;
 import com.septemberhx.server.core.MSystemModel;
 
 import java.util.*;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static com.septemberhx.server.adaptive.algorithm.ga.MGAUtils.fastNonDominatedSort;
 
@@ -14,20 +17,47 @@ import static com.septemberhx.server.adaptive.algorithm.ga.MGAUtils.fastNonDomin
  */
 public class MMOEADPopulation extends MBaseGA {
 
+    private ExecutorService fixedThreadPool;
+
     public MMOEADPopulation(MServerOperator serverOperator, MServerOperator rawOperator) {
         super(serverOperator, rawOperator);
+        int maxThread = Math.min(50, Runtime.getRuntime().availableProcessors());
+        this.fixedThreadPool = Executors.newFixedThreadPool(maxThread);
     }
 
     public void init() {
         this.population = new MPopulation();
+        CountDownLatch firstLatch = new CountDownLatch(Configuration.POPULATION_SIZE);
         for (int i = 0; i < Configuration.POPULATION_SIZE; ++i) {
-            this.population.populace.add(MChromosome.randomInit(
-                    MBaseGA.fixedNodeIdList.size(),
-                    MBaseGA.fixedServiceIdList.size(),
-                    this.rawOperator,
-                    10
-            ));
+            this.fixedThreadPool.execute(new Runnable() {
+                @Override
+                public void run() {
+                    population.populace.add(MChromosome.randomInit(
+                            MBaseGA.fixedNodeIdList.size(),
+                            MBaseGA.fixedServiceIdList.size(),
+                            rawOperator,
+                            10
+                    ));
+                    firstLatch.countDown();
+                }
+            });
         }
+
+        try {
+            firstLatch.await();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+//        this.population = new MPopulation();
+//        for (int i = 0; i < Configuration.POPULATION_SIZE; ++i) {
+//            this.population.populace.add(MChromosome.randomInit(
+//                    MBaseGA.fixedNodeIdList.size(),
+//                    MBaseGA.fixedServiceIdList.size(),
+//                    this.rawOperator,
+//                    10
+//            ));
+//        }
     }
 
     @Override
@@ -42,40 +72,58 @@ public class MMOEADPopulation extends MBaseGA {
 
         for (int i = 0; i < Configuration.MOEAD_MAX_ROUND; ++i) {
             List<MChromosome> nextG = new ArrayList<>();
+
+            CountDownLatch firstLatch = new CountDownLatch(Configuration.POPULATION_SIZE);
             for (int j = 0; j < Configuration.POPULATION_SIZE; ++j) {
-                MChromosome father1 = this.population.getPopulace().get(B[j][MGAUtils.CROSSOVER_PROB_RAND.nextInt(Configuration.MOEAD_NEIGHBOR_SIZE)]);
-                MChromosome father2 = this.population.getPopulace().get(B[j][MGAUtils.CROSSOVER_PROB_RAND.nextInt(Configuration.MOEAD_NEIGHBOR_SIZE)]);
-                List<MChromosome> children = father1.crossover(father2);
-                if (MGAUtils.MUTATION_PROB_RAND.nextDouble() < Configuration.MOEAD_MUTATION_RATE) {
-                    children.forEach(MChromosome::mutation);
-                }
-                children.forEach(MChromosome::afterBorn);
+                int finalJ = j;
+                this.fixedThreadPool.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        MChromosome father1 = population.getPopulace().get(B[finalJ][MGAUtils.CROSSOVER_PROB_RAND.nextInt(Configuration.MOEAD_NEIGHBOR_SIZE)]);
+                        MChromosome father2 = population.getPopulace().get(B[finalJ][MGAUtils.CROSSOVER_PROB_RAND.nextInt(Configuration.MOEAD_NEIGHBOR_SIZE)]);
+                        List<MChromosome> children = father1.crossover(father2);
+                        if (MGAUtils.MUTATION_PROB_RAND.nextDouble() < Configuration.MOEAD_MUTATION_RATE) {
+                            children.forEach(MChromosome::mutation);
+                        }
+                        children.forEach(MChromosome::afterBorn);
 
-                MChromosome bestChild;
-                if (MGAUtils.dominates(children.get(0), children.get(1)) == MGAUtils.DOMINANT) {
-                    bestChild = children.get(0);
-                } else {
-                    bestChild = children.get(1);
-                }
+                        MChromosome bestChild;
+                        if (MGAUtils.dominates(children.get(0), children.get(1)) == MGAUtils.DOMINANT) {
+                            bestChild = children.get(0);
+                        } else {
+                            bestChild = children.get(1);
+                        }
 
-                for (int k = 0; i < Configuration.POPULATION_SIZE; ++i) {
-                    if (MGAUtils.dominates(bestChild, this.population.getPopulace().get(B[j][k])) == MGAUtils.DOMINANT) {
-                        this.population.getPopulace().set(B[j][k], bestChild);
+                        for (int k = 0; k < Configuration.MOEAD_NEIGHBOR_SIZE; ++k) {
+                            if (MGAUtils.dominates(bestChild, population.getPopulace().get(B[finalJ][k])) == MGAUtils.DOMINANT) {
+                                population.getPopulace().set(B[finalJ][k], bestChild);
+                            }
+                        }
+                        nextG.add(bestChild);
+                        firstLatch.countDown();
                     }
-                }
-                nextG.add(bestChild);
+                });
             }
+            try {
+                firstLatch.await();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
             for (MChromosome c : nextG) {
                 c.calcNSGAIIFitness();
             }
             nextG.addAll(P_EP);
             Map<Integer, List<MChromosome>> paretoFront = fastNonDominatedSort(nextG);
             P_EP = paretoFront.get(1);
+            logger.info("Round " + i + ", " + P_EP.get(0).getObjectiveValues());
         }
 
         // the result: P_EP
         P_EP.get(0).getCurrOperator().printStatus();
         logger.info(P_EP.get(0).getObjectiveValues());
+
+        this.fixedThreadPool.shutdown();
         return P_EP.get(0).getCurrOperator();
     }
 
