@@ -53,9 +53,10 @@ public class MExperiment {
     }
 
     public static void main(String[] args) {
-        System.out.println("====== Start with data: " + args[0] + " with algorithm " + args[1] + " with max-round " + args[2]);
+        System.out.println("====== Start with data: " + args[0] + " with algorithm " + args[1] + " with max-round " + args[2] + " with population " + args[3]);
 //        calcPrevSystemState("D:\\Workspace\\gitlab\\mdata\\Lab2\\ExperimentData", "D:\\Workspace\\gitlab\\mdata\\Lab2\\ExperimentData\\prev_system.json");
         MMajorAlgorithm.GA_TYPE gaType = MMajorAlgorithm.GA_TYPE.WSGA;
+        Configuration.POPULATION_SIZE = Integer.parseInt(args[3]);
         switch (args[1]) {
             case "wsga":
                 gaType = MMajorAlgorithm.GA_TYPE.WSGA;
