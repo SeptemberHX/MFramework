@@ -72,7 +72,7 @@ public class MWSGAPopulation extends MBaseGA {
         while (currRound <= Configuration.WSGA_MAX_ROUND) {
             logger.info("Round " + currRound);
 
-            List<MChromosome> nextG = new ArrayList<>();
+            List<MChromosome> nextG = new Vector<>();  // thread-safe
 //            while (nextG.size() < Configuration.POPULATION_SIZE) {
 //                MChromosome parent1 = binaryTournamentSelection(this.population);
 //                MChromosome parent2 = binaryTournamentSelection(this.population);

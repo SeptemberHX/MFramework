@@ -73,7 +73,7 @@ public class MNSGAIIPopulation extends MBaseGA {
         while (currRound <= Configuration.NSGAII_MAX_ROUND) {
             logger.info("Round " + currRound);
 
-            List<MChromosome> nextG = new ArrayList<>();
+            List<MChromosome> nextG = new Vector<>();  // thread-safe
             CountDownLatch firstLatch = new CountDownLatch(Configuration.POPULATION_SIZE);
             for (int i = 0; i < Configuration.POPULATION_SIZE; ++i) {
                 this.fixedThreadPool.execute(new Runnable() {

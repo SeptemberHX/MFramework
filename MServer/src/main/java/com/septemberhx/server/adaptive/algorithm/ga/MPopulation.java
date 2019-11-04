@@ -3,8 +3,8 @@ package com.septemberhx.server.adaptive.algorithm.ga;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Vector;
 
 /**
  * @author SeptemberHX
@@ -21,7 +21,7 @@ public class MPopulation {
     }
 
     public MPopulation() {
-        this(new ArrayList<>());
+        this(new Vector<>());  // thread-safe
     }
 
     public void calcNSGAIIFitness() {

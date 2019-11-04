@@ -71,7 +71,7 @@ public class MMOEADPopulation extends MBaseGA {
 //        double[] z = getRefrencePoint(this.population);
 
         for (int i = 0; i < Configuration.MOEAD_MAX_ROUND; ++i) {
-            List<MChromosome> nextG = new ArrayList<>();
+            List<MChromosome> nextG = new Vector<>();  // thread-safe
 
             CountDownLatch firstLatch = new CountDownLatch(Configuration.POPULATION_SIZE);
             for (int j = 0; j < Configuration.POPULATION_SIZE; ++j) {
