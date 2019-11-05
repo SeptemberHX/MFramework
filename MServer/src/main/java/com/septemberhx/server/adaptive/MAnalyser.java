@@ -4,12 +4,11 @@ import com.google.common.graph.*;
 import com.septemberhx.common.log.MLogType;
 import com.septemberhx.common.log.MServiceBaseLog;
 import com.septemberhx.server.adaptive.algorithm.MEvolveType;
+import com.septemberhx.server.adaptive.algorithm.ga.Configuration;
 import com.septemberhx.server.base.MAnalyserResult;
-import com.septemberhx.server.base.model.MDemandState;
-import com.septemberhx.server.base.model.MLogChain;
-import com.septemberhx.server.base.model.MSIInterface;
-import com.septemberhx.server.base.model.MSystemIndex;
+import com.septemberhx.server.base.model.*;
 import com.septemberhx.server.core.MDemandStateManager;
+import com.septemberhx.server.core.MServerOperator;
 import com.septemberhx.server.core.MServiceInstanceManager;
 import com.septemberhx.server.core.MSystemModel;
 import lombok.Getter;
@@ -31,8 +30,11 @@ public class MAnalyser {
     @Getter
     private long timeWindowInMillis;
 
-    public MAnalyser() {
+    private MServerOperator prevOperator;
+
+    public MAnalyser(MServerOperator prevServerOperator) {
         this.timeWindowInMillis = 60 * 1000;
+        this.prevOperator = prevServerOperator;
         System.out.println(DateTime.now().minus(this.timeWindowInMillis));
     }
 
@@ -45,6 +47,11 @@ public class MAnalyser {
      */
     public MAnalyserResult analyse(List<MServiceBaseLog> logList, List<MDemandState> demandStates) {
         MAnalyserResult analyserResult = new MAnalyserResult();
+
+        if (Configuration.COMPOSITION_ALL_ENABLED) {
+            analyserResult.setAllCallGraph(this.buildAllCallGraph());
+        }
+
         Map<String, List<MLogChain>> userId2LogChainList = this.analyseLogChains(logList);
         analyserResult.setCallGraph(this.buildCallGraph(userId2LogChainList));
 
@@ -75,14 +82,14 @@ public class MAnalyser {
      *  edge: call direction and frequency
      * @param userId2LogChainList: All the service log chains of the affected users
      */
-    private MutableValueGraph<MSIInterface, Integer> buildCallGraph(Map<String, List<MLogChain>> userId2LogChainList) {
-        MutableValueGraph<MSIInterface, Integer> interfaceGraph = ValueGraphBuilder.directed().build();
+    private MutableValueGraph<MSInterface, Integer> buildCallGraph(Map<String, List<MLogChain>> userId2LogChainList) {
+        MutableValueGraph<MSInterface, Integer> interfaceGraph = ValueGraphBuilder.directed().build();
 
         for (String userId : userId2LogChainList.keySet()) {
             List<MLogChain> chainList = userId2LogChainList.get(userId);
             for (MLogChain logChain : chainList) {
-                List<MSIInterface> sInsInterfaceList = logChain.getConnections();
-                for (MSIInterface serviceInstanceInterface : sInsInterfaceList) {
+                List<MSInterface> sInsInterfaceList = logChain.getConnections();
+                for (MSInterface serviceInstanceInterface : sInsInterfaceList) {
                     interfaceGraph.addNode(serviceInstanceInterface);
                 }
 
@@ -96,6 +103,39 @@ public class MAnalyser {
                         ++r;
                         interfaceGraph.putEdgeValue(sInsInterfaceList.get(i), sInsInterfaceList.get(i + 1), r);
                     }
+                }
+            }
+        }
+        return interfaceGraph;
+    }
+
+    /**
+     * Build the call graph according to previous system status
+     */
+    private MutableValueGraph<MSInterface, Integer> buildAllCallGraph() {
+        MutableValueGraph<MSInterface, Integer> interfaceGraph = ValueGraphBuilder.directed().build();
+        for (MUser user : MSystemModel.getIns().getUserManager().getAllValues()) {
+            for (MDemandChain demandChain : user.getDemandChainList()) {
+                MSInterface prevInterface = null;
+                for (MUserDemand userDemand : demandChain.getDemandList()) {
+                    Optional<MDemandState> demandStateOptional = this.prevOperator.getDemandStateManager().getById(userDemand.getId());
+                    if (!demandStateOptional.isPresent()) {
+                        continue;
+                    }
+
+                    MDemandState demandState = demandStateOptional.get();
+                    MSInterface MSInterface = new MSInterface(
+                            demandState.getInterfaceId(),
+                            this.prevOperator.getInstanceById(demandState.getInstanceId()).getServiceId()
+                    );
+
+                    if (prevInterface != null) {
+                        Optional<Integer> connectCount = interfaceGraph.edgeValue(prevInterface, MSInterface);
+                        int r = connectCount.orElse(0);
+                        ++r;
+                        interfaceGraph.putEdgeValue(prevInterface, MSInterface, r);
+                    }
+                    prevInterface = MSInterface;
                 }
             }
         }
@@ -177,9 +217,5 @@ public class MAnalyser {
             }
         }
         return logChainList;
-    }
-
-    public static void main(String[] args) {
-        MAnalyser a = new MAnalyser();
     }
 }

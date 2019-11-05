@@ -47,8 +47,8 @@ public class MLogChain {
         return lastLog.getLogDateTime().getMillis() - firstLog.getLogDateTime().getMillis();
     }
 
-    public List<MSIInterface> getConnections() {
-        List<MSIInterface> instanceInterfaces = new ArrayList<>();
+    public List<MSInterface> getConnections() {
+        List<MSInterface> instanceInterfaces = new ArrayList<>();
         for (MServiceBaseLog serviceBaseLog : this.logList) {
             if (serviceBaseLog.getLogType() != MLogType.FUNCTION_CALL) {
                 continue;
@@ -56,10 +56,9 @@ public class MLogChain {
 
             Optional<MServiceInstance> serviceInstance = MSystemModel.getIns().getMSIManager().getInstanceByIpAddr(serviceBaseLog.getLogIpAddr());
             if (serviceInstance.isPresent()) {
-                MSIInterface instanceInterface = new MSIInterface(
-                        serviceInstance.get().getId(),
-                        serviceBaseLog.getLogObjectId(),
-                        serviceBaseLog.getLogMethodName()
+                MSInterface instanceInterface = new MSInterface(
+                        serviceBaseLog.getLogMethodName(),
+                        serviceBaseLog.getLogObjectId()
                 );
                 instanceInterfaces.add(instanceInterface);
             }

@@ -1,9 +1,6 @@
 package com.septemberhx.server.adaptive.algorithm;
 
-import com.septemberhx.server.adaptive.algorithm.ga.MBaseGA;
-import com.septemberhx.server.adaptive.algorithm.ga.MMOEADPopulation;
-import com.septemberhx.server.adaptive.algorithm.ga.MNSGAIIPopulation;
-import com.septemberhx.server.adaptive.algorithm.ga.MWSGAPopulation;
+import com.septemberhx.server.adaptive.algorithm.ga.*;
 import com.septemberhx.server.base.MAnalyserResult;
 import com.septemberhx.server.base.MPlannerResult;
 import com.septemberhx.server.core.MServerOperator;
@@ -46,7 +43,10 @@ public class MMajorAlgorithm implements MAlgorithmInterface {
         MServerOperator serverOperator = MSystemModel.getIns().getOperator();
         serverOperator.reInit();
         // Then, do the composition job behind initialization. It will modify system model by operator
-//        MCompositionAlgorithmInCommon.doCompositionPart(data.getCallGraph());
+        MCompositionAlgorithmInCommon.doCompositionPart(data.getCallGraph(), rawOperator, serverOperator);
+        if (Configuration.COMPOSITION_ALL_ENABLED) {
+            MCompositionAlgorithmInCommon.doCompositionPart(data.getAllCallGraph(), rawOperator, serverOperator);
+        }
         // DO NOT CHANGE THE ORDER ABOVE.
 
         // Due to the huge amount of the user demands, it's not likely to put demand-instance mapping in the result of

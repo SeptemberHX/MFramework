@@ -3,6 +3,7 @@ package com.septemberhx.server.adaptive.algorithm;
 import com.septemberhx.server.adaptive.MAnalyser;
 import com.septemberhx.server.base.MAnalyserResult;
 import com.septemberhx.server.core.MServerOperator;
+import com.septemberhx.server.core.MSystemModel;
 import com.septemberhx.server.utils.MDataUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,7 +19,7 @@ public class MMinorTest {
 
     @Test
     void calc() {
-        MAnalyser analyser = new MAnalyser();
+        MAnalyser analyser = new MAnalyser(MSystemModel.getIns().getOperator());
         MAnalyserResult analyserResult = analyser.analyse(new ArrayList<>(), new ArrayList<>());
 
         MMinorAlgorithm minorAlgorithm = new MMinorAlgorithm();

@@ -3,6 +3,7 @@ package com.septemberhx.server.adaptive.algorithm;
 import com.septemberhx.server.adaptive.MAnalyser;
 import com.septemberhx.server.base.MAnalyserResult;
 import com.septemberhx.server.core.MServerOperator;
+import com.septemberhx.server.core.MSystemModel;
 import com.septemberhx.server.utils.MDataUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,7 +19,7 @@ class MMajorTest {
 
     @Test
     void wsga() {
-        MAnalyser analyser = new MAnalyser();
+        MAnalyser analyser = new MAnalyser(MSystemModel.getIns().getOperator());
         MAnalyserResult analyserResult = analyser.analyse(new ArrayList<>(), new ArrayList<>());
 
         MMajorAlgorithm mMajorAlgorithm = new MMajorAlgorithm(MMajorAlgorithm.GA_TYPE.WSGA);
@@ -27,7 +28,7 @@ class MMajorTest {
 
     @Test
     void nsga_ii() {
-        MAnalyser analyser = new MAnalyser();
+        MAnalyser analyser = new MAnalyser(MSystemModel.getIns().getOperator());
         MAnalyserResult analyserResult = analyser.analyse(new ArrayList<>(), new ArrayList<>());
 
         MMajorAlgorithm mMajorAlgorithm = new MMajorAlgorithm(MMajorAlgorithm.GA_TYPE.NSGA_II);
@@ -36,7 +37,7 @@ class MMajorTest {
 
     @Test
     void moea_d() {
-        MAnalyser analyser = new MAnalyser();
+        MAnalyser analyser = new MAnalyser(MSystemModel.getIns().getOperator());
         MAnalyserResult analyserResult = analyser.analyse(new ArrayList<>(), new ArrayList<>());
 
         MMajorAlgorithm mMajorAlgorithm = new MMajorAlgorithm(MMajorAlgorithm.GA_TYPE.MODE_A);

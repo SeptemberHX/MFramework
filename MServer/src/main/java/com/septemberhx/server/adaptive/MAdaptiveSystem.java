@@ -32,7 +32,7 @@ public class MAdaptiveSystem {
     public static Double MINOR_THRESHOLD = 0.0;     // when there are users not satisfied, we will use minor
     public static Double MAJOR_THRESHOLD = 0.1;     // when 10% users are not satisfied, we use major
 
-    public static Double COMPOSITION_THRESHOLD = 0.2;
+    public static Double COMPOSITION_THRESHOLD = 0.005;
     public static Long MAX_DELAY_TOLERANCE = 300L;
     public static Long UNAVAILABLE_TOLERANCE = 3000L;
     public static Long UNAVAILABLE_TRANSFORM_TIME = 1000000L;
@@ -41,7 +41,7 @@ public class MAdaptiveSystem {
 
     public MAdaptiveSystem() {
         this.monitor = new MMonitor();
-        this.analyser = new MAnalyser();
+        this.analyser = new MAnalyser(MSystemModel.getIns().getOperator());
         this.planner = new MPlanner();
 
         MClusterExecutor clusterExecutor = new MClusterExecutor();

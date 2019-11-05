@@ -507,7 +507,12 @@ public class MServerOperator extends MObjectManager<MServerState> {
     public void compositeService(MService service1, MServiceInterface interface1, MService service2, MServiceInterface interface2) {
         // interfaceId contains serviceName
         String serviceId = MIDUtils.generateServiceId(String.format("%s__%s", interface1.getInterfaceId(), interface2.getInterfaceId()),
-                String.format("%s_%s", service1.getRId(), service2.getRId()));
+                String.format("%s_%s", service1.getId(), service2.getId()));
+
+        if (Configuration.DEBUG_MODE) {
+            logger.info(String.format("Composite service %s|%s and %s|%s to %s", service1.getId(), interface1.getInterfaceId(), service2.getId(), interface2.getInterfaceId(), serviceId));
+        }
+
         String serviceName = serviceId;
         String functionName = String.format("%s__%s", interface1.getFullFuncName(), interface2.getFullFuncName());
         MServiceInterface newInterface = new MServiceInterface();

@@ -29,7 +29,7 @@ public class MMinorAlgorithm implements MAlgorithmInterface {
         MServerOperator serverOperator = MSystemModel.getIns().getOperator();
         serverOperator.reInit();
         // Then, do the composition job behind initialization. It will modify system model by operator
-        MCompositionAlgorithmInCommon.doCompositionPart(data.getCallGraph());
+        MCompositionAlgorithmInCommon.doCompositionPart(data.getCallGraph(), rawOperator, serverOperator);
         // DO NOT CHANGE THE ORDER ABOVE.
 
         // Below, do the calc job

@@ -24,7 +24,7 @@ public class MExperiment {
         MDataUtils.loadDataFromDir(dataDirPath, true);
 
         // create previous placement and assignment with heuristic algorithm
-        MAnalyser analyser = new MAnalyser();
+        MAnalyser analyser = new MAnalyser(new MServerOperator());
         MAnalyserResult analyserResult = analyser.analyse(new ArrayList<>(), new ArrayList<>());
 
         MMinorAlgorithm minorAlgorithm = new MMinorAlgorithm();
@@ -44,7 +44,7 @@ public class MExperiment {
         MServerOperator serverOperator = MDataUtils.loadServerOperator(dataDirPath + "/prev_system.json");
         serverOperator.printStatus();
 
-        MAnalyser analyser = new MAnalyser();
+        MAnalyser analyser = new MAnalyser(serverOperator);
         MAnalyserResult analyserResult = analyser.analyse(new ArrayList<>(), new ArrayList<>());
 
         MMajorAlgorithm mMajorAlgorithm = new MMajorAlgorithm(gaType);
@@ -53,10 +53,15 @@ public class MExperiment {
     }
 
     public static void main(String[] args) {
-        System.out.println("====== Start with data: " + args[0] + " with algorithm " + args[1] + " with max-round " + args[2] + " with population " + args[3]);
+        System.out.println("====== Start with data: " + args[0]
+                + " with algorithm " + args[1]
+                + " with max-round " + args[2]
+                + " with population " + args[3]
+                + ", compositionEnabled = " + args[4]);
 //        calcPrevSystemState("D:\\Workspace\\gitlab\\mdata\\Lab2\\ExperimentData", "D:\\Workspace\\gitlab\\mdata\\Lab2\\ExperimentData\\prev_system.json");
         MMajorAlgorithm.GA_TYPE gaType = MMajorAlgorithm.GA_TYPE.WSGA;
         Configuration.POPULATION_SIZE = Integer.parseInt(args[3]);
+        Configuration.COMPOSITION_ALL_ENABLED = Boolean.parseBoolean(args[4]);
         switch (args[1]) {
             case "wsga":
                 gaType = MMajorAlgorithm.GA_TYPE.WSGA;
