@@ -686,12 +686,17 @@ public class MServerOperator extends MObjectManager<MServerState> {
                 for (MUserDemand demand : demandChain.getDemandList()) {
                     Optional<MDemandState> demandStateOptional = this.demandStateManager.getById(demand.getId());
                     if (demandStateOptional.isPresent()) {
-                        MNodeConnectionInfo info = MSystemModel.getIns().getMSNManager()
-                                .getConnectionInfo(nodeId, demandStateOptional.get().getNodeId());
-
                         MServiceInterface serviceInterface = this.serviceManager.getInterfaceById(demandStateOptional.get().getInterfaceId());
-                        tDelay = info.getDelay();
-                        tTrans = (double) (serviceInterface.getInDataSize() + serviceInterface.getOutDataSize()) / info.getBandwidth();
+                        if (!demandStateOptional.get().getNodeId().equals(nodeId)) {
+                            MNodeConnectionInfo info = MSystemModel.getIns().getMSNManager()
+                                    .getConnectionInfo(nodeId, demandStateOptional.get().getNodeId());
+                            tDelay = info.getDelay() * 2;
+                            tTrans = (double) (serviceInterface.getInDataSize() + serviceInterface.getOutDataSize()) / info.getBandwidth();
+                        }
+
+                        MServerNode node = MSystemModel.getIns().getMSNManager().getById(nodeId).get();
+                        tDelay += node.getDelay() * 2;  // delay between user and node
+                        tTrans += (double) (serviceInterface.getInDataSize() + serviceInterface.getOutDataSize()) / node.getBandwidth();
                     } else {
                         tDelay = MAdaptiveSystem.UNAVAILABLE_TOLERANCE;
                         tTrans = MAdaptiveSystem.UNAVAILABLE_TRANSFORM_TIME;

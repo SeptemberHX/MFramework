@@ -11,6 +11,8 @@ public class MServerNode extends MBaseObject {
     private ServerNodeType nodeType;
     private MResource resource;
     private MPosition position;
+    private Long delay;  // delay between direct user and node
+    private Long bandwidth;  // bandwidth between direct user and node
 
     @Override
     public String toString() {
@@ -18,6 +20,8 @@ public class MServerNode extends MBaseObject {
                 "nodeType=" + nodeType +
                 ", resource=" + resource +
                 ", position=" + position +
+                ", delay=" + delay +
+                ", bandwidth=" + bandwidth +
                 ", id='" + id + '\'' +
                 '}';
     }
