@@ -86,6 +86,7 @@ public class MMOEADPopulation extends MBaseGA {
                             children.forEach(MChromosome::mutation);
                         }
                         children.forEach(MChromosome::afterBorn);
+                        children.forEach(MChromosome::getObjectiveValues);  // calculate the cost in the threads to speed up
 
                         MChromosome bestChild;
                         if (MGAUtils.dominates(children.get(0), children.get(1)) == MGAUtils.DOMINANT) {

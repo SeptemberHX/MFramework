@@ -17,8 +17,8 @@ public class MWSGAPopulation extends MBaseGA {
 
     public static Double W_SCORE = 1.0;
     public static Double W_COST = 0.01;
-    public static Double P_SCORE = 0.5;
-    public static Double P_COST = 0.5;
+    public static Double P_SCORE = 0.9;
+    public static Double P_COST = 0.1;
 
     private ExecutorService fixedThreadPool;
 
@@ -96,6 +96,7 @@ public class MWSGAPopulation extends MBaseGA {
                             children.forEach(MChromosome::mutation);
                         }
                         children.forEach(MChromosome::afterBorn);
+                        children.forEach(MChromosome::getWSGAFitness);  // calculate the fitness in the threads to speed up
                         finalNextG.addAll(children);
                         firstLatch.countDown();
                     }

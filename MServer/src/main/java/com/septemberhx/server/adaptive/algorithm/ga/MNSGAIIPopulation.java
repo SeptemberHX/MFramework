@@ -96,6 +96,7 @@ public class MNSGAIIPopulation extends MBaseGA {
                             children.forEach(MChromosome::mutation);
                         }
                         children.forEach(MChromosome::afterBorn);
+                        children.forEach(MChromosome::getObjectiveValues);  // calculate the cost in the threads to speed up
 
                         if (Configuration.DEBUG_MODE) {
                             if (!parent1.verify()) {
