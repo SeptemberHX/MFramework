@@ -16,29 +16,41 @@ import java.util.stream.Collectors;
  */
 public class MDemandStateManager extends MObjectManager<MDemandState> {
 
+    private Map<String, List<String>> instanceId2StateIdList;
+
+    public MDemandStateManager() {
+        this.instanceId2StateIdList = new HashMap<>();
+    }
+
     public MDemandStateManager shallowClone() {
         MDemandStateManager cloneObject = new MDemandStateManager();
         Map<String, MDemandState> cloneObjMap = new HashMap<>(this.objectMap);
+        Map<String, List<String>> cloneObjMap2List = new HashMap<>();
+        for (String instanceId : this.instanceId2StateIdList.keySet()) {
+            cloneObjMap2List.put(instanceId, new ArrayList<>(this.instanceId2StateIdList.get(instanceId)));
+        }
         cloneObject.setObjectMap(cloneObjMap);
+        cloneObject.instanceId2StateIdList = cloneObjMap2List;
         return cloneObject;
     }
 
     public void deleteById(String demandId) {
+        if (this.objectMap.containsKey(demandId)) {
+            MDemandState demandState = this.objectMap.get(demandId);
+            this.instanceId2StateIdList.get(demandState.getInstanceId()).remove(demandState.getId());
+            if (this.instanceId2StateIdList.get(demandState.getInstanceId()).isEmpty()) {
+                this.instanceId2StateIdList.remove(demandState.getInstanceId());
+            }
+        }
         this.objectMap.remove(demandId);
     }
 
     public void add(MDemandState demandState) {
         this.objectMap.put(demandState.getId(), demandState);
-    }
-
-    public List<MDemandState> getDemandStateByInstanceId(String instanceId) {
-        List<MDemandState> resultList = new ArrayList<>();
-        for (MDemandState demandState : this.objectMap.values()) {
-            if (demandState.isAssigned() && demandState.getInstanceId().equals(instanceId)) {
-                resultList.add(demandState);
-            }
+        if (!this.instanceId2StateIdList.containsKey(demandState.getInstanceId())) {
+            this.instanceId2StateIdList.put(demandState.getInstanceId(), new ArrayList<>());
         }
-        return resultList;
+        this.instanceId2StateIdList.get(demandState.getInstanceId()).add(demandState.getId());
     }
 
     public List<MDemandState> getDemandStateByInterfaceId(String interfaceId) {
@@ -68,10 +80,28 @@ public class MDemandStateManager extends MObjectManager<MDemandState> {
     }
 
     public List<MDemandState> getDemandStatesOnInstance(String instanceId) {
-        return this.objectMap.values().stream().filter(s -> s.getInstanceId().equals(instanceId)).collect(Collectors.toList());
+        List<MDemandState> result = new ArrayList<>();
+        for (String demandStateId : this.instanceId2StateIdList.getOrDefault(instanceId, new ArrayList<>())) {
+            result.add(this.objectMap.get(demandStateId));
+        }
+
+//        List<MDemandState> result1 = this.objectMap.values().stream().filter(d -> d.getInstanceId().equals(instanceId)).collect(Collectors.toList());
+//        if (result1.size() != result.size()) {
+//            logger.error("MDemandState size not the same.");
+//        }
+//        return result;
+        return result;
     }
 
     public void replace(MDemandState newState) {
+        MDemandState oldState = this.objectMap.get(newState.getId());
+        if (!oldState.getInstanceId().equals(newState.getInstanceId())) {
+            this.instanceId2StateIdList.get(oldState.getInstanceId()).remove(oldState.getId());
+            if (!this.instanceId2StateIdList.containsKey(newState.getInstanceId())) {
+                this.instanceId2StateIdList.put(newState.getInstanceId(), new ArrayList<>());
+            }
+            this.instanceId2StateIdList.get(newState.getInstanceId()).add(newState.getId());
+        }
         this.objectMap.put(newState.getId(), newState);
     }
 }

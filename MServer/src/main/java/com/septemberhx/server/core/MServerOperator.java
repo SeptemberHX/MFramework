@@ -7,7 +7,6 @@ import com.septemberhx.common.base.MObjectManager;
 import com.septemberhx.common.bean.MCompositionRequest;
 import com.septemberhx.server.adaptive.MAdaptiveSystem;
 import com.septemberhx.server.adaptive.algorithm.ga.Configuration;
-import com.septemberhx.server.adaptive.algorithm.ga.MBaseGA;
 import com.septemberhx.server.base.MNodeConnectionInfo;
 import com.septemberhx.server.base.model.*;
 import com.septemberhx.server.job.*;
@@ -298,7 +297,7 @@ public class MServerOperator extends MObjectManager<MServerState> {
         List<MUserDemand> userDemands = new ArrayList<>();
 //        if (!this.instanceManager.containsById(instanceId)) return userDemands;
 
-        for (MDemandState demandState : this.demandStateManager.getDemandStateByInstanceId(instanceId)) {
+        for (MDemandState demandState : this.demandStateManager.getDemandStatesOnInstance(instanceId)) {
             userDemands.add(
                     MSystemModel.getIns()
                             .getUserManager()
@@ -357,7 +356,7 @@ public class MServerOperator extends MObjectManager<MServerState> {
         }
 
         // change user demands on this instance
-        for (MDemandState demandState : this.demandStateManager.getDemandStateByInstanceId(instanceId)) {
+        for (MDemandState demandState : this.demandStateManager.getDemandStatesOnInstance(instanceId)) {
             MDemandState newState = new MDemandState(
                     demandState.getId(),
                     demandState.getInstanceId(),

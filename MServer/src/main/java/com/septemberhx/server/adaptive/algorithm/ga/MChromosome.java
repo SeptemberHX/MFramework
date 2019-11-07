@@ -96,7 +96,7 @@ public class MChromosome {
     }
 
     public boolean verify() {
-        if (!Configuration.DEBUG_MODE) {
+        if (Configuration.DEBUG_MODE) {
             return true;
         }
 
