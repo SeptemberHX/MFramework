@@ -890,8 +890,8 @@ public class MServerOperator extends MObjectManager<MServerState> {
 
     public Map<String, MDemandState> getDemandStateByInstanceIds(Set<String> instanceIdList) {
         Map<String, MDemandState> r = new HashMap<>();
-        for (MDemandState demandState : this.demandStateManager.getAllValues()) {
-            if (instanceIdList.contains(demandState.getInstanceId())) {
+        for (String instanceId : instanceIdList) {
+            for (MDemandState demandState : this.demandStateManager.getDemandStatesOnInstance(instanceId)) {
                 r.put(demandState.getId(), demandState);
             }
         }
