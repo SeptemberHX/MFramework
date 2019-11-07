@@ -370,7 +370,7 @@ public class MChromosome {
         this.ifDemandsAssigned = true;
         this.unSolvedDemandList.clear();
 
-        this.currOperator.adjustJobList();  // remove useless jobs
+//        this.currOperator.adjustJobList();  // remove useless jobs
 
         // For deploy job. Some times the deployed instance will not used. So we will delete it
         List<MBaseJob> jobList = this.currOperator.getJobList();
