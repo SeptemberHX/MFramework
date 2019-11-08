@@ -8,6 +8,7 @@ package com.septemberhx.server.adaptive.algorithm.ga;
 public class Configuration {
 
     public static boolean DEBUG_MODE = false;
+    public static boolean VERIFY_EVERY_CHILD = false;
     public static boolean COMPOSITION_ALL_ENABLED = false;
 
     public static int POPULATION_SIZE = 100;

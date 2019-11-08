@@ -103,7 +103,7 @@ public class MChromosome {
     }
 
     public boolean verify() {
-        if (!Configuration.DEBUG_MODE) {
+        if (!Configuration.DEBUG_MODE && !Configuration.VERIFY_EVERY_CHILD) {
             return true;
         }
 

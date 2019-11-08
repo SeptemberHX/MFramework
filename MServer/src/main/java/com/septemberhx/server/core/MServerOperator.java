@@ -256,7 +256,7 @@ public class MServerOperator extends MObjectManager<MServerState> {
             if (!this.verify()) {
                 logger.error("Failed to verify before addNewInstance");
             }
-            logger.info("Before addNewInstance: " + this.nodeId2ResourceLeft.get(nodeId));
+//            logger.info("Before addNewInstance: " + this.nodeId2ResourceLeft.get(nodeId));
         }
 
         Optional<MService> serviceOptional = this.serviceManager.getById(serviceId);
@@ -268,8 +268,8 @@ public class MServerOperator extends MObjectManager<MServerState> {
             this.insId2LeftCap.put(instance.getId(), mService.getMaxUserCap());
 
             if (Configuration.DEBUG_MODE) {
-                logger.info("After addNewInstance: " + this.nodeId2ResourceLeft.get(nodeId));
-                logger.info("Target service: " + mService.getResource());
+//                logger.info("After addNewInstance: " + this.nodeId2ResourceLeft.get(nodeId));
+//                logger.info("Target service: " + mService.getResource());
                 if (!this.verify()) {
                     logger.error("Failed to verify after addNewInstance");
                     logger.debug(instance);
@@ -286,7 +286,6 @@ public class MServerOperator extends MObjectManager<MServerState> {
     }
 
     public List<MUserDemand> deleteInstance(String instanceId, boolean ifAddJob) {
-
         if (Configuration.DEBUG_MODE) {
             if (!this.verify()) {
                 logger.error("Failed to verify before deleteInstance");
@@ -295,7 +294,11 @@ public class MServerOperator extends MObjectManager<MServerState> {
 
         // collect user demands on this instance
         List<MUserDemand> userDemands = new ArrayList<>();
-//        if (!this.instanceManager.containsById(instanceId)) return userDemands;
+
+        // allow delete non-exist instance here to improve availability
+        if (!this.instanceManager.containsById(instanceId) && !this.insId2LeftCap.containsKey(instanceId)) {
+            return userDemands;
+        }
 
         for (MDemandState demandState : this.demandStateManager.getDemandStatesOnInstance(instanceId)) {
             userDemands.add(
