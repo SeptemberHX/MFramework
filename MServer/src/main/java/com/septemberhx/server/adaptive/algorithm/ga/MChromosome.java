@@ -435,6 +435,10 @@ public class MChromosome {
             if (Configuration.DEBUG_MODE)
                 logger.info(this.getId() + " Delete empty instance: " + instance.getId());
 
+            // avoid remove non-exist instance
+            if (!this.currOperator.containsById(instance.getId())) {
+                continue;
+            }
             if (this.rawOperator.getInstanceById(instance.getId()) != null) {
                 this.currOperator.deleteInstance(instance.getId());
             } else {
