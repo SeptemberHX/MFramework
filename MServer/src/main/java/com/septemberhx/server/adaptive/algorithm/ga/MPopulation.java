@@ -40,7 +40,9 @@ public class MPopulation {
             double normValue1 = (objValues.get(0) - minValue1) / (maxValue1 - minValue1);
             double normValue2 = (objValues.get(1) - minValue2) / (maxValue2 - minValue2);
             chromosome.setNormObjectiveValues(normValue1, normValue2);
-            System.out.println(String.format("%f, %f -> %f, %f | %f", objValues.get(0), objValues.get(1), normValue1, normValue2, chromosome.getNormWSGAFitness()));
+            if (Configuration.DEBUG_MODE) {
+                System.out.println(String.format("%f, %f -> %f, %f | %f", objValues.get(0), objValues.get(1), normValue1, normValue2, chromosome.getNormWSGAFitness()));
+            }
         }
     }
 }
