@@ -57,11 +57,13 @@ public class MExperiment {
                 + " with algorithm " + args[1]
                 + " with max-round " + args[2]
                 + " with population " + args[3]
-                + ", compositionEnabled = " + args[4]);
+                + ", compositionEnabled = " + args[4]
+                + ", verify children = " + args[5]);
 //        calcPrevSystemState("D:\\Workspace\\gitlab\\mdata\\Lab2\\ExperimentData", "D:\\Workspace\\gitlab\\mdata\\Lab2\\ExperimentData\\prev_system.json");
         MMajorAlgorithm.GA_TYPE gaType = MMajorAlgorithm.GA_TYPE.WSGA;
         Configuration.POPULATION_SIZE = Integer.parseInt(args[3]);
         Configuration.COMPOSITION_ALL_ENABLED = Boolean.parseBoolean(args[4]);
+        Configuration.VERIFY_EVERY_CHILD = Boolean.parseBoolean(args[5]);
         switch (args[1]) {
             case "wsga":
                 gaType = MMajorAlgorithm.GA_TYPE.WSGA;
