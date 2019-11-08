@@ -1,6 +1,5 @@
 package com.septemberhx.server.adaptive.algorithm.ga;
 import com.septemberhx.server.core.MServerOperator;
-import com.septemberhx.server.core.MSystemModel;
 
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
@@ -48,15 +47,7 @@ public class MNSGAIIPopulation extends MBaseGA {
         } catch (Exception e) {
             e.printStackTrace();
         }
-//        this.population = new MPopulation();
-//        for (int i = 0; i < Configuration.POPULATION_SIZE; ++i) {
-//            this.population.populace.add(MChromosome.randomInit(
-//                    MBaseGA.fixedNodeIdList.size(),
-//                    MBaseGA.fixedServiceIdList.size(),
-//                    this.rawOperator,
-//                    10
-//            ));
-//        }
+        this.population.normalizeObjectValues();
     }
 
     @Override
@@ -64,7 +55,6 @@ public class MNSGAIIPopulation extends MBaseGA {
         this.init();
 
         int currRound = 1;
-        this.population.calcNSGAIIFitness();
         Map<Integer, List<MChromosome>> paretoFront = fastNonDominatedSort(this.population.getPopulace());
         for (int i = 1; i < paretoFront.size(); ++i) {
             crowdingDistanceAssignment(paretoFront.get(i));
@@ -96,7 +86,6 @@ public class MNSGAIIPopulation extends MBaseGA {
                             children.forEach(MChromosome::mutation);
                         }
                         children.forEach(MChromosome::afterBorn);
-                        children.forEach(MChromosome::getObjectiveValues);  // calculate the cost in the threads to speed up
 
                         if (Configuration.DEBUG_MODE) {
                             if (!parent1.verify()) {
@@ -117,10 +106,9 @@ public class MNSGAIIPopulation extends MBaseGA {
                 e.printStackTrace();
             }
 
-            for (MChromosome child : nextG) {
-                child.calcNSGAIIFitness();
-            }
             nextG.addAll(this.population.getPopulace());
+            MPopulation.normalizeObjectValues(nextG);
+
             paretoFront = fastNonDominatedSort(nextG);
             for (int i = 1; i < paretoFront.size(); ++i) {  // the pareto level starts from 1
                 crowdingDistanceAssignment(paretoFront.get(i));
@@ -129,7 +117,9 @@ public class MNSGAIIPopulation extends MBaseGA {
             this.population.setPopulace(nextG.subList(0, Configuration.POPULATION_SIZE));
             ++currRound;
 
-            logger.info("Best: " + this.population.getPopulace().get(0).getObjectiveValues());
+            logger.info("Best: " + this.population.getPopulace().get(0).getNormWSGAFitness());
+            logger.info(this.population.getPopulace().get(0).getFitness());
+            logger.info(this.population.getPopulace().get(0).getCost());
         }
         this.population.getPopulace().get(0).getCurrOperator().printStatus();
 
@@ -166,13 +156,13 @@ public class MNSGAIIPopulation extends MBaseGA {
             sortAgainstObjective(nondominatedChromosomes, i);
             nondominatedChromosomes.get(0).setCrowdingDistance(Double.MAX_VALUE);
             nondominatedChromosomes.get(size - 1).setCrowdingDistance(Double.MAX_VALUE);
-            double maxObjectiveValue = nondominatedChromosomes.get(0).getObjectiveValues().get(i);
-            double minObjectiveValue = nondominatedChromosomes.get(size - 1).getObjectiveValues().get(i);
+            double maxObjectiveValue = nondominatedChromosomes.get(0).getNormObjectiveValues().get(i);
+            double minObjectiveValue = nondominatedChromosomes.get(size - 1).getNormObjectiveValues().get(i);
             for(int j = 1; j < size - 1; j++) {
                 if (nondominatedChromosomes.get(j).getCrowdingDistance() < Double.MAX_VALUE) {
                     nondominatedChromosomes.get(j).setCrowdingDistance(
                             nondominatedChromosomes.get(j).getCrowdingDistance() + (
-                                    (nondominatedChromosomes.get(j + 1).getObjectiveValues().get(i) - nondominatedChromosomes.get(j - 1).getObjectiveValues().get(i)) / (maxObjectiveValue - minObjectiveValue)
+                                    (nondominatedChromosomes.get(j + 1).getNormObjectiveValues().get(i) - nondominatedChromosomes.get(j - 1).getNormObjectiveValues().get(i)) / (maxObjectiveValue - minObjectiveValue)
                             )
                     );
                 }
@@ -182,7 +172,7 @@ public class MNSGAIIPopulation extends MBaseGA {
 
     private static void sortAgainstObjective(final List<MChromosome> chromosomes, int objectiveIndex) {
         chromosomes.sort((o1, o2) ->
-                -o1.getObjectiveValues().get(objectiveIndex).compareTo(o2.getObjectiveValues().get(objectiveIndex))
+                -o1.getNormObjectiveValues().get(objectiveIndex).compareTo(o2.getNormObjectiveValues().get(objectiveIndex))
         );
     }
 }

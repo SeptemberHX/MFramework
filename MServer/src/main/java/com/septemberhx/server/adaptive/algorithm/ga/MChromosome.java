@@ -35,6 +35,14 @@ public class MChromosome {
     private double fitness = -1;
     private double cost = -1;
 
+    @Getter
+    @Setter
+    private double normFitness = -1;
+
+    @Getter
+    @Setter
+    private double normCost = -1;
+
     // --------- Belows for NSGA-II algorithm
     @Getter
     @Setter
@@ -86,8 +94,7 @@ public class MChromosome {
         }
 
         r.unSolvedDemandList = MSystemModel.getIns().getUserManager().getAllUserDemands();
-        r.assignDemands();
-
+        r.afterBorn();
         if (!r.verify()) {
             throw new RuntimeException("Illegal random init result");
         }
@@ -307,6 +314,9 @@ public class MChromosome {
         if (!this.verify()) {
             throw new RuntimeException("Illegal new-born result");
         }
+
+        this.getCost();
+        this.getFitness();
     }
 
     private void moveOneInstance() {
@@ -601,21 +611,12 @@ public class MChromosome {
         return this.cost;
     }
 
-    // small is better
-    public double getWSGAFitness() {
-        double score = this.getFitness();
-        double cost = this.getCost();
+    public double getNormWSGAFitness() {
+        double score = this.getNormFitness();
+        double cost = this.getNormCost();
 
-        return MWSGAPopulation.W_SCORE * score * MWSGAPopulation.P_SCORE
-                + MWSGAPopulation.W_COST * cost * MWSGAPopulation.P_COST;
-    }
-
-    public void calcWSGAFitness() {
-        this.getWSGAFitness();
-    }
-
-    public void calcNSGAIIFitness() {
-        this.getObjectiveValues();
+        return MWSGAPopulation.W_SCORE * score
+                + MWSGAPopulation.W_COST * cost;
     }
 
     public List<Double> getObjectiveValues() {
@@ -623,6 +624,18 @@ public class MChromosome {
         objectiveList.add(this.getCost());
         objectiveList.add(this.getFitness());
         return objectiveList;
+    }
+
+    public List<Double> getNormObjectiveValues() {
+        List<Double> objectiveList = new ArrayList<>(2);
+        objectiveList.add(this.getNormCost());
+        objectiveList.add(this.getNormFitness());
+        return objectiveList;
+    }
+
+    public void setNormObjectiveValues(double value0, double value1) {
+        this.normCost = value0;
+        this.normFitness = value1;
     }
 
     public void reset() {

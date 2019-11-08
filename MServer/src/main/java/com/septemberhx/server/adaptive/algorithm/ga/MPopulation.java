@@ -24,15 +24,23 @@ public class MPopulation {
         this(new Vector<>());  // thread-safe
     }
 
-    public void calcNSGAIIFitness() {
-        for (MChromosome chromosome : populace) {
-            chromosome.calcNSGAIIFitness();
-        }
+    // normalize the cost and avgTime to [0, 1]
+    public void normalizeObjectValues() {
+        normalizeObjectValues(this.populace);
     }
 
-    public void calcWSGAFitness() {
-        for (MChromosome chromosome : populace) {
-            chromosome.calcWSGAFitness();
+    public static void normalizeObjectValues(List<MChromosome> chromosomeList) {
+        double maxValue1 = MBaseGA.maxValue1;
+        double minValue1 = MBaseGA.minValue1;
+        double maxValue2 = MBaseGA.maxValue2;
+        double minValue2 = MBaseGA.minValue2;
+
+        for (MChromosome chromosome : chromosomeList) {
+            List<Double> objValues = chromosome.getObjectiveValues();
+            double normValue1 = (objValues.get(0) - minValue1) / (maxValue1 - minValue1);
+            double normValue2 = (objValues.get(1) - minValue2) / (maxValue2 - minValue2);
+            chromosome.setNormObjectiveValues(normValue1, normValue2);
+            System.out.println(String.format("%f, %f -> %f, %f | %f", objValues.get(0), objValues.get(1), normValue1, normValue2, chromosome.getNormWSGAFitness()));
         }
     }
 }

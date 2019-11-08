@@ -15,10 +15,8 @@ import java.util.concurrent.Executors;
  */
 public class MWSGAPopulation extends MBaseGA {
 
-    public static Double W_SCORE = 1.0;
-    public static Double W_COST = 0.01;
-    public static Double P_SCORE = 0.9;
-    public static Double P_COST = 0.1;
+    public static Double W_SCORE = 0.5;
+    public static Double W_COST = 0.5;
 
     private ExecutorService fixedThreadPool;
 
@@ -52,15 +50,7 @@ public class MWSGAPopulation extends MBaseGA {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-//        for (int i = 0; i < Configuration.POPULATION_SIZE; ++i) {
-//            this.population.populace.add(MChromosome.randomInit(
-//                    MBaseGA.fixedNodeIdList.size(),
-//                    MBaseGA.fixedServiceIdList.size(),
-//                    this.rawOperator,
-//                    10
-//            ));
-//        }
+        this.population.normalizeObjectValues();
     }
 
     @Override
@@ -68,21 +58,10 @@ public class MWSGAPopulation extends MBaseGA {
         this.init();
 
         int currRound = 1;
-        this.population.calcWSGAFitness();
         while (currRound <= Configuration.WSGA_MAX_ROUND) {
             logger.info("Round " + currRound);
 
             List<MChromosome> nextG = new Vector<>();  // thread-safe
-//            while (nextG.size() < Configuration.POPULATION_SIZE) {
-//                MChromosome parent1 = binaryTournamentSelection(this.population);
-//                MChromosome parent2 = binaryTournamentSelection(this.population);
-//                List<MChromosome> children = parent1.crossover(parent2);
-//                if (MGAUtils.MUTATION_PROB_RAND.nextDouble() < Configuration.WSGA_MUTATION_RATE) {
-//                    children.forEach(MChromosome::mutation);
-//                }
-//                children.forEach(MChromosome::afterBorn);
-//                nextG.addAll(children);
-//            }
             CountDownLatch firstLatch = new CountDownLatch(Configuration.POPULATION_SIZE / 2);
             for (int i = 0; i < Configuration.POPULATION_SIZE / 2; ++i) {
                 List<MChromosome> finalNextG = nextG;
@@ -96,7 +75,6 @@ public class MWSGAPopulation extends MBaseGA {
                             children.forEach(MChromosome::mutation);
                         }
                         children.forEach(MChromosome::afterBorn);
-                        children.forEach(MChromosome::getWSGAFitness);  // calculate the fitness in the threads to speed up
                         finalNextG.addAll(children);
                         firstLatch.countDown();
                     }
@@ -109,12 +87,14 @@ public class MWSGAPopulation extends MBaseGA {
             }
 
             nextG.addAll(this.population.getPopulace());
-            nextG.sort(Comparator.comparingDouble(MChromosome::getWSGAFitness));
+            MPopulation.normalizeObjectValues(nextG);
+
+            nextG.sort(Comparator.comparingDouble(MChromosome::getNormWSGAFitness));
             nextG = nextG.subList(0, Configuration.POPULATION_SIZE);
             this.population.setPopulace(nextG);
             ++currRound;
 
-            logger.info("Best: " + this.population.getPopulace().get(0).getWSGAFitness());
+            logger.info("Best: " + this.population.getPopulace().get(0).getNormWSGAFitness());
             logger.info(this.population.getPopulace().get(0).getFitness());
             logger.info(this.population.getPopulace().get(0).getCost());
         }

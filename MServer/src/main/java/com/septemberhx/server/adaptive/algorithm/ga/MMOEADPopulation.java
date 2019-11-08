@@ -1,7 +1,6 @@
 package com.septemberhx.server.adaptive.algorithm.ga;
 
 import com.septemberhx.server.core.MServerOperator;
-import com.septemberhx.server.core.MSystemModel;
 
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
@@ -48,16 +47,7 @@ public class MMOEADPopulation extends MBaseGA {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-//        this.population = new MPopulation();
-//        for (int i = 0; i < Configuration.POPULATION_SIZE; ++i) {
-//            this.population.populace.add(MChromosome.randomInit(
-//                    MBaseGA.fixedNodeIdList.size(),
-//                    MBaseGA.fixedServiceIdList.size(),
-//                    this.rawOperator,
-//                    10
-//            ));
-//        }
+        this.population.normalizeObjectValues();
     }
 
     @Override
@@ -65,12 +55,13 @@ public class MMOEADPopulation extends MBaseGA {
         this.init();
 
         List<MChromosome> P_EP = new ArrayList<>();
-        this.population.calcNSGAIIFitness();
         double[][] weightVectors = generateWeightVectors(Configuration.POPULATION_SIZE);
         int[][] B = getNeighbors(weightVectors, Configuration.MOEAD_NEIGHBOR_SIZE);
 //        double[] z = getRefrencePoint(this.population);
 
         for (int i = 0; i < Configuration.MOEAD_MAX_ROUND; ++i) {
+            logger.info("Round " + i);
+
             List<MChromosome> nextG = new Vector<>();  // thread-safe
 
             CountDownLatch firstLatch = new CountDownLatch(Configuration.POPULATION_SIZE);
@@ -86,7 +77,6 @@ public class MMOEADPopulation extends MBaseGA {
                             children.forEach(MChromosome::mutation);
                         }
                         children.forEach(MChromosome::afterBorn);
-                        children.forEach(MChromosome::getObjectiveValues);  // calculate the cost in the threads to speed up
 
                         MChromosome bestChild;
                         if (MGAUtils.dominates(children.get(0), children.get(1)) == MGAUtils.DOMINANT) {
@@ -111,18 +101,20 @@ public class MMOEADPopulation extends MBaseGA {
                 e.printStackTrace();
             }
 
-            for (MChromosome c : nextG) {
-                c.calcNSGAIIFitness();
-            }
             nextG.addAll(P_EP);
+            MPopulation.normalizeObjectValues(nextG);
+
             Map<Integer, List<MChromosome>> paretoFront = fastNonDominatedSort(nextG);
             P_EP = paretoFront.get(1);
-            logger.info("Round " + i + ", " + P_EP.get(0).getObjectiveValues());
+
+            logger.info("Best: " + P_EP.get(0).getNormWSGAFitness());
+            logger.info(P_EP.get(0).getFitness());
+            logger.info(P_EP.get(0).getCost());
         }
 
         // the result: P_EP
         P_EP.get(0).getCurrOperator().printStatus();
-        logger.info(P_EP.get(0).getObjectiveValues());
+        logger.info(P_EP.get(0).getNormObjectiveValues());
 
         this.fixedThreadPool.shutdown();
         return P_EP.get(0).getCurrOperator();
@@ -130,15 +122,15 @@ public class MMOEADPopulation extends MBaseGA {
 
     private static double[] getRefrencePoint(MPopulation population) {
         double[] z = new double[2];
-        z[0] = population.getPopulace().get(0).getObjectiveValues().get(0);
-        z[1] = population.getPopulace().get(0).getObjectiveValues().get(1);
+        z[0] = population.getPopulace().get(0).getNormObjectiveValues().get(0);
+        z[1] = population.getPopulace().get(0).getNormObjectiveValues().get(1);
         for (int i = 1; i < population.getPopulace().size(); ++i) {
-            if (population.getPopulace().get(i).getObjectiveValues().get(0) < z[0]) {
-                z[0] = population.getPopulace().get(i).getObjectiveValues().get(0);
+            if (population.getPopulace().get(i).getNormObjectiveValues().get(0) < z[0]) {
+                z[0] = population.getPopulace().get(i).getNormObjectiveValues().get(0);
             }
 
-            if (population.getPopulace().get(i).getObjectiveValues().get(1) < z[1]) {
-                z[1] = population.getPopulace().get(i).getObjectiveValues().get(1);
+            if (population.getPopulace().get(i).getNormObjectiveValues().get(1) < z[1]) {
+                z[1] = population.getPopulace().get(i).getNormObjectiveValues().get(1);
             }
         }
         return z;

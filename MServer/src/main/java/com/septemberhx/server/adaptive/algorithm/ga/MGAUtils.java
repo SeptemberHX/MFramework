@@ -21,10 +21,10 @@ public class MGAUtils {
         boolean isDominant = true;
         boolean atLeastOneIsLarger = false;
         for(int i = 0; i < 2; i++) {
-            if(chromosome1.getObjectiveValues().get(i) > chromosome2.getObjectiveValues().get(i)) {
+            if(chromosome1.getNormObjectiveValues().get(i) > chromosome2.getNormObjectiveValues().get(i)) {
                 isDominant = false;
                 break;
-            } else if (!atLeastOneIsLarger && (chromosome1.getObjectiveValues().get(i) < chromosome2.getObjectiveValues().get(i))) {
+            } else if (!atLeastOneIsLarger && (chromosome1.getNormObjectiveValues().get(i) < chromosome2.getNormObjectiveValues().get(i))) {
                 atLeastOneIsLarger = true;
             }
         }

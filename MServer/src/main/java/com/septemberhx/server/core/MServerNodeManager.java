@@ -105,4 +105,46 @@ public class MServerNodeManager extends MObjectManager<MServerNode> {
     public MNodeConnectionInfo getConnectionInfo(String fromNodeId, String toNodeId) {
         return this.serverNodeGraph.edgeValueOrDefault(fromNodeId, toNodeId, null);
     }
+
+    public double getMaxBandwidth() {
+        double r = 0;
+        for (MServerNode node : this.getAllValues()) {
+            if (node.getBandwidth() > r) {
+                r = node.getBandwidth();
+            }
+        }
+
+        for (EndpointPair<String> edge : this.serverNodeGraph.edges()) {
+            if (this.serverNodeGraph.edgeValue(edge) != null && this.serverNodeGraph.edgeValue(edge).get().getBandwidth() > r) {
+                r = this.serverNodeGraph.edgeValue(edge).get().getBandwidth();
+            }
+        }
+        return r;
+    }
+
+    public double getMaxDelay() {
+        double r = 0;
+        for (MServerNode node : this.getAllValues()) {
+            if (node.getDelay() > r) {
+                r = node.getDelay();
+            }
+        }
+
+        for (EndpointPair<String> edge : this.serverNodeGraph.edges()) {
+            if (this.serverNodeGraph.edgeValue(edge) != null && this.serverNodeGraph.edgeValue(edge).get().getDelay() > r) {
+                r = this.serverNodeGraph.edgeValue(edge).get().getDelay();
+            }
+        }
+        return r;
+    }
+
+    public double getMinDelayBetweenNodeAndUser() {
+        double r = -1;
+        for (MServerNode node : this.getAllValues()) {
+            if (r < 0 || node.getDelay() < r) {
+                r = node.getDelay();
+            }
+        }
+        return r;
+    }
 }

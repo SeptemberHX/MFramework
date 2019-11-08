@@ -4,6 +4,7 @@ import com.septemberhx.common.base.MObjectManager;
 import com.septemberhx.server.base.model.MService;
 import com.septemberhx.server.base.model.MServiceInstance;
 import com.septemberhx.server.base.model.MServiceInterface;
+import com.septemberhx.server.base.model.MUserDemand;
 import lombok.Setter;
 
 import java.util.*;
@@ -91,5 +92,39 @@ public class MServiceManager extends MObjectManager<MService> {
 
     public List<MService> getAllServicesByServiceName(String serviceName) {
         return this.getAllValues().stream().filter(s -> s.getServiceName().equals(serviceName)).collect(Collectors.toList());
+    }
+
+    // for composited services
+    public List<MServiceInterface> getCompositedInterfaceStartsWithDemand(MService service, MUserDemand userDemand) {
+        List<MServiceInterface> result = new ArrayList<>();
+
+        for (MServiceInterface serviceInterface : service.getAllComInterfaces()) {
+            // todo:
+        }
+        return result;
+    }
+
+    public double getMaxInSizeData() {
+        double r = 0;
+        for (MService service : this.getAllValues()) {
+            for (MServiceInterface serviceInterface : service.getAllInterface()) {
+                if (serviceInterface.getInDataSize() > r) {
+                    r = serviceInterface.getInDataSize();
+                }
+            }
+        }
+        return r;
+    }
+
+    public double getMaxOutSizeData() {
+        double r = 0;
+        for (MService service : this.getAllValues()) {
+            for (MServiceInterface serviceInterface : service.getAllInterface()) {
+                if (serviceInterface.getOutDataSize() > r) {
+                    r = serviceInterface.getOutDataSize();
+                }
+            }
+        }
+        return r;
     }
 }

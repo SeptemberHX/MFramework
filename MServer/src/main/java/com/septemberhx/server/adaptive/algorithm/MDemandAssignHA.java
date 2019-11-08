@@ -25,7 +25,31 @@ public class MDemandAssignHA {
 
     private static Logger logger = LogManager.getLogger(MDemandAssignHA.class);
 
-    public static List<MBaseJob> calc(List<MUserDemand> userDemands, MServerOperator snapshotOperator) {
+    // composition version
+    public static List<MBaseJob> calc_compVersion(List<MUserDemand> userDemands, MServerOperator snapshotOperator) {
+        int rawJobListSize = snapshotOperator.getJobList().size();
+
+        Map<String, MUserDemand> demandMap = new HashMap<>();
+        for (MUserDemand userDemand : userDemands) {
+            demandMap.put(userDemand.getId(), userDemand);
+        }
+
+        for (MUserDemand userDemand : userDemands) {
+            if (!demandMap.containsKey(userDemand.getId())) {
+                continue;
+            }
+
+            // 1. find available composited-version services for this demand in his demand chains
+            List<MService> comServiceList = new ArrayList<>();
+            for (MService comService : snapshotOperator.getServiceManager().getAllComServices()) {
+                
+            }
+        }
+
+        return snapshotOperator.getJobList().subList(rawJobListSize, snapshotOperator.getJobList().size());
+    }
+
+        public static List<MBaseJob> calc(List<MUserDemand> userDemands, MServerOperator snapshotOperator) {
         int rawJobListSize = snapshotOperator.getJobList().size();
 
         // sort the user demands by function id and sla
