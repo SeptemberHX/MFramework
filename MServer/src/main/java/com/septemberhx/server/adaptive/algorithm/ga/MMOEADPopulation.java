@@ -110,6 +110,8 @@ public class MMOEADPopulation extends MBaseGA {
             logger.info("Best: " + P_EP.get(0).getNormWSGAFitness());
             logger.info(P_EP.get(0).getFitness());
             logger.info(P_EP.get(0).getCost());
+
+            System.gc();
         }
 
         // the result: P_EP
