@@ -68,15 +68,20 @@ public class MWSGAPopulation extends MBaseGA {
                 this.fixedThreadPool.execute(new Runnable() {
                     @Override
                     public void run() {
-                        MChromosome parent1 = binaryTournamentSelection(population);
-                        MChromosome parent2 = binaryTournamentSelection(population);
-                        List<MChromosome> children = parent1.crossover(parent2);
-                        if (MGAUtils.MUTATION_PROB_RAND.nextDouble() < Configuration.WSGA_MUTATION_RATE) {
-                            children.forEach(MChromosome::mutation);
+                        try {
+                            MChromosome parent1 = binaryTournamentSelection(population);
+                            MChromosome parent2 = binaryTournamentSelection(population);
+                            List<MChromosome> children = parent1.crossover(parent2);
+                            if (MGAUtils.MUTATION_PROB_RAND.nextDouble() < Configuration.WSGA_MUTATION_RATE) {
+                                children.forEach(MChromosome::mutation);
+                            }
+                            children.forEach(MChromosome::afterBorn);
+                            finalNextG.addAll(children);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        } finally {
+                            firstLatch.countDown();
                         }
-                        children.forEach(MChromosome::afterBorn);
-                        finalNextG.addAll(children);
-                        firstLatch.countDown();
                     }
                 });
             }

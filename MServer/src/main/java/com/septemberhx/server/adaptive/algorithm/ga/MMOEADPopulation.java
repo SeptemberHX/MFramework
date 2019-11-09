@@ -70,28 +70,33 @@ public class MMOEADPopulation extends MBaseGA {
                 this.fixedThreadPool.execute(new Runnable() {
                     @Override
                     public void run() {
-                        MChromosome father1 = population.getPopulace().get(B[finalJ][MGAUtils.CROSSOVER_PROB_RAND.nextInt(Configuration.MOEAD_NEIGHBOR_SIZE)]);
-                        MChromosome father2 = population.getPopulace().get(B[finalJ][MGAUtils.CROSSOVER_PROB_RAND.nextInt(Configuration.MOEAD_NEIGHBOR_SIZE)]);
-                        List<MChromosome> children = father1.crossover(father2);
-                        if (MGAUtils.MUTATION_PROB_RAND.nextDouble() < Configuration.MOEAD_MUTATION_RATE) {
-                            children.forEach(MChromosome::mutation);
-                        }
-                        children.forEach(MChromosome::afterBorn);
-
-                        MChromosome bestChild;
-                        if (MGAUtils.dominates(children.get(0), children.get(1)) == MGAUtils.DOMINANT) {
-                            bestChild = children.get(0);
-                        } else {
-                            bestChild = children.get(1);
-                        }
-
-                        for (int k = 0; k < Configuration.MOEAD_NEIGHBOR_SIZE; ++k) {
-                            if (MGAUtils.dominates(bestChild, population.getPopulace().get(B[finalJ][k])) == MGAUtils.DOMINANT) {
-                                population.getPopulace().set(B[finalJ][k], bestChild);
+                        try {
+                            MChromosome father1 = population.getPopulace().get(B[finalJ][MGAUtils.CROSSOVER_PROB_RAND.nextInt(Configuration.MOEAD_NEIGHBOR_SIZE)]);
+                            MChromosome father2 = population.getPopulace().get(B[finalJ][MGAUtils.CROSSOVER_PROB_RAND.nextInt(Configuration.MOEAD_NEIGHBOR_SIZE)]);
+                            List<MChromosome> children = father1.crossover(father2);
+                            if (MGAUtils.MUTATION_PROB_RAND.nextDouble() < Configuration.MOEAD_MUTATION_RATE) {
+                                children.forEach(MChromosome::mutation);
                             }
+                            children.forEach(MChromosome::afterBorn);
+
+                            MChromosome bestChild;
+                            if (MGAUtils.dominates(children.get(0), children.get(1)) == MGAUtils.DOMINANT) {
+                                bestChild = children.get(0);
+                            } else {
+                                bestChild = children.get(1);
+                            }
+
+                            for (int k = 0; k < Configuration.MOEAD_NEIGHBOR_SIZE; ++k) {
+                                if (MGAUtils.dominates(bestChild, population.getPopulace().get(B[finalJ][k])) == MGAUtils.DOMINANT) {
+                                    population.getPopulace().set(B[finalJ][k], bestChild);
+                                }
+                            }
+                            nextG.add(bestChild);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        } finally {
+                            firstLatch.countDown();
                         }
-                        nextG.add(bestChild);
-                        firstLatch.countDown();
                     }
                 });
             }

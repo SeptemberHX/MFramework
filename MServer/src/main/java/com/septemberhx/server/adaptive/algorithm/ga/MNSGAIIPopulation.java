@@ -69,34 +69,39 @@ public class MNSGAIIPopulation extends MBaseGA {
                 this.fixedThreadPool.execute(new Runnable() {
                     @Override
                     public void run() {
-                        MChromosome parent1 = binaryTournamentSelection(population);
-                        MChromosome parent2 = binaryTournamentSelection(population);
+                        try {
+                            MChromosome parent1 = binaryTournamentSelection(population);
+                            MChromosome parent2 = binaryTournamentSelection(population);
 
-                        if (Configuration.DEBUG_MODE) {
-                            if (!parent1.verify()) {
-                                logger.error(parent1.getId() + " failed to verify before crossover");
+                            if (Configuration.DEBUG_MODE) {
+                                if (!parent1.verify()) {
+                                    logger.error(parent1.getId() + " failed to verify before crossover");
+                                }
+                                if (!parent2.verify()) {
+                                    logger.error(parent2.getId() + " failed to verify before crossover");
+                                }
                             }
-                            if (!parent2.verify()) {
-                                logger.error(parent2.getId() + " failed to verify before crossover");
-                            }
-                        }
 
-                        List<MChromosome> children = parent1.crossover(parent2);
-                        if (MGAUtils.MUTATION_PROB_RAND.nextDouble() < Configuration.NSGAII_MUTATION_RATE) {
-                            children.forEach(MChromosome::mutation);
-                        }
-                        children.forEach(MChromosome::afterBorn);
+                            List<MChromosome> children = parent1.crossover(parent2);
+                            if (MGAUtils.MUTATION_PROB_RAND.nextDouble() < Configuration.NSGAII_MUTATION_RATE) {
+                                children.forEach(MChromosome::mutation);
+                            }
+                            children.forEach(MChromosome::afterBorn);
 
-                        if (Configuration.DEBUG_MODE) {
-                            if (!parent1.verify()) {
-                                logger.error(parent1.getId() + " failed to verify after crossover");
+                            if (Configuration.DEBUG_MODE) {
+                                if (!parent1.verify()) {
+                                    logger.error(parent1.getId() + " failed to verify after crossover");
+                                }
+                                if (!parent2.verify()) {
+                                    logger.error(parent2.getId() + " failed to verify after crossover");
+                                }
                             }
-                            if (!parent2.verify()) {
-                                logger.error(parent2.getId() + " failed to verify after crossover");
-                            }
+                            nextG.addAll(children);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        } finally {
+                            firstLatch.countDown();
                         }
-                        nextG.addAll(children);
-                        firstLatch.countDown();
                     }
                 });
             }
