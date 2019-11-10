@@ -502,7 +502,7 @@ public class MServerOperator extends MObjectManager<MServerState> {
     }
 
     public void addNewJob(MBaseJob baseJob) {
-        this.jobList.add(baseJob);
+//        this.jobList.add(baseJob);
     }
 
     /**
