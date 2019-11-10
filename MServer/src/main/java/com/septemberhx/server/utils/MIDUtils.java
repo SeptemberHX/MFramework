@@ -1,8 +1,5 @@
 package com.septemberhx.server.utils;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.UUID;
 
 /**
@@ -17,7 +14,6 @@ public class MIDUtils {
      *   by 1 each time. When create a new instance, the smallest usable noId should be used.
      * @param nodeId: node id
      * @param serviceId: service Id
-     * @param idList: current id lists of given service on target node
      * @return String
      */
     public static String generateInstanceId(String nodeId, String serviceId) {
@@ -46,5 +42,9 @@ public class MIDUtils {
 
     public static String generateFunctionId(String functionName) {
         return String.format("%s_%s", functionName, UUID.randomUUID());
+    }
+
+    public static String generateComDemandAssignId() {
+        return UUID.randomUUID().toString();
     }
 }

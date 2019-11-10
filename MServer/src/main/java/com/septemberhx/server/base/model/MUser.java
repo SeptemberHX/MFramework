@@ -60,4 +60,14 @@ public class MUser extends MBaseObject {
             }
         }
     }
+
+    public MDemandChain getContainedChain(String demandId) {
+        for (MDemandChain demandChain : this.getDemandChainList()) {
+            if (demandChain.containsDemandId(demandId)) {
+                return demandChain;
+            }
+        }
+
+        return null;
+    }
 }

@@ -1,0 +1,199 @@
+[{
+  "generated": false,
+  "serviceName": "ali_service",
+  "gitUrl": "",
+  "interfaceMap": {
+    "ali_service_r01__pay_function": {
+      "patternUrl": "",
+      "fullFuncName": "com.test.ali_service.pay_function",
+      "slaLevel": 1,
+      "functionId": "pay_function",
+      "cpuResource": 0,
+      "ramResource": 0,
+      "maxUserNum": 100,
+      "interfaceId": "ali_service_r01__pay_function",
+      "compositionList": null,
+      "serviceId": "ali_service_r01",
+      "inDataSize": 1,
+      "outDataSize": 5
+    },
+    "ali_service_r01__market_function": {
+      "patternUrl": "",
+      "fullFuncName": "com.test.ali_service.market_function",
+      "slaLevel": 1,
+      "functionId": "market_function",
+      "cpuResource": 0,
+      "ramResource": 0,
+      "maxUserNum": 100,
+      "interfaceId": "ali_service_r01__market_function",
+      "compositionList": null,
+      "serviceId": "ali_service_r01",
+      "inDataSize": 10,
+      "outDataSize": 50
+    },
+    "ali_service_r01__canteen_function": {
+      "patternUrl": "",
+      "fullFuncName": "com.test.ali_service.canteen_function",
+      "slaLevel": 2,
+      "functionId": "canteen_function",
+      "cpuResource": 0,
+      "ramResource": 0,
+      "maxUserNum": 100,
+      "interfaceId": "ali_service_r01__canteen_function",
+      "compositionList": [],
+      "serviceId": "ali_service_r01",
+      "inDataSize": 5,
+      "outDataSize": 40
+    }
+  },
+  "resource": {
+    "cpu": 200,
+    "ram": 200,
+    "bandwidth": 100
+  },
+  "maxUserCap": 200,
+  "id": "ali_service_r01",
+  "artifactInfo": {
+    "groupId": "com.test",
+    "artifactId": "ali_service",
+    "version": "1.0"
+  },
+  "rId": "r01"
+},
+  {
+    "generated": false,
+    "serviceName": "wechat_service",
+    "gitUrl": "",
+    "interfaceMap": {
+      "wechat_service_r01__pay_function": {
+        "patternUrl": "",
+        "fullFuncName": "com.test.wechat_service.pay_function",
+        "slaLevel": 1,
+        "functionId": "pay_function",
+        "cpuResource": 0,
+        "ramResource": 0,
+        "maxUserNum": 100,
+        "interfaceId": "wechat_service_r01__pay_function",
+        "compositionList": [],
+        "serviceId": "wechat_service_r01",
+        "inDataSize": 2,
+        "outDataSize": 4
+      }
+    },
+    "resource": {
+      "cpu": 100,
+      "ram": 100,
+      "bandwidth": 100
+    },
+    "maxUserCap": 150,
+    "id": "wechat_service_r01",
+    "artifactInfo": {
+      "groupId": "com.test",
+      "artifactId": "wechat_service",
+      "version": "1.0"
+    },
+    "rId": "r01"
+  },
+  {
+    "generated": false,
+    "serviceName": "paypal_service",
+    "gitUrl": "",
+    "interfaceMap": {
+      "paypal_service_r01__pay_function": {
+        "patternUrl": "",
+        "fullFuncName": "com.test.paypal_service.pay_function",
+        "slaLevel": 1,
+        "functionId": "pay_function",
+        "cpuResource": 0,
+        "ramResource": 0,
+        "maxUserNum": 100,
+        "interfaceId": "paypal_service_r01__pay_function",
+        "compositionList": null,
+        "serviceId": "paypal_service_r01",
+        "inDataSize": 2,
+        "outDataSize": 4
+      }
+    },
+    "resource": {
+      "cpu": 120,
+      "ram": 200,
+      "bandwidth": 100
+    },
+    "maxUserCap": 100,
+    "id": "paypal_service_r01",
+    "artifactInfo": {
+      "groupId": "com.test",
+      "artifactId": "paypal_service",
+      "version": "1.0"
+    },
+    "rId": "r01"
+  },
+  {
+    "generated": false,
+    "serviceName": "shunfeng_service",
+    "gitUrl": "",
+    "interfaceMap": {
+      "shunfeng_service_r01__delivery_function": {
+        "patternUrl": "",
+        "fullFuncName": "com.test.shunfeng_service.delivery_function",
+        "slaLevel": 3,
+        "functionId": "delivery_function",
+        "cpuResource": 0,
+        "ramResource": 0,
+        "maxUserNum": 100,
+        "interfaceId": "shunfeng_service_r01__delivery_function",
+        "compositionList": null,
+        "serviceId": "shunfeng_service_r01",
+        "inDataSize": 20,
+        "outDataSize": 5
+      }
+    },
+    "resource": {
+      "cpu": 120,
+      "ram": 200,
+      "bandwidth": 100
+    },
+    "maxUserCap": 150,
+    "id": "shunfeng_service_r01",
+    "artifactInfo": {
+      "groupId": "com.test",
+      "artifactId": "shunfeng_service",
+      "version": "1.0"
+    },
+    "rId": "r01"
+  },
+  {
+    "generated": false,
+    "serviceName": "cainiao_service",
+    "gitUrl": "",
+    "interfaceMap": {
+      "cainiao_service_r01__delivery_function": {
+        "patternUrl": "",
+        "fullFuncName": "com.test.cainiao_service.delivery_function",
+        "slaLevel": 2,
+        "functionId": "delivery_function",
+        "cpuResource": 0,
+        "ramResource": 0,
+        "maxUserNum": 100,
+        "interfaceId": "cainiao_service_r01__delivery_function",
+        "compositionList": null,
+        "serviceId": "cainiao_service_r01",
+        "inDataSize": 20,
+        "outDataSize": 5
+      }
+    },
+    "resource": {
+      "cpu": 200,
+      "ram": 200,
+      "bandwidth": 100
+    },
+    "maxUserCap": 150,
+    "id": "cainiao_service_r01",
+    "artifactInfo": {
+      "groupId": "com.test",
+      "artifactId": "cainiao_service",
+      "version": "1.0"
+    },
+    "rId": "r01"
+  }
+  ]

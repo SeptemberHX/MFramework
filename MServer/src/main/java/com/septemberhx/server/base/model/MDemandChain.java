@@ -63,4 +63,13 @@ public class MDemandChain {
                 ", demandMap=" + demandMap +
                 '}';
     }
+
+    public int getDemandIndex(String demandId) {
+        for (int i = 0; i < this.demandIdList.size(); ++i) {
+            if (this.demandIdList.get(i).equals(demandId)) {
+                return i;
+            }
+        }
+        return -1;
+    }
 }

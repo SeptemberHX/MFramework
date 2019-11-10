@@ -342,8 +342,12 @@ public class MChromosome {
      * In this function, we will assign demands to instances, and "save" non-feasible solution
      */
     private void assignDemands() {
-        List<MBaseJob> newJobList = MDemandAssignHA.calc(this.unSolvedDemandList, currOperator);
-
+        List<MBaseJob> newJobList;
+        if (Configuration.COMPOSITION_ALL_ENABLED) {
+            newJobList = MDemandAssignHA.calc_compVersion(this.unSolvedDemandList, currOperator);
+        } else {
+            newJobList = MDemandAssignHA.calc(this.unSolvedDemandList, currOperator);
+        }
         if (Configuration.DEBUG_MODE) {
             logger.info(this.id + " unsolved demand size: " + this.unSolvedDemandList);
             logger.info(this.id + " solved demand size: " + this.currOperator.getDemandStateManager().getAllValues().size() + " before assignDemands");
@@ -421,8 +425,7 @@ public class MChromosome {
 
         // delete un-necessary instances
         for (MServiceInstance instance : this.currOperator.getAllInstances()) {
-            if (this.rawOperator.getInstanceById(instance.getId()) == null
-                    && this.currOperator.getInstanceUserNumber(instance.getId()) == 0
+            if (this.currOperator.getInstanceUserNumber(instance.getId()) == 0
                     && !emptyInstanceList.contains(instance)) {
                 emptyInstanceList.add(instance);
             }
@@ -436,7 +439,7 @@ public class MChromosome {
                 logger.info(this.getId() + " Delete empty instance: " + instance.getId());
 
             // avoid remove non-exist instance
-            if (!this.currOperator.containsById(instance.getId())) {
+            if (this.currOperator.getInstanceById(instance.getId()) == null) {
                 continue;
             }
             if (this.rawOperator.getInstanceById(instance.getId()) != null) {
@@ -554,16 +557,55 @@ public class MChromosome {
         Map<String, MDemandState> otherOldStates = getDemandMappingFromGenes(parent2, fromIndex, toIndex);
 
         List<MUserDemand> child1UnSolvedStateList = new ArrayList<>();
+
+        Set<String> comDemandIdSet = new HashSet<>();
+
         for (String demandId : oldStates.keySet()) {
+            if (comDemandIdSet.contains(demandId)) continue;
+
             MDemandState oldState = oldStates.get(demandId);
             MUserDemand demand = MSystemModel.getIns().getUserManager().getUserDemandByUserAndDemandId(
                     oldState.getUserId(), oldState.getId()
             );
             if (otherOldStates.containsKey(demandId)) {
-
                 MServiceInstance instance = this.currOperator.getInstanceById(otherOldStates.get(demandId).getInstanceId());
                 if (instance != null) {
-                    this.currOperator.assignDemandToIns(demand, instance, oldState);
+                    MDemandState otherOldState = otherOldStates.get(demandId);
+                    if (otherOldState.isAssignAsComp()) {
+                        // if it is comp-assigned, we will try to find other demands assigned at the same time
+                        List<MUserDemand> compDemandList = new ArrayList<>();
+                        List<MDemandState> oldDemandList = new ArrayList<>();
+                        compDemandList.add(demand);
+                        boolean successFlag = true;
+                        for (MDemandState otherState : otherOldStates.values()) {
+                            // jump over itself
+                            if (otherState.getId().equals(otherOldState.getId())) continue;
+
+                            // find the demands assigned with the same assignId
+                            if (otherState.isAssignAsComp() && otherState.getComAssignId().equals(otherOldState.getComAssignId())) {
+                                Optional<MDemandState> stateOptional = this.currOperator.getDemandStateManager().getById(otherState.getId());
+                                // if these demands are assigned with other assignId, we will not assign this demand
+                                if (stateOptional.isPresent() && stateOptional.get().isAssignAsComp()) {
+                                    successFlag = false;
+                                    break;
+                                } else {
+                                    stateOptional.ifPresent(oldDemandList::add);
+                                    MUserDemand tmpDemand = MSystemModel.getIns().getUserManager().getUserDemandByUserAndDemandId(otherState.getUserId(), otherState.getId());
+                                    compDemandList.add(tmpDemand);
+                                    comDemandIdSet.add(tmpDemand.getId());
+                                }
+                            }
+                        }
+                        if (successFlag) {
+                            this.currOperator.assignDemandChainIoIns(compDemandList, instance, this.currOperator.getServiceInterface(otherOldState.getInterfaceId()), oldDemandList);
+                        } else {
+                            // failed to match, just remove it
+                            this.currOperator.removeDemandState(oldState);
+                            child1UnSolvedStateList.add(demand);
+                        }
+                    } else {
+                        this.currOperator.assignDemandToIns(demand, instance, oldState);
+                    }
                 } else {
                     this.currOperator.removeDemandState(oldState);
                     child1UnSolvedStateList.add(demand);

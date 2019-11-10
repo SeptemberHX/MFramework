@@ -19,6 +19,8 @@ public class MDemandState extends MBaseObject {
     private String userId;      // the id of the user
     private String nodeId;      // the id of the node where the instance located
 
+    private String comAssignId;
+
     public MDemandState(MUserDemand userDemand) {
         this.id = userDemand.getId();
         this.userId = userDemand.getUserId();
@@ -30,7 +32,13 @@ public class MDemandState extends MBaseObject {
         this.nodeId = serviceInstance.getNodeId();
     }
 
+    public void compSatisfy(MServiceInstance serviceInstance, MServiceInterface serviceInterface, String comAssignId) {
+        this.satisfy(serviceInstance, serviceInterface);
+        this.comAssignId = comAssignId;
+    }
+
     private void clean() {
+        this.comAssignId = null;
         this.instanceId = null;
         this.interfaceId = null;
         this.nodeId = null;
@@ -47,6 +55,7 @@ public class MDemandState extends MBaseObject {
                 ", interfaceId='" + interfaceId + '\'' +
                 ", userId='" + userId + '\'' +
                 ", nodeId='" + nodeId + '\'' +
+                ", comAssignId='" + comAssignId + '\'' +
                 ", id='" + id + '\'' +
                 '}';
     }
@@ -62,6 +71,7 @@ public class MDemandState extends MBaseObject {
         r.instanceId = this.instanceId;
         r.interfaceId = this.interfaceId;
         r.nodeId = this.nodeId;
+        r.comAssignId = this.comAssignId;
         return r;
     }
 
@@ -71,5 +81,15 @@ public class MDemandState extends MBaseObject {
         this.interfaceId = interfaceId;
         this.userId = userId;
         this.nodeId = nodeId;
+        this.comAssignId = null;
+    }
+
+    public MDemandState(String id, String instanceId, String interfaceId, String userId, String nodeId, String comAssignId) {
+        this(id, instanceId, interfaceId, userId, nodeId);
+        this.comAssignId = comAssignId;
+    }
+
+    public boolean isAssignAsComp() {
+        return this.comAssignId != null;
     }
 }

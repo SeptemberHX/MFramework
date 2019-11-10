@@ -11,6 +11,7 @@ import com.septemberhx.server.base.MNodeConnectionInfo;
 import com.septemberhx.server.base.model.*;
 import com.septemberhx.server.job.*;
 import com.septemberhx.server.utils.MIDUtils;
+import com.septemberhx.server.utils.MModelUtils;
 import lombok.Getter;
 import org.javatuples.Pair;
 
@@ -33,6 +34,7 @@ public class MServerOperator extends MObjectManager<MServerState> {
     // clone objects
     @Getter
     private MDemandStateManager demandStateManager;
+    @Getter
     private MServiceInstanceManager instanceManager;
 
     @Getter
@@ -59,7 +61,7 @@ public class MServerOperator extends MObjectManager<MServerState> {
         MServerOperator serverOperator = new MServerOperator();
         serverOperator.demandStateManager = new MDemandStateManager();
         serverOperator.instanceManager = new MServiceInstanceManager();
-        serverOperator.serviceManager = MSystemModel.getIns().getServiceManager().shallowClone();
+        serverOperator.serviceManager = MSystemModel.getIns().getOperator().getServiceManager().shallowClone();
 
         serverOperator.jobList.clear();
         serverOperator.insId2LeftCap.clear();
@@ -243,6 +245,27 @@ public class MServerOperator extends MObjectManager<MServerState> {
         return newDemandState;
     }
 
+    public void assignDemandChainIoIns(List<MUserDemand> demandList, MServiceInstance instance,
+                                       MServiceInterface serviceInterface, List<MDemandState> oldDemandStateList) {
+        for (MDemandState oldState : oldDemandStateList) {
+            if (oldState.isAssignAsComp()) {
+                throw new RuntimeException("Remove old com-service demand state in assignDemand is not supported");
+            }
+            this.removeDemandState(oldState);
+        }
+        this.insId2LeftCap.put(instance.getId(), this.insId2LeftCap.getOrDefault(instance.getId(), 0) - 1);
+
+        Optional<MService> serviceOptional = this.serviceManager.getById(instance.getServiceId());
+        String comAssignId = MIDUtils.generateComDemandAssignId();
+        for (MUserDemand demand : demandList) {
+            if (serviceOptional.isPresent()) {
+                MDemandState state = new MDemandState(demand);
+                state.compSatisfy(instance, serviceInterface, comAssignId);
+                this.demandStateManager.add(state);
+            }
+        }
+    }
+
     public void removeDemandState(MDemandState oldState) {
         if (this.demandStateManager.containsById(oldState.getId())) {
             this.insId2LeftCap.put(oldState.getInstanceId(), this.insId2LeftCap.get(oldState.getInstanceId()) + 1);
@@ -388,6 +411,16 @@ public class MServerOperator extends MObjectManager<MServerState> {
         return resultList;
     }
 
+    public List<String> getInstanceIdListOnNodeOfServiceWithEnoughCap(String nodeId, String serviceId) {
+        List<String> resultList = new LinkedList<>();
+        for (MServiceInstance serviceInstance : this.instanceManager.getInstancesOnNode(nodeId)) {
+            if (serviceInstance.getServiceId().equals(serviceId) && this.insId2LeftCap.get(serviceInstance.getId()) > 0) {
+                resultList.add(serviceInstance.getId());
+            }
+        }
+        return resultList;
+    }
+
     public List<MServiceInstance> getInstancesCanMetWithEnoughCapOnNode(String nodeId, MUserDemand userDemand) {
         List<MServiceInstance> instanceList = this.getInstancesOnNode(nodeId);
         List<MServiceInstance> resultList = new ArrayList<>();
@@ -507,35 +540,7 @@ public class MServerOperator extends MObjectManager<MServerState> {
 
     // ------------------- Composition Part --------------------
     public void compositeService(MService service1, MServiceInterface interface1, MService service2, MServiceInterface interface2) {
-        // interfaceId contains serviceName
-        String serviceId = MIDUtils.generateServiceId(String.format("%s__%s", interface1.getInterfaceId(), interface2.getInterfaceId()),
-                String.format("%s_%s", service1.getId(), service2.getId()));
-
-        if (Configuration.DEBUG_MODE) {
-            logger.info(String.format("Composite service %s|%s and %s|%s to %s", service1.getId(), interface1.getInterfaceId(), service2.getId(), interface2.getInterfaceId(), serviceId));
-        }
-
-        String serviceName = serviceId;
-        String functionName = String.format("%s__%s", interface1.getFullFuncName(), interface2.getFullFuncName());
-        MServiceInterface newInterface = new MServiceInterface();
-        newInterface.setInterfaceId(MIDUtils.generateInterfaceId(serviceId, functionName));
-        newInterface.setSlaLevel(-1);
-        newInterface.setFunctionId(MIDUtils.generateFunctionId(functionName));
-        newInterface.setServiceId(serviceId);
-
-        List<String> compositionList = new ArrayList<>();
-        compositionList.addAll(interface1.getCompositionList());
-        compositionList.addAll(interface2.getCompositionList());
-        newInterface.setCompositionList(compositionList);
-
-        Map<String, MServiceInterface> interfaceMap = new HashMap<>();
-        interfaceMap.put(newInterface.getInterfaceId(), newInterface);
-
-        MService newService = new MService(serviceId, serviceName, null, interfaceMap);
-        newService.setGenerated(true);
-        newService.setMaxUserCap(Math.min(service1.getMaxUserCap(), service2.getMaxUserCap()));
-        newService.setResource(service1.getResource().max(service2.getResource()));
-
+        MService newService = MModelUtils.compService(service1, interface1, service2, interface2);
         this.addNewService(newService);
         this.addNewJob(this.getBuildJob(newService));
     }
@@ -685,9 +690,16 @@ public class MServerOperator extends MObjectManager<MServerState> {
             for (MDemandChain demandChain : user.getDemandChainList()) {
                 double tDelay = 0;
                 double tTrans = 0;
+                String prevDemandStateAssignId = null;
                 for (MUserDemand demand : demandChain.getDemandList()) {
                     Optional<MDemandState> demandStateOptional = this.demandStateManager.getById(demand.getId());
                     if (demandStateOptional.isPresent()) {
+                        if (prevDemandStateAssignId != null
+                                && demandStateOptional.get().isAssignAsComp()
+                                && demandStateOptional.get().getComAssignId().equals(prevDemandStateAssignId)) {
+                            continue;
+                        }
+
                         MServiceInterface serviceInterface = this.serviceManager.getInterfaceById(demandStateOptional.get().getInterfaceId());
                         if (!demandStateOptional.get().getNodeId().equals(nodeId)) {
                             MNodeConnectionInfo info = MSystemModel.getIns().getMSNManager()
@@ -699,6 +711,8 @@ public class MServerOperator extends MObjectManager<MServerState> {
                         MServerNode node = MSystemModel.getIns().getMSNManager().getById(nodeId).get();
                         tDelay += node.getDelay() * 2;  // delay between user and node
                         tTrans += (double) (serviceInterface.getInDataSize() + serviceInterface.getOutDataSize()) / node.getBandwidth();
+
+                        prevDemandStateAssignId = demandStateOptional.get().getComAssignId();
                     } else {
                         tDelay = MAdaptiveSystem.UNAVAILABLE_TOLERANCE;
                         tTrans = MAdaptiveSystem.UNAVAILABLE_TRANSFORM_TIME;
@@ -1070,12 +1084,26 @@ public class MServerOperator extends MObjectManager<MServerState> {
         }
 
         for (MServiceInstance instance : this.instanceManager.getAllValues()) {
-            int userDemandsSize = this.demandStateManager.getDemandStatesOnInstance(instance.getId()).size();
+            int userDemandsSize = 0;
+            Set<String> comDemandAssignIdSet = new HashSet<>();
+            for (MDemandState demandState : this.demandStateManager.getDemandStatesOnInstance(instance.getId())) {
+                if (!demandState.isAssignAsComp()) {
+                    userDemandsSize += 1;
+                } else {
+                    comDemandAssignIdSet.add(demandState.getComAssignId());
+                }
+            }
+            userDemandsSize += comDemandAssignIdSet.size();
             int serviceCap = this.getServiceById(instance.getServiceId()).getMaxUserCap();
 
             if (this.insId2LeftCap.get(instance.getId()) != serviceCap - userDemandsSize) {
                 this.printStatus();
                 logger.warn("Instance " + instance.getId() + " has inconsistent capability");
+                return false;
+            }
+
+            if (this.insId2LeftCap.get(instance.getId()) == serviceCap) {
+                logger.warn("Instance with 0 users");
                 return false;
             }
         }
@@ -1196,5 +1224,9 @@ public class MServerOperator extends MObjectManager<MServerState> {
             logger.info("Unsolved demands size: " + unSolvedDemands.size());
         }
         return unSolvedDemands;
+    }
+
+    public MServiceInterface getServiceInterface(String interfaceId) {
+        return this.serviceManager.getInterfaceById(interfaceId);
     }
 }

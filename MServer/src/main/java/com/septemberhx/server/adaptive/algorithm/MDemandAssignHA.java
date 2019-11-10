@@ -5,8 +5,10 @@ import com.septemberhx.server.core.MServerOperator;
 import com.septemberhx.server.core.MSystemModel;
 import com.septemberhx.server.job.MBaseJob;
 import com.septemberhx.server.utils.MIDUtils;
+import com.septemberhx.server.utils.MModelUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.javatuples.Triplet;
 
 import java.util.*;
 
@@ -30,39 +32,115 @@ public class MDemandAssignHA {
         int rawJobListSize = snapshotOperator.getJobList().size();
 
         Map<String, MUserDemand> demandMap = new HashMap<>();
+        Set<String> userIdSet = new HashSet<>();
         for (MUserDemand userDemand : userDemands) {
             demandMap.put(userDemand.getId(), userDemand);
+            userIdSet.add(userDemand.getUserId());
+        }
+
+        // get node list for each user
+        Map<String, List<MServerNode>> userId2NodeList = new HashMap<>();
+        for (String userId : userIdSet) {
+            MUser mUser = MSystemModel.getIns().getUserManager().getById(userId).get();
+            String closestNodeId = MSystemModel.getIns().getMSNManager().getClosestNodeId(mUser.getPosition());
+            Optional<MServerNode> closestNodeOption = MSystemModel.getIns().getMSNManager().getById(closestNodeId);
+            MServerNode closestNode = closestNodeOption.get();
+            List<MServerNode> serverNodeList = MSystemModel.getIns().getMSNManager().getConnectedNodesDecentWithDelayTolerance(closestNodeId);
+            serverNodeList.add(0, closestNode);
+            userId2NodeList.put(userId, serverNodeList);
         }
 
         for (MUserDemand userDemand : userDemands) {
             if (!demandMap.containsKey(userDemand.getId())) {
                 continue;
             }
+            MUser user = MSystemModel.getIns().getUserManager().getById(userDemand.getUserId()).get();
 
             // 1. find available composited-version services for this demand in his demand chains
-            List<MService> comServiceList = new ArrayList<>();
-            for (MService comService : snapshotOperator.getServiceManager().getAllComServices()) {
-                
+            List<Triplet<MService, MServiceInterface, List<MUserDemand>>> potentialPairList = MModelUtils.getProperComServiceList(
+                    userDemand, user.getContainedChain(userDemand.getId()), snapshotOperator.getServiceManager()
+            );
+
+            boolean assignSuccessfully = false;
+            for (MServerNode node : userId2NodeList.get(userDemand.getUserId())) {
+                // 2.1 find instance of com-service with enough capability
+                for (Triplet<MService, MServiceInterface, List<MUserDemand>> potentialPair : potentialPairList) {
+                    // if other demands are satisfied by other com-service, we will ignore this potential solution
+                    List<MUserDemand> demandChain = potentialPair.getValue2();
+                    boolean flag = true;
+                    List<MDemandState> oldDemandState = new ArrayList<>();
+                    for (MUserDemand demand : demandChain) {
+                        Optional<MDemandState> stateOptional = snapshotOperator.getDemandStateManager().getById(demand.getId());
+                        if (stateOptional.isPresent()) {
+                            MDemandState state = stateOptional.get();
+                            oldDemandState.add(state);
+                            if (state.isAssignAsComp()) {
+                                flag = false;
+                            }
+                            break;
+                        }
+                    }
+                    if (!flag) {
+                        continue;
+                    }
+
+                    // now, all other demands are assigned to simple service or not assigned
+                    List<String> instanceIdList = snapshotOperator.getInstanceIdListOnNodeOfServiceWithEnoughCap(
+                            node.getId(), potentialPair.getValue0().getId()
+                    );
+                    if (!instanceIdList.isEmpty()) {
+                        MServiceInstance serviceInstance = snapshotOperator.getInstanceById(instanceIdList.get(0));
+                        snapshotOperator.assignDemandChainIoIns(demandChain, serviceInstance, potentialPair.getValue1(), oldDemandState);
+                        assignSuccessfully = true;
+                    } else {
+                        String nodeId = node.getId();
+                        String serviceId = potentialPair.getValue0().getId();
+                        if (snapshotOperator.ifNodeHasResForIns(nodeId, serviceId)) {
+                            String uniqueInstanceId = MIDUtils.generateInstanceId(nodeId, serviceId);
+                            MServiceInstance newInstance = snapshotOperator.addNewInstance(serviceId, nodeId, uniqueInstanceId);
+                            snapshotOperator.assignDemandChainIoIns(demandChain, newInstance, potentialPair.getValue1(), oldDemandState);
+                            assignSuccessfully = true;
+                        }
+                    }
+
+                    if (assignSuccessfully) {
+                        // remember remove all assigned demands in demands map
+                        for (MUserDemand demand : demandChain) {
+                            demandMap.remove(demand.getId());
+                        }
+                        break;
+                    }
+                }
+                if (assignSuccessfully) {
+                    break;
+                }
             }
         }
+
+        // use raw calc to solve left demands
+        MDemandAssignHA.calc(new ArrayList<>(demandMap.values()), snapshotOperator);
 
         return snapshotOperator.getJobList().subList(rawJobListSize, snapshotOperator.getJobList().size());
     }
 
-        public static List<MBaseJob> calc(List<MUserDemand> userDemands, MServerOperator snapshotOperator) {
+    public static List<MBaseJob> calc(List<MUserDemand> userDemands, MServerOperator snapshotOperator) {
         int rawJobListSize = snapshotOperator.getJobList().size();
 
-        // sort the user demands by function id and sla
-        Collections.sort(userDemands, new Comparator<MUserDemand>() {
-            @Override
-            public int compare(MUserDemand o1, MUserDemand o2) {
-                if (o1.getFunctionId().equals(o2.getFunctionId())) {
-                    return -Integer.compare(o1.getSlaLevel(), o2.getSlaLevel());
-                } else {
-                    return o1.getFunctionId().compareTo(o2.getFunctionId());
-                }
-            }
-        });
+        Set<String> userIdSet = new HashSet<>();
+        for (MUserDemand userDemand : userDemands) {
+            userIdSet.add(userDemand.getUserId());
+        }
+        // get node list for each user
+        Map<String, List<MServerNode>> userId2NodeList = new HashMap<>();
+        for (String userId : userIdSet) {
+            MUser mUser = MSystemModel.getIns().getUserManager().getById(userId).get();
+            String closestNodeId = MSystemModel.getIns().getMSNManager().getClosestNodeId(mUser.getPosition());
+            Optional<MServerNode> closestNodeOption = MSystemModel.getIns().getMSNManager().getById(closestNodeId);
+            MServerNode closestNode = closestNodeOption.get();
+            List<MServerNode> serverNodeList = MSystemModel.getIns().getMSNManager().getConnectedNodesDecentWithDelayTolerance(closestNodeId);
+            serverNodeList.add(0, closestNode);
+            userId2NodeList.put(userId, serverNodeList);
+        }
 
         // deal with all not good demands
         for (MUserDemand userDemand : userDemands) {
@@ -72,12 +150,7 @@ public class MDemandAssignHA {
             }
 
             // Step 1: get all available nodes for this user according to max delay
-            MUser mUser = mUserOptional.get();
-            String closestNodeId = MSystemModel.getIns().getMSNManager().getClosestNodeId(mUser.getPosition());
-            Optional<MServerNode> closestNodeOption = MSystemModel.getIns().getMSNManager().getById(closestNodeId);
-            MServerNode closestNode = closestNodeOption.get();
-            List<MServerNode> serverNodeList = MSystemModel.getIns().getMSNManager().getConnectedNodesDecentWithDelayTolerance(closestNodeId);
-            serverNodeList.add(0, closestNode);
+            List<MServerNode> serverNodeList = userId2NodeList.get(userDemand.getUserId());
 
             // Step 2: try to satisfy each demand not meet
             Optional<MDemandState> demandStateOp = MSystemModel.getIns().getDemandStateManager().getById(userDemand.getId());

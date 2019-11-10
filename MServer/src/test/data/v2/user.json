@@ -1,0 +1,33 @@
+[
+  {
+    "demandChainList": [
+      {
+        "demandIdList": [
+          "user_10_canteen_function_game",
+          "user_10_pay_function_game"
+        ],
+        "demandMap": {
+          "user_10_canteen_function_game": {
+            "id": "user_10_canteen_function_game",
+            "userId": "user_10",
+            "functionId": "canteen_function",
+            "slaLevel": 1,
+            "serviceId": "ali_service"
+          },
+          "user_10_pay_function_game": {
+            "id": "user_10_pay_function_game",
+            "userId": "user_10",
+            "functionId": "pay_function",
+            "slaLevel": 1,
+            "serviceId": "wechat_service"
+          }
+        }
+      }
+    ],
+    "position": {
+      "x": 9.955947685751328,
+      "y": 6.926515064729289
+    },
+    "id": "user_10"
+  }
+]
