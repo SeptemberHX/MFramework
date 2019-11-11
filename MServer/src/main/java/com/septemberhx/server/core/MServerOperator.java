@@ -230,7 +230,7 @@ public class MServerOperator extends MObjectManager<MServerState> {
             oldInstanceId = oldState.getInstanceId();
         }
         this.insId2LeftCap.put(instance.getId(), this.insId2LeftCap.getOrDefault(instance.getId(), 0) - 1);
-        this.jobList.add(new MSwitchJob(userDemand.getId(), instance.getId(), oldInstanceId));
+//        this.jobList.add(new MSwitchJob(userDemand.getId(), instance.getId(), oldInstanceId));
 
         MDemandState newDemandState = this.assignDemandToInterfaceOnSpecificInstance(userDemand, instance);
         this.demandStateManager.add(newDemandState);
@@ -502,7 +502,7 @@ public class MServerOperator extends MObjectManager<MServerState> {
     }
 
     public void addNewJob(MBaseJob baseJob) {
-//        this.jobList.add(baseJob);
+        this.jobList.add(baseJob);
     }
 
     /**

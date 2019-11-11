@@ -384,45 +384,9 @@ public class MChromosome {
         this.ifDemandsAssigned = true;
         this.unSolvedDemandList.clear();
 
-//        this.currOperator.adjustJobList();  // remove useless jobs
+        this.currOperator.getJobList().clear();  // remove it
 
-        // For deploy job. Some times the deployed instance will not used. So we will delete it
-        List<MBaseJob> jobList = this.currOperator.getJobList();
-        Iterator<MBaseJob> jobIterator = jobList.iterator();
         List<MServiceInstance> emptyInstanceList = new ArrayList<>();
-        while (jobIterator.hasNext()) {
-            MBaseJob currJob = jobIterator.next();
-            if (currJob.getType() == MJobType.DEPLOY) {
-                MDeployJob deployJob = (MDeployJob) currJob;
-                if (this.currOperator.getInstanceById(deployJob.getInstanceId()) == null) {
-                    jobIterator.remove();
-                    continue;
-                }
-
-                if (this.currOperator.getInstanceUserNumber(deployJob.getInstanceId()) == 0) {
-                    MServiceInstance instance = this.currOperator.getInstanceById(deployJob.getInstanceId());
-                    emptyInstanceList.add(instance);
-                    jobIterator.remove();
-                }
-
-                // if the job try to deploy an instance that exists before, we will remove it
-                if (this.rawOperator.getInstanceById(deployJob.getInstanceId()) != null) {
-                    jobIterator.remove();
-                }
-            } else if (currJob.getType() == MJobType.DELETE) {
-                // if the job tries to remove an instance that not exists before, we will remove it
-                if (this.rawOperator.getInstanceById(((MDeleteJob) currJob).getInstanceId()) == null) {
-                    jobIterator.remove();
-                }
-            } else if (currJob.getType() == MJobType.MOVE) {
-                // if the job tries to move an instance to the same node, we will remove it
-                MMoveJob moveJob = (MMoveJob) currJob;
-                if (this.rawOperator.getInstanceById(moveJob.getInstanceId()).getNodeId().equals(moveJob.getTargetNodeId())) {
-                    jobIterator.remove();
-                }
-            }
-        }
-
         // delete un-necessary instances
         for (MServiceInstance instance : this.currOperator.getAllInstances()) {
             if (this.currOperator.getInstanceUserNumber(instance.getId()) == 0
