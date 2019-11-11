@@ -576,6 +576,7 @@ public class MChromosome {
                             this.currOperator.removeDemandState(oldState);
                             child1UnSolvedStateList.add(demand);
                         }
+
                     } else {
                         this.currOperator.assignDemandToIns(demand, instance, oldState);
                     }
@@ -584,6 +585,7 @@ public class MChromosome {
                     child1UnSolvedStateList.add(demand);
                 }
             } else {
+                this.currOperator.removeDemandState(oldState);
                 child1UnSolvedStateList.add(demand);
             }
         }

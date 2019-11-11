@@ -5,6 +5,7 @@ import com.septemberhx.server.base.model.MDemandState;
 import com.septemberhx.server.base.model.MServiceInstance;
 import com.septemberhx.server.base.model.MServiceInterface;
 import com.septemberhx.server.base.model.MUserDemand;
+import lombok.Getter;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -16,6 +17,7 @@ import java.util.stream.Collectors;
  */
 public class MDemandStateManager extends MObjectManager<MDemandState> {
 
+    @Getter
     private Map<String, List<String>> instanceId2StateIdList;
 
     public MDemandStateManager() {
@@ -82,7 +84,9 @@ public class MDemandStateManager extends MObjectManager<MDemandState> {
     public List<MDemandState> getDemandStatesOnInstance(String instanceId) {
         List<MDemandState> result = new ArrayList<>();
         for (String demandStateId : this.instanceId2StateIdList.getOrDefault(instanceId, new ArrayList<>())) {
-            result.add(this.objectMap.get(demandStateId));
+            if (this.objectMap.containsKey(demandStateId)) {
+                result.add(this.objectMap.get(demandStateId));
+            }
         }
 
 //        List<MDemandState> result1 = this.objectMap.values().stream().filter(d -> d.getInstanceId().equals(instanceId)).collect(Collectors.toList());

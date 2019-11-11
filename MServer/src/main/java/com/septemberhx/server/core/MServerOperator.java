@@ -324,11 +324,15 @@ public class MServerOperator extends MObjectManager<MServerState> {
         }
 
         for (MDemandState demandState : this.demandStateManager.getDemandStatesOnInstance(instanceId)) {
-            userDemands.add(
-                    MSystemModel.getIns()
-                            .getUserManager()
-                            .getUserDemandByUserAndDemandId(demandState.getUserId(), demandState.getId()));
-            this.removeDemandState(demandState);
+            try {
+                userDemands.add(
+                        MSystemModel.getIns()
+                                .getUserManager()
+                                .getUserDemandByUserAndDemandId(demandState.getUserId(), demandState.getId()));
+                this.removeDemandState(demandState);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
 
         // remove instance data
@@ -388,7 +392,8 @@ public class MServerOperator extends MObjectManager<MServerState> {
                     demandState.getInstanceId(),
                     demandState.getInterfaceId(),
                     demandState.getUserId(),
-                    targetNodeId
+                    targetNodeId,
+                    demandState.getComAssignId()
             );
             this.demandStateManager.replace(newState);
         }
@@ -1108,6 +1113,15 @@ public class MServerOperator extends MObjectManager<MServerState> {
             }
         }
 
+        for (List<String> demandIdList : this.demandStateManager.getInstanceId2StateIdList().values()) {
+            for (String demandStateId : demandIdList) {
+                if (this.demandStateManager.getObjectMap().get(demandStateId) == null) {
+                    logger.warn("DemandState " + demandStateId + " is null");
+                    return false;
+                }
+            }
+        }
+
         return true;
     }
 
@@ -1206,7 +1220,8 @@ public class MServerOperator extends MObjectManager<MServerState> {
                     randomInstance.getId(),
                     demandState.getInterfaceId(),
                     demandState.getUserId(),
-                    demandState.getNodeId()
+                    demandState.getNodeId(),
+                    demandState.getComAssignId()
             );
             this.demandStateManager.replace(newState);
         }

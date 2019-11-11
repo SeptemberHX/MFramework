@@ -62,11 +62,14 @@ public class MModelUtils {
                 }
                 if (ifMatch) {
                     targetInterface = comInterface;
-                    matchedDemandList = demandList.subList(targetIndex - i, demandList.size() - 1);
+                    matchedDemandList = demandList.subList(targetIndex - i, targetIndex - i + interfaceUnitList.size());
                     break;
                 }
             }
 
+            if (matchedDemandList != null && matchedDemandList.size() != 2) {
+                System.out.println("Fuck!!!");
+            }
         }
         return new Pair<>(targetInterface, matchedDemandList);
     }

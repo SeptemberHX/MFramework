@@ -75,17 +75,12 @@ public class MDemandState extends MBaseObject {
         return r;
     }
 
-    public MDemandState(String id, String instanceId, String interfaceId, String userId, String nodeId) {
+    public MDemandState(String id, String instanceId, String interfaceId, String userId, String nodeId, String comAssignId) {
         this.id = id;
         this.instanceId = instanceId;
         this.interfaceId = interfaceId;
         this.userId = userId;
         this.nodeId = nodeId;
-        this.comAssignId = null;
-    }
-
-    public MDemandState(String id, String instanceId, String interfaceId, String userId, String nodeId, String comAssignId) {
-        this(id, instanceId, interfaceId, userId, nodeId);
         this.comAssignId = comAssignId;
     }
 
