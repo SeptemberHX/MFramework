@@ -47,6 +47,11 @@ public class MMajorAlgorithm implements MAlgorithmInterface {
         if (Configuration.COMPOSITION_ALL_ENABLED) {
             MCompositionAlgorithmInCommon.doCompositionPart(data.getAllCallGraph(), rawOperator, serverOperator);
         }
+        MCompositionAlgorithmInCommon.initPotentialPairList(
+                MSystemModel.getIns().getUserManager().getAllUserDemands(),
+                serverOperator.getServiceManager(),
+                MSystemModel.getIns().getUserManager()
+        );
         // DO NOT CHANGE THE ORDER ABOVE.
 
         // Due to the huge amount of the user demands, it's not likely to put demand-instance mapping in the result of

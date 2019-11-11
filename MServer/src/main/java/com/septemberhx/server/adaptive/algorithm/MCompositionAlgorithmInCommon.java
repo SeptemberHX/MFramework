@@ -3,11 +3,12 @@ package com.septemberhx.server.adaptive.algorithm;
 import com.google.common.graph.EndpointPair;
 import com.google.common.graph.MutableValueGraph;
 import com.septemberhx.server.adaptive.MAdaptiveSystem;
-import com.septemberhx.server.base.model.MSInterface;
-import com.septemberhx.server.base.model.MService;
-import com.septemberhx.server.base.model.MServiceInstance;
-import com.septemberhx.server.base.model.MServiceInterface;
+import com.septemberhx.server.base.model.*;
 import com.septemberhx.server.core.MServerOperator;
+import com.septemberhx.server.core.MServiceManager;
+import com.septemberhx.server.core.MUserManager;
+import com.septemberhx.server.utils.MModelUtils;
+import org.javatuples.Triplet;
 
 import java.util.*;
 
@@ -20,6 +21,20 @@ import java.util.*;
  * It should be executed before minor/major algorithm
  */
 public class MCompositionAlgorithmInCommon {
+
+    public static Map<String, List<Triplet<MService, MServiceInterface, List<MUserDemand>>>> potentialPairListMap;
+
+    public static void initPotentialPairList(List<MUserDemand> userDemandList, MServiceManager serviceManager, MUserManager userManager) {
+        potentialPairListMap = new HashMap<>();
+        for (MUserDemand userDemand : userDemandList) {
+            MUser user = userManager.getById(userDemand.getUserId()).get();
+            List<Triplet<MService, MServiceInterface, List<MUserDemand>>> potentialPairList = MModelUtils.getProperComServiceList(
+                    userDemand, user.getContainedChain(userDemand.getId()), serviceManager
+            );
+            potentialPairListMap.put(userDemand.getId(), potentialPairList);
+        }
+    }
+
     public static void doCompositionPart(MutableValueGraph<MSInterface, Integer> interfaceGraph, MServerOperator prevOperator, MServerOperator currOperator) {
         List<EndpointPair<MSInterface>> edgeList = new ArrayList<>(interfaceGraph.edges());
         Collections.sort(edgeList, (o1, o2) ->

@@ -54,12 +54,10 @@ public class MDemandAssignHA {
             if (!demandMap.containsKey(userDemand.getId())) {
                 continue;
             }
-            MUser user = MSystemModel.getIns().getUserManager().getById(userDemand.getUserId()).get();
 
             // 1. find available composited-version services for this demand in his demand chains
-            List<Triplet<MService, MServiceInterface, List<MUserDemand>>> potentialPairList = MModelUtils.getProperComServiceList(
-                    userDemand, user.getContainedChain(userDemand.getId()), snapshotOperator.getServiceManager()
-            );
+            List<Triplet<MService, MServiceInterface, List<MUserDemand>>> potentialPairList =
+                    MCompositionAlgorithmInCommon.potentialPairListMap.get(userDemand.getId());
 
             boolean assignSuccessfully = false;
             for (MServerNode node : userId2NodeList.get(userDemand.getUserId())) {

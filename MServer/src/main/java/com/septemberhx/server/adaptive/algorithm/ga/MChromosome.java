@@ -524,6 +524,18 @@ public class MChromosome {
 
         Set<String> comDemandIdSet = new HashSet<>();
 
+        // to speed up
+        Map<String, List<MDemandState>> assignId2State = new HashMap<>();
+        for (MDemandState otherState : otherOldStates.values()) {
+            if (!otherState.isAssignAsComp()) continue;
+
+            if (!assignId2State.containsKey(otherState.getComAssignId())) {
+                assignId2State.put(otherState.getComAssignId(), new ArrayList<>());
+            }
+            assignId2State.get(otherState.getComAssignId()).add(otherState);
+        }
+        //
+
         for (String demandId : oldStates.keySet()) {
             if (comDemandIdSet.contains(demandId)) continue;
 
@@ -541,23 +553,20 @@ public class MChromosome {
                         List<MDemandState> oldDemandList = new ArrayList<>();
                         compDemandList.add(demand);
                         boolean successFlag = true;
-                        for (MDemandState otherState : otherOldStates.values()) {
+                        for (MDemandState otherState : assignId2State.get(otherOldState.getComAssignId())) {
                             // jump over itself
                             if (otherState.getId().equals(otherOldState.getId())) continue;
-
                             // find the demands assigned with the same assignId
-                            if (otherState.isAssignAsComp() && otherState.getComAssignId().equals(otherOldState.getComAssignId())) {
-                                Optional<MDemandState> stateOptional = this.currOperator.getDemandStateManager().getById(otherState.getId());
-                                // if these demands are assigned with other assignId, we will not assign this demand
-                                if (stateOptional.isPresent() && stateOptional.get().isAssignAsComp()) {
-                                    successFlag = false;
-                                    break;
-                                } else {
-                                    stateOptional.ifPresent(oldDemandList::add);
-                                    MUserDemand tmpDemand = MSystemModel.getIns().getUserManager().getUserDemandByUserAndDemandId(otherState.getUserId(), otherState.getId());
-                                    compDemandList.add(tmpDemand);
-                                    comDemandIdSet.add(tmpDemand.getId());
-                                }
+                            Optional<MDemandState> stateOptional = this.currOperator.getDemandStateManager().getById(otherState.getId());
+                            // if these demands are assigned with other assignId, we will not assign this demand
+                            if (stateOptional.isPresent() && stateOptional.get().isAssignAsComp()) {
+                                successFlag = false;
+                                break;
+                            } else {
+                                stateOptional.ifPresent(oldDemandList::add);
+                                MUserDemand tmpDemand = MSystemModel.getIns().getUserManager().getUserDemandByUserAndDemandId(otherState.getUserId(), otherState.getId());
+                                compDemandList.add(tmpDemand);
+                                comDemandIdSet.add(tmpDemand.getId());
                             }
                         }
                         if (successFlag) {

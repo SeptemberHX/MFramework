@@ -30,6 +30,11 @@ public class MMinorAlgorithm implements MAlgorithmInterface {
         serverOperator.reInit();
         // Then, do the composition job behind initialization. It will modify system model by operator
         MCompositionAlgorithmInCommon.doCompositionPart(data.getCallGraph(), rawOperator, serverOperator);
+        MCompositionAlgorithmInCommon.initPotentialPairList(
+                MSystemModel.getIns().getUserManager().getAllUserDemands(),
+                serverOperator.getServiceManager(),
+                MSystemModel.getIns().getUserManager()
+        );
         // DO NOT CHANGE THE ORDER ABOVE.
 
         // Below, do the calc job
