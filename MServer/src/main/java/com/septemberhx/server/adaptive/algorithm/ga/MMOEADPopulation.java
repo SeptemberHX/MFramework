@@ -116,7 +116,9 @@ public class MMOEADPopulation extends MBaseGA {
             logger.info(P_EP.get(0).getFitness());
             logger.info(P_EP.get(0).getCost());
 
-            System.gc();
+            if (i % 10 == 0) {
+                System.gc();
+            }
         }
 
         // the result: P_EP

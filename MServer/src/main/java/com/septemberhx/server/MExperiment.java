@@ -53,7 +53,7 @@ public class MExperiment {
     }
 
     public static void main(String[] args) {
-//        calcPrevSystemState("D:\\Workspace\\gitlab\\mdata\\Lab2\\ExperimentData\\v1\\5000", "D:\\Workspace\\gitlab\\mdata\\Lab2\\ExperimentData\\v1\\5000\\prev_system.json");
+//        calcPrevSystemState("D:\\Workspace\\gitlab\\mdata\\Lab2\\ExperimentData\\v1_3000_edge_resource_differ\\5000", "D:\\Workspace\\gitlab\\mdata\\Lab2\\ExperimentData\\v1_3000_edge_resource_differ\\5000\\prev_system.json");
         System.out.println("====== Start with data: " + args[0]
                 + " with algorithm " + args[1]
                 + " with max-round " + args[2]
