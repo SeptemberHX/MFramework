@@ -59,6 +59,7 @@ public class MMOEADPopulation extends MBaseGA {
         int[][] B = getNeighbors(weightVectors, Configuration.MOEAD_NEIGHBOR_SIZE);
 //        double[] z = getRefrencePoint(this.population);
 
+        MChromosome bestOne = null;
         for (int i = 0; i < Configuration.MOEAD_MAX_ROUND; ++i) {
             logger.info("Round " + i);
 
@@ -112,22 +113,31 @@ public class MMOEADPopulation extends MBaseGA {
             Map<Integer, List<MChromosome>> paretoFront = fastNonDominatedSort(nextG);
             P_EP = paretoFront.get(1);
 
-            logger.info("Best: " + P_EP.get(0).getNormWSGAFitness());
-            logger.info(P_EP.get(0).getFitness());
-            logger.info(P_EP.get(0).getCost());
+            if (bestOne == null) {
+                bestOne = Collections.min(P_EP, Comparator.comparingDouble(MChromosome::getNormWSGAFitness));
+            } else {
+                MChromosome currBest = Collections.min(P_EP, Comparator.comparingDouble(MChromosome::getNormWSGAFitness));
+                if (bestOne.getNormWSGAFitness() > currBest.getNormWSGAFitness()) {
+                    bestOne = currBest;
+                }
+            }
+
+            logger.info("Best: " + bestOne.getNormWSGAFitness());
+            logger.info(bestOne.getFitness());
+            logger.info(bestOne.getCost());
+            bestOne.getCurrOperator().printStatus();
 
             if (i % 10 == 0) {
                 System.gc();
             }
-            P_EP.get(0).getCurrOperator().printStatus();
         }
 
         // the result: P_EP
-        P_EP.get(0).getCurrOperator().printStatus();
-        logger.info(P_EP.get(0).getNormObjectiveValues());
+        bestOne.getCurrOperator().printStatus();
+        logger.info(bestOne.getNormObjectiveValues());
 
         this.fixedThreadPool.shutdown();
-        return P_EP.get(0).getCurrOperator();
+        return bestOne.getCurrOperator();
     }
 
     private static double[] getRefrencePoint(MPopulation population) {

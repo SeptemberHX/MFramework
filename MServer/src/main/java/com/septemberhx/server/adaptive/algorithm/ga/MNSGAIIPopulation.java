@@ -60,6 +60,7 @@ public class MNSGAIIPopulation extends MBaseGA {
             crowdingDistanceAssignment(paretoFront.get(i));
         }
 
+        MChromosome bestOne = null;
         while (currRound <= Configuration.NSGAII_MAX_ROUND) {
             logger.info("Round " + currRound);
 
@@ -122,19 +123,28 @@ public class MNSGAIIPopulation extends MBaseGA {
             this.population.setPopulace(nextG.subList(0, Configuration.POPULATION_SIZE));
             ++currRound;
 
-            logger.info("Best: " + this.population.getPopulace().get(0).getNormWSGAFitness());
-            logger.info(this.population.getPopulace().get(0).getFitness());
-            logger.info(this.population.getPopulace().get(0).getCost());
-            this.population.getPopulace().get(0).getCurrOperator().printStatus();
+            if (bestOne == null) {
+                bestOne = Collections.min(this.population.getPopulace(), Comparator.comparingDouble(MChromosome::getNormWSGAFitness));
+            } else {
+                MChromosome currBest = Collections.min(this.population.getPopulace(), Comparator.comparingDouble(MChromosome::getNormWSGAFitness));
+                if (bestOne.getNormWSGAFitness() > currBest.getNormWSGAFitness()) {
+                    bestOne = currBest;
+                }
+            }
+
+            logger.info("Best: " + bestOne.getNormWSGAFitness());
+            logger.info(bestOne.getFitness());
+            logger.info(bestOne.getCost());
+            bestOne.getCurrOperator().printStatus();
 
             if (currRound % 10 == 0) {
                 System.gc();
             }
         }
-        this.population.getPopulace().get(0).getCurrOperator().printStatus();
+        bestOne.getCurrOperator().printStatus();
 
         this.fixedThreadPool.shutdown();
-        return this.population.getPopulace().get(0).getCurrOperator();
+        return bestOne.getCurrOperator();
     }
 
     private static void order(List<MChromosome> chromosomeList) {
