@@ -119,6 +119,7 @@ public class MMOEADPopulation extends MBaseGA {
             if (i % 10 == 0) {
                 System.gc();
             }
+            P_EP.get(0).getCurrOperator().printStatus();
         }
 
         // the result: P_EP
