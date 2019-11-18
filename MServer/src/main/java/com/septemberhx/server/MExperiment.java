@@ -1,5 +1,6 @@
 package com.septemberhx.server;
 
+import com.septemberhx.server.adaptive.MAdaptiveSystem;
 import com.septemberhx.server.adaptive.MAnalyser;
 import com.septemberhx.server.adaptive.algorithm.MMajorAlgorithm;
 import com.septemberhx.server.adaptive.algorithm.MMinorAlgorithm;
@@ -53,17 +54,26 @@ public class MExperiment {
     }
 
     public static void main(String[] args) {
-//        calcPrevSystemState("D:\\Workspace\\gitlab\\mdata\\Lab2\\ExperimentData\\v1_3000_edge_resource_differ\\5000", "D:\\Workspace\\gitlab\\mdata\\Lab2\\ExperimentData\\v1_3000_edge_resource_differ\\5000\\prev_system.json");
+//        String data_version = "v1_1500_edge_resource_differ";
+//        for (int i = 1500; i <= 5000; i+=500) {
+//            calcPrevSystemState(
+//                String.format("D:\\Workspace\\gitlab\\mdata\\Lab2\\ExperimentData\\%s\\%d", data_version, i),
+//                String.format("D:\\Workspace\\gitlab\\mdata\\Lab2\\ExperimentData\\%s\\%d\\prev_system.json", data_version, i)
+//            );
+//        }
         System.out.println("====== Start with data: " + args[0]
                 + " with algorithm " + args[1]
                 + " with max-round " + args[2]
                 + " with population " + args[3]
                 + ", compositionEnabled = " + args[4]
-                + ", verify children = " + args[5]);
+                + ", verify children = " + args[5]
+                + ", composition threshold = " + args[6]
+        );
         MMajorAlgorithm.GA_TYPE gaType = MMajorAlgorithm.GA_TYPE.WSGA;
         Configuration.POPULATION_SIZE = Integer.parseInt(args[3]);
         Configuration.COMPOSITION_ALL_ENABLED = Boolean.parseBoolean(args[4]);
         Configuration.VERIFY_EVERY_CHILD = Boolean.parseBoolean(args[5]);
+        MAdaptiveSystem.COMPOSITION_THRESHOLD = Double.parseDouble(args[6]);
         switch (args[1]) {
             case "wsga":
                 gaType = MMajorAlgorithm.GA_TYPE.WSGA;
