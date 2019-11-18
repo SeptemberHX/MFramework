@@ -1,5 +1,6 @@
 package com.septemberhx.server.adaptive.algorithm;
 
+import com.septemberhx.server.adaptive.algorithm.ga.Configuration;
 import com.septemberhx.server.base.model.*;
 import com.septemberhx.server.core.MServerOperator;
 import com.septemberhx.server.core.MSystemModel;
@@ -91,16 +92,16 @@ public class MDemandAssignHA {
                         snapshotOperator.assignDemandChainIoIns(demandChain, serviceInstance, potentialPair.getValue1(), oldDemandState);
                         assignSuccessfully = true;
                     }
-//                    else {
-//                        String nodeId = node.getId();
-//                        String serviceId = potentialPair.getValue0().getId();
-//                        if (snapshotOperator.ifNodeHasResForIns(nodeId, serviceId)) {
-//                            String uniqueInstanceId = MIDUtils.generateInstanceId(nodeId, serviceId);
-//                            MServiceInstance newInstance = snapshotOperator.addNewInstance(serviceId, nodeId, uniqueInstanceId);
-//                            snapshotOperator.assignDemandChainIoIns(demandChain, newInstance, potentialPair.getValue1(), oldDemandState);
-//                            assignSuccessfully = true;
-//                        }
-//                    }
+                    else {
+                        String nodeId = node.getId();
+                        String serviceId = potentialPair.getValue0().getId();
+                        if (snapshotOperator.ifNodeHasResForIns(nodeId, serviceId)) {
+                            String uniqueInstanceId = MIDUtils.generateInstanceId(nodeId, serviceId);
+                            MServiceInstance newInstance = snapshotOperator.addNewInstance(serviceId, nodeId, uniqueInstanceId);
+                            snapshotOperator.assignDemandChainIoIns(demandChain, newInstance, potentialPair.getValue1(), oldDemandState);
+                            assignSuccessfully = true;
+                        }
+                    }
 
                     if (assignSuccessfully) {
                         // remember remove all assigned demands in demands map

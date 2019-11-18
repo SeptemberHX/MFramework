@@ -433,6 +433,11 @@ public class MServerOperator extends MObjectManager<MServerState> {
             if (!this.ifInstanceHasCap(instance.getId(), 1)) {
                 continue;
             }
+
+            if (userDemand.getServiceId() != null && !instance.getServiceId().startsWith(userDemand.getServiceId())) {
+                continue;
+            }
+
             // todo: Calculate a functionId2InstanceId map in reInit(). So we don't need to search it in this part
             Optional<MService> serviceOptional = this.serviceManager.getById(instance.getServiceId());
             serviceOptional.ifPresent(mService -> {

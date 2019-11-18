@@ -88,7 +88,8 @@ public class MMinorAlgorithm implements MAlgorithmInterface {
                 resultList.add(new MUserDemand(
                         userDemands.get(startIndex).getUserId(),
                         r.getValue0().getFunctionId(),
-                        r.getValue0().getSlaLevel()
+                        r.getValue0().getSlaLevel(),
+                        r.getValue0().getServiceId()
                 ));
             }
             startIndex = r.getValue1();
