@@ -434,7 +434,7 @@ public class MServerOperator extends MObjectManager<MServerState> {
                 continue;
             }
 
-            if (userDemand.getServiceId() != null && !instance.getServiceId().startsWith(userDemand.getServiceId())) {
+            if (userDemand.getServiceName() != null && !instance.getServiceId().startsWith(userDemand.getServiceName())) {
                 continue;
             }
 
@@ -846,8 +846,12 @@ public class MServerOperator extends MObjectManager<MServerState> {
             }
         }
 
+        Set<String> serviceUsedSet = new HashSet<>();
+        for (MServiceInstance instance : this.getAllInstances()) {
+            serviceUsedSet.add(instance.getServiceId());
+        }
         for (MService service : this.serviceManager.getAllValues()) {
-            if (!rawOperator.getServiceManager().containsById(service.getId()) && service.isGenerated()) {
+            if (!rawOperator.getServiceManager().containsById(service.getId()) && service.isGenerated() && !serviceUsedSet.contains(service.getId())) {
                 composition_num += 1;
             }
         }

@@ -114,6 +114,7 @@ public class MAnalyser {
      */
     private MutableValueGraph<MSInterface, Integer> buildAllCallGraph() {
         MutableValueGraph<MSInterface, Integer> interfaceGraph = ValueGraphBuilder.directed().build();
+        // consider before status
         for (MUser user : MSystemModel.getIns().getUserManager().getAllValues()) {
             for (MDemandChain demandChain : user.getDemandChainList()) {
                 MSInterface prevInterface = null;
@@ -136,6 +137,37 @@ public class MAnalyser {
                         interfaceGraph.putEdgeValue(prevInterface, MSInterface, r);
                     }
                     prevInterface = MSInterface;
+                }
+            }
+        }
+
+        // consider now status
+        for (MUser user : MSystemModel.getIns().getUserManager().getAllValues()) {
+            for (MDemandChain demandChain : user.getDemandChainList()) {
+                MSInterface prevInterface = null;
+                for (MUserDemand userDemand : demandChain.getDemandList()) {
+                    if (userDemand.getServiceName() == null) {
+                        prevInterface = null;
+                        continue;
+                    }
+
+                    // to reduce create useless chain, we will only composite the highest rid
+                    // so the composite one will fit all sla levels
+                    List<MService> serviceList = MSystemModel.getIns().getOperator().getServiceManager().getAllServicesByServiceName(userDemand.getServiceName());
+                    serviceList.sort(Comparator.comparing(MService::getRId));
+                    MService tService = serviceList.get(serviceList.size() - 1);
+                    MSInterface msInterface = new MSInterface(
+                        tService.getInterfaceMetUserDemand(userDemand).get(0).getInterfaceId(),
+                        tService.getId()
+                    );
+
+                    if (prevInterface != null) {
+                        Optional<Integer> connectCount = interfaceGraph.edgeValue(prevInterface, msInterface);
+                        int r = connectCount.orElse(0);
+                        ++r;
+                        interfaceGraph.putEdgeValue(prevInterface, msInterface, r);
+                    }
+                    prevInterface = msInterface;
                 }
             }
         }
