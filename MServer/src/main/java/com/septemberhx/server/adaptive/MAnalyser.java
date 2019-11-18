@@ -110,7 +110,7 @@ public class MAnalyser {
     }
 
     /**
-     * Build the call graph according to current user demands
+     * Build the call graph according to previous system status
      */
     private MutableValueGraph<MSInterface, Integer> buildAllCallGraph() {
         MutableValueGraph<MSInterface, Integer> interfaceGraph = ValueGraphBuilder.directed().build();
@@ -118,12 +118,15 @@ public class MAnalyser {
             for (MDemandChain demandChain : user.getDemandChainList()) {
                 MSInterface prevInterface = null;
                 for (MUserDemand userDemand : demandChain.getDemandList()) {
-                    if (userDemand.getServiceId() == null) continue;  // we can't handle this. Jump over it
+                    Optional<MDemandState> demandStateOptional = this.prevOperator.getDemandStateManager().getById(userDemand.getId());
+                    if (!demandStateOptional.isPresent()) {
+                        continue;
+                    }
 
-                    MService service = MSystemModel.getIns().getServiceManager().getById(userDemand.getServiceId()).get();
+                    MDemandState demandState = demandStateOptional.get();
                     MSInterface MSInterface = new MSInterface(
-                            service.getInterfaceMetUserDemand(userDemand).get(0).getInterfaceId(),
-                            service.getId()
+                            demandState.getInterfaceId(),
+                            this.prevOperator.getInstanceById(demandState.getInstanceId()).getServiceId()
                     );
 
                     if (prevInterface != null) {
