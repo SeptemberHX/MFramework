@@ -90,16 +90,17 @@ public class MDemandAssignHA {
                         MServiceInstance serviceInstance = snapshotOperator.getInstanceById(instanceIdList.get(0));
                         snapshotOperator.assignDemandChainIoIns(demandChain, serviceInstance, potentialPair.getValue1(), oldDemandState);
                         assignSuccessfully = true;
-                    } else {
-                        String nodeId = node.getId();
-                        String serviceId = potentialPair.getValue0().getId();
-                        if (snapshotOperator.ifNodeHasResForIns(nodeId, serviceId)) {
-                            String uniqueInstanceId = MIDUtils.generateInstanceId(nodeId, serviceId);
-                            MServiceInstance newInstance = snapshotOperator.addNewInstance(serviceId, nodeId, uniqueInstanceId);
-                            snapshotOperator.assignDemandChainIoIns(demandChain, newInstance, potentialPair.getValue1(), oldDemandState);
-                            assignSuccessfully = true;
-                        }
                     }
+//                    else {
+//                        String nodeId = node.getId();
+//                        String serviceId = potentialPair.getValue0().getId();
+//                        if (snapshotOperator.ifNodeHasResForIns(nodeId, serviceId)) {
+//                            String uniqueInstanceId = MIDUtils.generateInstanceId(nodeId, serviceId);
+//                            MServiceInstance newInstance = snapshotOperator.addNewInstance(serviceId, nodeId, uniqueInstanceId);
+//                            snapshotOperator.assignDemandChainIoIns(demandChain, newInstance, potentialPair.getValue1(), oldDemandState);
+//                            assignSuccessfully = true;
+//                        }
+//                    }
 
                     if (assignSuccessfully) {
                         // remember remove all assigned demands in demands map
