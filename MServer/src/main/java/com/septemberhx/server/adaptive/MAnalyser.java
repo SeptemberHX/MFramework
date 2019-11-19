@@ -113,7 +113,7 @@ public class MAnalyser {
      * Build the call graph according to previous system status
      */
     private MutableValueGraph<MSInterface, Integer> buildAllCallGraph() {
-        MutableValueGraph<MSInterface, Integer> interfaceGraph = ValueGraphBuilder.directed().build();
+        MutableValueGraph<MSInterface, Integer> interfaceGraph = ValueGraphBuilder.directed().allowsSelfLoops(true).build();
         // consider before status
         for (MUser user : MSystemModel.getIns().getUserManager().getAllValues()) {
             for (MDemandChain demandChain : user.getDemandChainList()) {
@@ -134,6 +134,9 @@ public class MAnalyser {
                         Optional<Integer> connectCount = interfaceGraph.edgeValue(prevInterface, MSInterface);
                         int r = connectCount.orElse(0);
                         ++r;
+                        if (prevInterface == MSInterface) {  // self-loop is not allowed
+                            continue;
+                        }
                         interfaceGraph.putEdgeValue(prevInterface, MSInterface, r);
                     }
                     prevInterface = MSInterface;
@@ -146,14 +149,14 @@ public class MAnalyser {
             for (MDemandChain demandChain : user.getDemandChainList()) {
                 MSInterface prevInterface = null;
                 for (MUserDemand userDemand : demandChain.getDemandList()) {
-                    if (userDemand.getServiceName() == null) {
+                    if (userDemand.getServiceId() == null) {
                         prevInterface = null;
                         continue;
                     }
 
                     // to reduce create useless chain, we will only composite the highest rid
                     // so the composite one will fit all sla levels
-                    List<MService> serviceList = MSystemModel.getIns().getOperator().getServiceManager().getAllServicesByServiceName(userDemand.getServiceName());
+                    List<MService> serviceList = MSystemModel.getIns().getServiceManager().getAllServicesByServiceName(userDemand.getServiceId());
                     serviceList.sort(Comparator.comparing(MService::getRId));
                     MService tService = serviceList.get(serviceList.size() - 1);
                     MSInterface msInterface = new MSInterface(

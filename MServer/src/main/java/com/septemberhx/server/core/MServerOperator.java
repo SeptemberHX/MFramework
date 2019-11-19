@@ -434,7 +434,7 @@ public class MServerOperator extends MObjectManager<MServerState> {
                 continue;
             }
 
-            if (userDemand.getServiceName() != null && !instance.getServiceId().startsWith(userDemand.getServiceName())) {
+            if (userDemand.getServiceId() != null && !instance.getServiceId().startsWith(userDemand.getServiceId())) {
                 continue;
             }
 

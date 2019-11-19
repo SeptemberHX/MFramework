@@ -54,11 +54,11 @@ public class MExperiment {
     }
 
     public static void main(String[] args) {
-//        String data_version = "v1_1500_edge_resource_differ";
-//        for (int i = 1500; i <= 5000; i+=500) {
+//        String data_version = "common";
+//        for (double i = 0.1; i <= 0.5; i+=0.05) {
 //            calcPrevSystemState(
-//                String.format("D:\\Workspace\\gitlab\\mdata\\Lab2\\ExperimentData\\%s\\%d", data_version, i),
-//                String.format("D:\\Workspace\\gitlab\\mdata\\Lab2\\ExperimentData\\%s\\%d\\prev_system.json", data_version, i)
+//                String.format("D:\\Workspace\\gitlab\\mdata\\Lab2\\ExperimentData\\%s\\%.1f", data_version, i),
+//                String.format("D:\\Workspace\\gitlab\\mdata\\Lab2\\ExperimentData\\%s\\%.1f\\prev_system.json", data_version, i)
 //            );
 //        }
         System.out.println("====== Start with data: " + args[0]
