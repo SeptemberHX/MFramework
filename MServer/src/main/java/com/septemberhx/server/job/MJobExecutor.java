@@ -42,6 +42,12 @@ public class MJobExecutor {
                 deployJob.markAsDoing();
                 logger.info("Deploy job info send");
                 break;
+            case DELETE:
+                MDeleteJob deleteJob = (MDeleteJob) job;
+                MServerUtils.sendDeleteInfo(deleteJob);
+                deleteJob.markAsDoing();
+                logger.info("Delete job info send");
+                break;
             case NOTIFY:
                 doNotifyJob((MNotifyJob) job);
                 break;

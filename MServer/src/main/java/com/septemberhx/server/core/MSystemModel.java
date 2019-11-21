@@ -3,6 +3,7 @@ package com.septemberhx.server.core;
 import com.septemberhx.common.bean.MInstanceInfoBean;
 import com.septemberhx.server.base.model.MServiceInstance;
 import com.septemberhx.server.base.model.MSystemIndex;
+import com.septemberhx.server.utils.MIDUtils;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -72,20 +73,22 @@ public class MSystemModel {
 
         // check if the instance is alive. The mObjectIdMap will not be null if alive
         // todo: get actual serviceId of the service instance
+        String ourInstanceId = MIDUtils.tranClusterInstanceIdToOurs(instanceInfo.getDockerInfo().getInstanceId());
         if (instanceInfo.getMObjectIdMap() != null) {
             this.mSIManager.update(new MServiceInstance(
                     instanceInfo.getParentIdMap(),
                     nodeId,
                     instanceInfo.getIp(),
                     instanceInfo.getPort(),
-                    instanceInfo.getId(),
+                    ourInstanceId,
                     instanceInfo.getMObjectIdMap(),
                     instanceInfo.getId(),
-                    instanceInfo.getId()
+                    instanceInfo.getId(),
+                    instanceInfo.getDockerInfo().getInstanceId()
             ));
-        } else if (this.mSIManager.containsById(instanceInfo.getId())){
+        } else if (this.mSIManager.containsById(ourInstanceId)){
             // remove the useless info when the instance is dead
-            this.mSIManager.remove(instanceInfo.getId());
+            this.mSIManager.remove(ourInstanceId);
         }
     }
 

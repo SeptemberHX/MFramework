@@ -16,6 +16,7 @@
         <module>MInfoCollector</module>
         <module>utils</module>
         <module>MContainerMetricsCollector</module>
+        <module>MGateway</module>
     </modules>
     <packaging>pom</packaging>
 

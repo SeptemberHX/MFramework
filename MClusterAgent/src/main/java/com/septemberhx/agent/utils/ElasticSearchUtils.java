@@ -43,8 +43,8 @@ public class ElasticSearchUtils {
      * @param endTime: The end of the time range
      * @return List: Service logs
      */
-    public static List<MBaseLog> getLogsBetween(RestHighLevelClient client, String[] indices, DateTime startTime, DateTime endTime) {
-        List<MBaseLog> logList = new ArrayList<>();
+    public static List<String> getLogsBetween(RestHighLevelClient client, String[] indices, DateTime startTime, DateTime endTime) {
+        List<String> logList = new ArrayList<>();
         SearchRequest sr = new SearchRequest(indices);
         final Scroll scroll = new Scroll(TimeValue.timeValueSeconds(1L));
         sr.scroll(scroll);
@@ -64,12 +64,12 @@ public class ElasticSearchUtils {
 
             while (searchHits != null && searchHits.length > 0) {
                 for (SearchHit hit : searchHits) {
-                    logger.info(hit.getIndex() + "|" + hit.getSourceAsMap().getOrDefault("mclient", null));
+//                    logger.info(hit.getIndex() + "|" + hit.getSourceAsMap().getOrDefault("mclient", null));
                     try {
                         MBaseLog baseLog =
                                 MBaseLog.getLogFromMap((Map<String, Object>) hit.getSourceAsMap().get("mclient"));
                         if (baseLog != null) {
-                            logList.add(baseLog);
+                            logList.add(baseLog.toString());
 //                            logger.info(baseLog.toString());
                         }
                     } catch (Exception e) {

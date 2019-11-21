@@ -17,14 +17,14 @@ public class MIDUtils {
      * @return String
      */
     public static String generateInstanceId(String nodeId, String serviceId) {
-        return String.format("%s_%s_%s", nodeId, serviceId, UUID.randomUUID());
+        return String.format("%s-%s-%s", nodeId, serviceId, UUID.randomUUID());
     }
 
     public static String getNodeIdFromInstanceId(String instanceId) {
         if (instanceId == null) {
             return "";
         }
-        return instanceId.split("_")[0];
+        return instanceId.split("-")[0];
     }
 
     public static String generateSpecificInstanceIdForTest(String nodeId, String serviceId) {
@@ -33,7 +33,7 @@ public class MIDUtils {
 
     // The serviceName should be unique
     public static String generateServiceId(String serviceName, String rId) {
-        return serviceName + "_" + rId;
+        return serviceName + "-" + rId;
     }
 
     public static String generateInterfaceId(String serviceId, String interfaceName) {
@@ -46,5 +46,9 @@ public class MIDUtils {
 
     public static String generateComDemandAssignId() {
         return UUID.randomUUID().toString();
+    }
+
+    public static String tranClusterInstanceIdToOurs(String clusterInstanceId) {
+        return clusterInstanceId.substring(0, clusterInstanceId.lastIndexOf('-'));
     }
 }

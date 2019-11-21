@@ -55,10 +55,10 @@ public class MExperiment {
 
     public static void main(String[] args) {
 //        String data_version = "common";
-//        for (double i = 0.1; i <= 0.5; i+=0.05) {
+//        for (double i = 0.15; i <= 0.5; i+=0.1) {
 //            calcPrevSystemState(
-//                String.format("D:\\Workspace\\gitlab\\mdata\\Lab2\\ExperimentData\\%s\\%.1f", data_version, i),
-//                String.format("D:\\Workspace\\gitlab\\mdata\\Lab2\\ExperimentData\\%s\\%.1f\\prev_system.json", data_version, i)
+//                String.format("D:\\Workspace\\gitlab\\mdata\\Lab2\\ExperimentData\\%s\\%.2f", data_version, i),
+//                String.format("D:\\Workspace\\gitlab\\mdata\\Lab2\\ExperimentData\\%s\\%.2f\\prev_system.json", data_version, i)
 //            );
 //        }
         System.out.println("====== Start with data: " + args[0]

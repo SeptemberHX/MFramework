@@ -18,8 +18,9 @@ public class MServiceInstance extends MBaseObject {
     private Set<String> mObjectIdSet;
     private String serviceName;
     private String serviceId;
+    private String podId;
 
-    public MServiceInstance(Map<String, String> parentIdMap, String nodeId, String ip, Integer port, String instanceId, Set<String> mObjectIdSet, String serviceName, String serviceId) {
+    public MServiceInstance(Map<String, String> parentIdMap, String nodeId, String ip, Integer port, String instanceId, Set<String> mObjectIdSet, String serviceName, String serviceId, String podId) {
         this.parentIdMap = parentIdMap;
         this.nodeId = nodeId;
         this.ip = ip;
@@ -28,6 +29,7 @@ public class MServiceInstance extends MBaseObject {
         this.mObjectIdSet = mObjectIdSet;
         this.serviceName = serviceName;
         this.serviceId = serviceId;
+        this.podId = podId;
     }
 
     public MServiceInstance deepClone() {
@@ -39,7 +41,8 @@ public class MServiceInstance extends MBaseObject {
                 this.id,
                 this.mObjectIdSet,
                 this.serviceName,
-                this.serviceId
+                this.serviceId,
+                this.podId
         );
     }
 
@@ -53,6 +56,7 @@ public class MServiceInstance extends MBaseObject {
                 ", mObjectIdSet=" + mObjectIdSet +
                 ", serviceName='" + serviceName + '\'' +
                 ", serviceId='" + serviceId + '\'' +
+                ", podId='" + podId + '\'' +
                 ", id='" + id + '\'' +
                 '}';
     }

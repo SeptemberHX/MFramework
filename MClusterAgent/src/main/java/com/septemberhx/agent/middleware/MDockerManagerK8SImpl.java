@@ -101,14 +101,11 @@ public class MDockerManagerK8SImpl implements MDockerManager {
     @Override
     public void deleteInstanceById(String instanceId) {
         try {
-            // We assume that the pods are deployed by Deployment, or we will have trouble in managing the dockers
-            // Because we control how the pods are deployed, we can know the Deployment by the instanceId
-            // For example: sample-service-fcb46ff9-k99wc is deployed by sample-service
-            String deploymentName = instanceId.substring(
-                    0, instanceId.substring(0, instanceId.lastIndexOf("-")).lastIndexOf("-")
-            );
-            this.extensionsV1beta1Api.deleteNamespacedDeployment(
-                    deploymentName,
+            // Because we control how the pods are deployed, we know that the pod we try to delete is deployed as a pod
+            // So we can just delete it, and it will not be reborn.
+            // In the future, we need to take a more elegant way to do this work.
+            this.coreV1Api.deleteNamespacedPod(
+                    instanceId,
                     K8S_NAMESPACE,
                     null,
                     null,
@@ -117,6 +114,7 @@ public class MDockerManagerK8SImpl implements MDockerManager {
                     null,
                     "Foreground"
             );
+            logger.info(String.format("Pod %s was deleted.", instanceId));
         } catch (IllegalStateException e) {
             ;
         } catch (ApiException e) {
@@ -127,12 +125,16 @@ public class MDockerManagerK8SImpl implements MDockerManager {
     }
 
     @Override
-    public V1Pod deployInstanceOnNode(String nodeId, V1Pod podBody) {
+    public V1Pod deployInstanceOnNode(String nodeId, String instanceId, V1Pod podBody) {
         // fill the node selector
         if (podBody.getSpec().getNodeSelector() == null) {
             podBody.getSpec().setNodeSelector(new HashMap<>());
         }
         podBody.getSpec().getNodeSelector().put("node", nodeId);
+
+        if (instanceId != null) {
+            podBody.getMetadata().setGenerateName(instanceId+"-");
+        }
 
         V1Pod resultPod = null;
         try {

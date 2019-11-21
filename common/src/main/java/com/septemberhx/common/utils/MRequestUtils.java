@@ -1,5 +1,7 @@
 package com.septemberhx.common.utils;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -14,6 +16,7 @@ import java.util.Map;
 public class MRequestUtils {
 
     private static RestTemplate restTemplate = new RestTemplate();
+    private static Logger logger = LogManager.getLogger(MRequestUtils.class);
 
     public static <T> T sendRequest(URI uri, @Nullable Object paramObj, Class<T> returnClass, RequestMethod method) {
         T result = null;
@@ -38,7 +41,7 @@ public class MRequestUtils {
             }
             result = entity.getBody();
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.warn(String.format("Failed to send request to %s in %s", uri, method));
         }
         return result;
     }

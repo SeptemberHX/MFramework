@@ -202,11 +202,11 @@ public class MClientUtils {
 
     public void depoly(MDeployPodRequest mDeployPodRequest) {
         try {
-            V1Pod pod = dockerManager.deployInstanceOnNode(mDeployPodRequest.getNodeId(), mDeployPodRequest.getPodBody());
+            V1Pod pod = dockerManager.deployInstanceOnNode(mDeployPodRequest.getNodeId(), mDeployPodRequest.getUniqueId(), mDeployPodRequest.getPodBody());
             podDuringDeploying.put(pod.getMetadata().getName(), mDeployPodRequest);
             logger.info("Job " + mDeployPodRequest.getId() + " dispatched");
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.warn(String.format("Failed to notify job %s to MServer. Please check the connection to MServer", mDeployPodRequest.getId()));
         }
     }
 
@@ -216,8 +216,10 @@ public class MClientUtils {
         if (!this.podDuringDeploying.containsKey(instanceId)) return false;
 
         String jobId = podDuringDeploying.get(infoBean.getDockerInfo().getInstanceId()).getId();
+
         MDeployNotifyRequest deployNotifyRequest = new MDeployNotifyRequest(jobId, instanceId);
         MRequestUtils.sendRequest(MUrlUtils.getMServerDeployNotifyJobUri(serverIpAddr, serverPort), deployNotifyRequest, null, RequestMethod.POST);
+
 
         logger.info("Job " + jobId + " finished and notified");
         this.podDuringDeploying.remove(instanceId);

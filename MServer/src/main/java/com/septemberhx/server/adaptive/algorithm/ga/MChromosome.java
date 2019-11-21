@@ -358,7 +358,7 @@ public class MChromosome {
             if (job.getType() == MJobType.DEPLOY) {
                 MDeployJob deployJob = (MDeployJob) job;
                 int nodeIndex = MWSGAPopulation.fixedNodeId2Index.get(deployJob.getNodeId());
-                int serviceIndex = MWSGAPopulation.fixedServiceId2Index.get(deployJob.getServiceId());
+                int serviceIndex = MWSGAPopulation.fixedServiceId2Index.get(deployJob.getServiceName());
                 this.genes[nodeIndex].addInstance(serviceIndex);
             } else if (job.getType() == MJobType.DELETE) {
                 MDeleteJob deleteJob = (MDeleteJob) job;

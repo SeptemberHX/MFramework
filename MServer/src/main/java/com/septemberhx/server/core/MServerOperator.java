@@ -284,7 +284,15 @@ public class MServerOperator extends MObjectManager<MServerState> {
 
         Optional<MService> serviceOptional = this.serviceManager.getById(serviceId);
 
-        MServiceInstance instance = new MServiceInstance(null, nodeId, null, null, instanceId, null, serviceOptional.get().getServiceName(), serviceId);
+        MServiceInstance instance = new MServiceInstance(
+                null,
+                nodeId,
+                null,
+                null,
+                instanceId,
+                null,
+                serviceOptional.get().getServiceName(),
+                serviceId, null);
         this.instanceManager.add(instance);
         serviceOptional.ifPresent(mService -> {
             this.nodeId2ResourceLeft.get(nodeId).assign(mService.getResource());
@@ -300,7 +308,7 @@ public class MServerOperator extends MObjectManager<MServerState> {
                 }
             }
         });
-        this.addNewJob(new MDeployJob(nodeId, serviceId, instanceId));
+        this.addNewJob(new MDeployJob(nodeId, serviceId, instanceId, null));
         return instance;
     }
 
@@ -884,7 +892,7 @@ public class MServerOperator extends MObjectManager<MServerState> {
 
             for (String currId : currInstanceIdSet) {
                 if (!oldInstanceIdSet.contains(currId)) {
-                    newJobList.add(new MDeployJob(node.getId(), this.getInstanceById(currId).getServiceId(), currId));
+                    newJobList.add(new MDeployJob(node.getId(), this.getInstanceById(currId).getServiceId(), currId, null));
                 }
             }
             for (String oldId : oldInstanceIdSet) {
@@ -943,7 +951,7 @@ public class MServerOperator extends MObjectManager<MServerState> {
             switch (baseJob.getType()) {
                 case DEPLOY:
                     MDeployJob deployJob = (MDeployJob) baseJob;
-                    objectId = deployJob.getInstanceId();
+                    objectId = deployJob.getUniqueId();
                     break;
                 case DELETE:
                     MDeleteJob deleteJob = (MDeleteJob) baseJob;
@@ -985,7 +993,7 @@ public class MServerOperator extends MObjectManager<MServerState> {
                     for (int i = 0; i < currJobList.size() - 1; ++i) {
                         removeJobIdList.add(currJobList.get(i).getId());
                     }
-                    if (!this.instanceManager.containsById(((MDeployJob) lastJob).getInstanceId())) {
+                    if (!this.instanceManager.containsById(((MDeployJob) lastJob).getUniqueId())) {
                         removeJobIdList.add(lastJob.getId());
                     }
                     break;
@@ -1023,7 +1031,7 @@ public class MServerOperator extends MObjectManager<MServerState> {
                     }
                     if (tDeployJob != null) {
                         currJobList.forEach(job -> removeJobIdList.add(job.getId()));
-                        tDeployJob.setServiceId(((MAdjustJob) lastJob).getTargetServiceId());
+                        tDeployJob.setServiceName(((MAdjustJob) lastJob).getTargetServiceId());
                         tDeployJob.newId();
                         this.jobList.add(tDeployJob);
                     }

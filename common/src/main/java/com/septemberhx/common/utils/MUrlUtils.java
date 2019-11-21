@@ -87,6 +87,10 @@ public class MUrlUtils {
         return MUrlUtils.getRemoteUri(clusterAgentIpAddr, port, MClusterConfig.MCLUSTERAGENT_FETCH_LOGS);
     }
 
+    public static URI getMClusterAgentDeleteInstanceUri(String clusterAgentIpAddr, int port) {
+        return MUrlUtils.getRemoteUri(clusterAgentIpAddr, port, MClusterConfig.MCLUSTERAGENT_DELETE_URI);
+    }
+
     public static URI getRemoteUri(String ipAddr, int port, String path) {
         URI uri = null;
         try {

@@ -107,9 +107,14 @@ public class MAgentController {
         }
 
         URI serverLoadUri = MUrlUtils.getMServerLoadInstanceInfoUri(this.serverIpAddr, this.serverPort);
-        System.out.println(infoBean.toString());
-        MRequestUtils.sendRequest(serverLoadUri, infoBean, null, RequestMethod.POST);
-        this.clientUtils.notifyDeployJobFinished(infoBean);
+        logger.info(infoBean.toString());
+
+        try {
+            MRequestUtils.sendRequest(serverLoadUri, infoBean, null, RequestMethod.POST);
+            this.clientUtils.notifyDeployJobFinished(infoBean);
+        } catch (Exception e) {
+            logger.warn("Failed to notify server with data in MAgentController::instanceRegistered");
+        }
     }
 
     @RequestMapping(path = "/setApiContinueStatus", method = RequestMethod.POST)

@@ -12,11 +12,13 @@ public class MDeployPodRequest {
     private String id;
     private String nodeId;
     private V1Pod podBody;
+    private String uniqueId;
 
-    public MDeployPodRequest(String id, String nodeId, V1Pod podBody) {
+    public MDeployPodRequest(String id, String nodeId, String uniqueId, V1Pod podBody) {
         this.id = id;
         this.nodeId = nodeId;
         this.podBody = podBody;
+        this.uniqueId = uniqueId;
     }
 
     public MDeployPodRequest() {
