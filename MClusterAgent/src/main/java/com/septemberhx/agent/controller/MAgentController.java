@@ -3,6 +3,8 @@ package com.septemberhx.agent.controller;
 import com.netflix.appinfo.InstanceInfo;
 import com.septemberhx.agent.utils.ElasticSearchUtils;
 import com.septemberhx.agent.utils.MClientUtils;
+import com.septemberhx.common.base.MUpdateCacheBean;
+import com.septemberhx.common.base.MUserDemand;
 import com.septemberhx.common.bean.*;
 import com.septemberhx.common.utils.MRequestUtils;
 import com.septemberhx.common.utils.MUrlUtils;
@@ -58,6 +60,23 @@ public class MAgentController {
                         new HttpHost(this.elasticsearchIpAddr, this.elasticsearchPort)
                 )
         );
+    }
+
+    @ResponseBody
+    @RequestMapping(path = "/fetchRequestUrl", method = RequestMethod.POST)
+    public String fetchRequestUrl(@RequestBody MUserDemand userDemand) {
+        URI requestUri = MUrlUtils.getMServerFetchRequestUrl(this.serverIpAddr, this.serverPort);
+        return MRequestUtils.sendRequest(requestUri, userDemand, String.class, RequestMethod.POST);
+    }
+
+    @ResponseBody
+    @RequestMapping(path = "/updateGateways", method = RequestMethod.POST)
+    public void updateGateway(@RequestBody MUpdateCacheBean cacheBean) {
+        for (InstanceInfo info : this.clientUtils.getAllGatewayInstance()) {
+            URI uri = MUrlUtils.getMGatewayUpdateUri(info.getIPAddr(), info.getPort());
+            System.out.println(uri.toString());
+            MRequestUtils.sendRequest(uri, cacheBean, null, RequestMethod.POST);
+        }
     }
 
     @ResponseBody

@@ -26,12 +26,14 @@ public class MClusterConfig {
     public final static String MCLUSTERAGENT_SET_APICS_URI = "/magent/setApiContinueStatus";
     public final static String MCLUSTERAGENT_FETCH_LOGS = "/magent/fetchLogsBetweenTime";
     public static final String MCLUSTERAGENT_DELETE_URI = "/magent/deleteInstance";
+    public final static String MCLUSTERAGNET_FETCH_REQUEST_URL = "/magent/fetchRequestUrl";
 
     public final static String MCLUSTERAGENT_FETCH_CLIENT_INFO = "/mclient/info";
     public final static String MSERVER_GET_REMOTE_URI = "/mserver/remoteuri";
     public final static String MSERVER_LOAD_INSTANCEINFO = "/mserver/loadInstanceInfo";
     public final static String MSERVER_JOB_NOTIFY_URI = "/mserver/notifyJob";
     public final static String MSERVER_DEPLOY_JOB_NOTIFY_URI = "/mserver/notifyDeployJob";
+    public final static String MSERVER_FETCH_REQUEST_URL = "/mserver/fetchRequestUrl";
 
     public final static String MCLUSTER_DOCKER_NAMESPACE = "kube-test";
 
@@ -40,6 +42,8 @@ public class MClusterConfig {
 
     public final static String BUILD_CENTER_BUILD_URI = "/buildcenter/build";
     public final static String BUILD_CENTER_CBUILD_URI = "/buildcenter/cbuild";
+
+    public final static String MGATEWAY_UPDATE_URI = "/update";
 
 
     public final static String K8S_NAMESPACE = "kube-test";

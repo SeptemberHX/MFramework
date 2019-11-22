@@ -1,6 +1,9 @@
 package com.septemberhx.server.adaptive;
 
 import com.google.common.graph.*;
+import com.septemberhx.common.base.MDemandChain;
+import com.septemberhx.common.base.MUser;
+import com.septemberhx.common.base.MUserDemand;
 import com.septemberhx.common.log.MLogType;
 import com.septemberhx.common.log.MServiceBaseLog;
 import com.septemberhx.server.adaptive.algorithm.MEvolveType;

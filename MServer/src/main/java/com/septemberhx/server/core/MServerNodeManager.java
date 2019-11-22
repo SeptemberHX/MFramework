@@ -6,9 +6,8 @@ import com.google.common.graph.ValueGraphBuilder;
 import com.septemberhx.server.adaptive.MAdaptiveSystem;
 import com.septemberhx.server.base.MNodeConnectionInfo;
 import com.septemberhx.common.base.MObjectManager;
-import com.septemberhx.server.base.model.MPosition;
+import com.septemberhx.common.base.MPosition;
 import com.septemberhx.server.base.model.MServerNode;
-import com.septemberhx.server.base.model.MUser;
 
 import java.util.*;
 import java.util.stream.Collectors;

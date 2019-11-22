@@ -7,7 +7,7 @@ import com.septemberhx.server.base.MNodeConnectionInfo;
 import com.septemberhx.server.base.model.MServerNode;
 import com.septemberhx.server.base.model.MService;
 import com.septemberhx.server.base.model.MServiceInstance;
-import com.septemberhx.server.base.model.MUser;
+import com.septemberhx.common.base.MUser;
 import com.septemberhx.server.core.*;
 
 import java.io.File;

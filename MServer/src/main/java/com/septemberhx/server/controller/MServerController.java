@@ -1,5 +1,6 @@
 package com.septemberhx.server.controller;
 
+import com.septemberhx.common.base.MUserDemand;
 import com.septemberhx.common.bean.*;
 import com.septemberhx.server.base.model.MServiceInstance;
 import com.septemberhx.server.core.MServerSkeleton;
@@ -19,6 +20,12 @@ import java.util.List;
 public class MServerController {
 
     private static Logger logger = LogManager.getLogger(MServerController.class);
+
+    @ResponseBody
+    @RequestMapping(path = "/fetchRequestUrl", method = RequestMethod.POST)
+    public String fetchRequestUrl(@RequestBody MUserDemand userDemand) {
+        return MServerSkeleton.fetchRequestUrl(userDemand);
+    }
 
     @ResponseBody
     @RequestMapping(path = "/loadInstanceInfo", method = RequestMethod.POST)

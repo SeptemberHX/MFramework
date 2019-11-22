@@ -1,10 +1,12 @@
 package com.septemberhx.server.utils;
 
+import com.septemberhx.common.base.MDemandChain;
+import com.septemberhx.common.base.MServiceInterface;
+import com.septemberhx.common.base.MUserDemand;
 import com.septemberhx.server.base.model.*;
 import com.septemberhx.server.core.MServiceManager;
 import org.javatuples.Pair;
 import org.javatuples.Triplet;
-import org.javatuples.Tuple;
 
 import java.util.ArrayList;
 import java.util.HashMap;

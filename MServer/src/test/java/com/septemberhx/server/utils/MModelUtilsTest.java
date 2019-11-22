@@ -1,16 +1,16 @@
 package com.septemberhx.server.utils;
 
-import com.septemberhx.server.adaptive.algorithm.ga.Configuration;
+import com.septemberhx.common.base.MDemandChain;
+import com.septemberhx.common.base.MServiceInterface;
+import com.septemberhx.common.base.MUser;
+import com.septemberhx.common.base.MUserDemand;
 import com.septemberhx.server.base.model.*;
 import com.septemberhx.server.core.MServiceManager;
 import com.septemberhx.server.core.MUserManager;
 import org.javatuples.Triplet;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 

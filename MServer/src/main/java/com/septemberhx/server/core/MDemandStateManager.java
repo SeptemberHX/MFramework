@@ -3,8 +3,8 @@ package com.septemberhx.server.core;
 import com.septemberhx.common.base.MObjectManager;
 import com.septemberhx.server.base.model.MDemandState;
 import com.septemberhx.server.base.model.MServiceInstance;
-import com.septemberhx.server.base.model.MServiceInterface;
-import com.septemberhx.server.base.model.MUserDemand;
+import com.septemberhx.common.base.MServiceInterface;
+import com.septemberhx.common.base.MUserDemand;
 import lombok.Getter;
 
 import java.util.*;

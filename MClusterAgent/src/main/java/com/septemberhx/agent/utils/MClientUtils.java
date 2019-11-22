@@ -200,6 +200,20 @@ public class MClientUtils {
 //        }
     }
 
+    /*
+     * Find all MGateway instances in the cluster
+     */
+    public List<InstanceInfo> getAllGatewayInstance() {
+        List<InstanceInfo> resultInfoList = new ArrayList<>();
+        List<InstanceInfo> infoList = this.clusterMiddleware.getInstanceInfoList();
+        for (InstanceInfo info : infoList) {
+            if (info.getAppName().equalsIgnoreCase("mgateway")) {
+                resultInfoList.add(info);
+            }
+        }
+        return resultInfoList;
+    }
+
     public void depoly(MDeployPodRequest mDeployPodRequest) {
         try {
             V1Pod pod = dockerManager.deployInstanceOnNode(mDeployPodRequest.getNodeId(), mDeployPodRequest.getUniqueId(), mDeployPodRequest.getPodBody());

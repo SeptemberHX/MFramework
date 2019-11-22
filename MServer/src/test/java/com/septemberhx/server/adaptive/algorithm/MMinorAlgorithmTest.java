@@ -1,7 +1,7 @@
 package com.septemberhx.server.adaptive.algorithm;
 
-import com.septemberhx.server.base.model.MUser;
-import com.septemberhx.server.base.model.MUserDemand;
+import com.septemberhx.common.base.MUser;
+import com.septemberhx.common.base.MUserDemand;
 import com.septemberhx.server.core.MSystemModel;
 import com.septemberhx.server.utils.MDataUtils;
 import org.junit.jupiter.api.BeforeEach;

@@ -91,6 +91,18 @@ public class MUrlUtils {
         return MUrlUtils.getRemoteUri(clusterAgentIpAddr, port, MClusterConfig.MCLUSTERAGENT_DELETE_URI);
     }
 
+    public static URI getMServerFetchRequestUrl(String clusterAgentIpAddr, int port) {
+        return MUrlUtils.getRemoteUri(clusterAgentIpAddr, port, MClusterConfig.MSERVER_FETCH_REQUEST_URL);
+    }
+
+    public static URI getMClusterFetchRequestUrl(String clusterIpAddr, int port) {
+        return MUrlUtils.getRemoteUri(clusterIpAddr, port, MClusterConfig.MCLUSTERAGNET_FETCH_REQUEST_URL);
+    }
+
+    public static URI getMGatewayUpdateUri(String ipAddr, int port) {
+        return MUrlUtils.getRemoteUri(ipAddr, port, MClusterConfig.MGATEWAY_UPDATE_URI);
+    }
+
     public static URI getRemoteUri(String ipAddr, int port, String path) {
         URI uri = null;
         try {

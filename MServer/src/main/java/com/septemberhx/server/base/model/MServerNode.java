@@ -1,9 +1,9 @@
 package com.septemberhx.server.base.model;
 
 import com.septemberhx.common.base.MBaseObject;
+import com.septemberhx.common.base.MPosition;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 
 @Getter
 @Setter

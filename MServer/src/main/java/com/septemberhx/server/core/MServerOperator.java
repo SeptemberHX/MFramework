@@ -1,9 +1,6 @@
 package com.septemberhx.server.core;
 
-import com.septemberhx.common.base.MArchitectInfo;
-import com.septemberhx.common.base.MBaseObject;
-import com.septemberhx.common.base.MClassFunctionPair;
-import com.septemberhx.common.base.MObjectManager;
+import com.septemberhx.common.base.*;
 import com.septemberhx.common.bean.MCompositionRequest;
 import com.septemberhx.server.adaptive.MAdaptiveSystem;
 import com.septemberhx.server.adaptive.algorithm.ga.Configuration;

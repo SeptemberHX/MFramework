@@ -1,9 +1,9 @@
 package com.septemberhx.server.core;
 
 import com.septemberhx.common.base.MObjectManager;
-import com.septemberhx.server.base.model.MDemandChain;
-import com.septemberhx.server.base.model.MUser;
-import com.septemberhx.server.base.model.MUserDemand;
+import com.septemberhx.common.base.MDemandChain;
+import com.septemberhx.common.base.MUser;
+import com.septemberhx.common.base.MUserDemand;
 
 import java.util.ArrayList;
 import java.util.List;

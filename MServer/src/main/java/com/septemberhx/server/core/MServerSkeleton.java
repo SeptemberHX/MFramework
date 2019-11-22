@@ -1,10 +1,13 @@
 package com.septemberhx.server.core;
 
 
+import com.septemberhx.common.base.MServiceInterface;
+import com.septemberhx.common.base.MUserDemand;
 import com.septemberhx.common.bean.MGetRemoteUriRequest;
 import com.septemberhx.common.bean.MInstanceInfoBean;
 import com.septemberhx.common.bean.MSetRestInfoRequest;
 import com.septemberhx.common.utils.MUrlUtils;
+import com.septemberhx.server.base.model.MDemandState;
 import com.septemberhx.server.base.model.MServiceInstance;
 import com.septemberhx.server.job.MJobManager;
 import com.septemberhx.server.utils.MServerUtils;
@@ -35,6 +38,21 @@ public class MServerSkeleton {
     private MServerSkeleton() {
         this.remoteInstanceIdMap = new HashMap<>();
         this.repoManager = MRepoManager.loadFromFile("./project.json");
+    }
+
+    public static String fetchRequestUrl(MUserDemand demand) {
+        Optional<MDemandState> demandStateOptional = MSystemModel.getIns().getDemandStateManager().getById(demand.getId());
+        if (demandStateOptional.isPresent()) {
+            MDemandState demandState = demandStateOptional.get();
+            Optional<MServiceInstance> instanceOptional = MSystemModel.getIns().getInstanceById(demandState.getInstanceId());
+            if (instanceOptional.isPresent()) {
+                MServiceInstance serviceInstance = instanceOptional.get();
+                MServiceInterface mServiceInterface = MSystemModel.getIns().getServiceManager().getInterfaceById(demandState.getInterfaceId());
+                URI uri = MUrlUtils.getRemoteUri(serviceInstance.getIp(), serviceInstance.getPort(), mServiceInterface.getPatternUrl());
+                return uri.toString();
+            }
+        }
+        return null;
     }
 
     public static MServerSkeleton getInstance() {

@@ -1,5 +1,6 @@
 package com.septemberhx.server.adaptive.algorithm.ga;
 
+import com.septemberhx.common.base.MUserDemand;
 import com.septemberhx.server.adaptive.algorithm.MDemandAssignHA;
 import com.septemberhx.server.base.model.*;
 import com.septemberhx.server.core.MServerOperator;

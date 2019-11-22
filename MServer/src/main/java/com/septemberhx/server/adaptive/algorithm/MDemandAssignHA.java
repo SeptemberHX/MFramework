@@ -1,12 +1,13 @@
 package com.septemberhx.server.adaptive.algorithm;
 
-import com.septemberhx.server.adaptive.algorithm.ga.Configuration;
+import com.septemberhx.common.base.MServiceInterface;
+import com.septemberhx.common.base.MUser;
+import com.septemberhx.common.base.MUserDemand;
 import com.septemberhx.server.base.model.*;
 import com.septemberhx.server.core.MServerOperator;
 import com.septemberhx.server.core.MSystemModel;
 import com.septemberhx.server.job.MBaseJob;
 import com.septemberhx.server.utils.MIDUtils;
-import com.septemberhx.server.utils.MModelUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.javatuples.Triplet;

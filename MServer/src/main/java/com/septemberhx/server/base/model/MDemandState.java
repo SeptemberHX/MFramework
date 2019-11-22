@@ -1,8 +1,9 @@
 package com.septemberhx.server.base.model;
 
 import com.septemberhx.common.base.MBaseObject;
+import com.septemberhx.common.base.MServiceInterface;
+import com.septemberhx.common.base.MUserDemand;
 import lombok.Getter;
-import lombok.Setter;
 
 /**
  * @author SeptemberHX

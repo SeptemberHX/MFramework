@@ -1,4 +1,4 @@
-package com.septemberhx.server.base.model;
+package com.septemberhx.common.base;
 
 import com.septemberhx.common.base.MClassFunctionPair;
 import lombok.Getter;

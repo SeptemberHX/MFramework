@@ -243,7 +243,7 @@ public class MApiTypeProcessor extends AbstractProcessor {
                 treeMaker.VarDef(
                         treeMaker.Modifiers(Flags.PARAMETER),
                         names.fromString("jsonParameters"),
-                        memberAccess("com.septemberhx.mclient.base.MResponse"),
+                        memberAccess("com.septemberhx.common.base.MResponse"),
                         null
                 );
 
@@ -284,7 +284,7 @@ public class MApiTypeProcessor extends AbstractProcessor {
         JCTree.JCMethodDecl resultMethodDecl = treeMaker.MethodDef(
                 modifiers,
                 jcMethodDecl.name,
-                memberAccess("com.septemberhx.mclient.base.MResponse"),
+                memberAccess("com.septemberhx.common.base.MResponse"),
                 List.<JCTree.JCTypeParameter>nil(),
                 List.<JCTree.JCVariableDecl>of(parameterDecl),
                 List.<JCTree.JCExpression>nil(),

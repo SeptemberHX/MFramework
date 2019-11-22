@@ -1,6 +1,5 @@
-package com.septemberhx.server.base.model;
+package com.septemberhx.common.base;
 
-import com.septemberhx.common.base.MBaseObject;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -24,6 +23,8 @@ public class MUserDemand extends MBaseObject {
         this.id = userId + "_" + functionId + "_" + slaLevel;
         this.serviceId = serviceId;
     }
+
+    public MUserDemand() {}
 
     public boolean isDemandMet(String functionIdProvided, Integer slaLevelProvided) {
         return functionIdProvided.equals(functionId) && slaLevelProvided >= slaLevel;

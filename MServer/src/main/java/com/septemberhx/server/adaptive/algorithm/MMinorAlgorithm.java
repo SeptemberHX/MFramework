@@ -1,13 +1,14 @@
 package com.septemberhx.server.adaptive.algorithm;
 
-import com.google.common.graph.EndpointPair;
+import com.septemberhx.common.base.MDemandChain;
+import com.septemberhx.common.base.MServiceInterface;
+import com.septemberhx.common.base.MUser;
+import com.septemberhx.common.base.MUserDemand;
 import com.septemberhx.server.base.MAnalyserResult;
 import com.septemberhx.server.base.MPlannerResult;
 import com.septemberhx.server.base.model.*;
 import com.septemberhx.server.core.MServerOperator;
 import com.septemberhx.server.core.MSystemModel;
-import com.septemberhx.server.job.MBaseJob;
-import com.septemberhx.server.utils.MIDUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.javatuples.Pair;

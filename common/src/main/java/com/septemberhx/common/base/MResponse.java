@@ -1,4 +1,4 @@
-package com.septemberhx.mclient.base;
+package com.septemberhx.common.base;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -21,5 +21,13 @@ public class MResponse {
     public MResponse set(String key, Object value) {
         this.valueMap.put(key, value);
         return this;
+    }
+
+    public MResponse() {
+
+    }
+
+    public MResponse(String status) {
+        this.status = "Fail";
     }
 }
