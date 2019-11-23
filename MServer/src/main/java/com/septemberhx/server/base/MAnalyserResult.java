@@ -23,6 +23,7 @@ public class MAnalyserResult {
     private Map<String, List<MUserDemand>> affectedUserId2MUserDemandsBySla;
     private MutableValueGraph<MSInterface, Integer> callGraph;
     private MutableValueGraph<MSInterface, Integer> allCallGraph;
+    private Map<String, List<String>> demandNotAssignedSet;
 
     public MAnalyserResult() {
         this.evolveType = MEvolveType.NO_NEED;

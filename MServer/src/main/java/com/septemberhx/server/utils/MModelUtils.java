@@ -5,9 +5,12 @@ import com.septemberhx.common.base.MServiceInterface;
 import com.septemberhx.common.base.MUserDemand;
 import com.septemberhx.server.base.model.*;
 import com.septemberhx.server.core.MServiceManager;
+import io.kubernetes.client.models.V1Pod;
+import io.kubernetes.client.util.Yaml;
 import org.javatuples.Pair;
 import org.javatuples.Triplet;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -112,5 +115,18 @@ public class MModelUtils {
         newService.setMaxUserCap(Math.min(service1.getMaxUserCap(), service2.getMaxUserCap()));
         newService.setResource(service1.getResource().max(service2.getResource()));
         return newService;
+    }
+
+    public static V1Pod readPodYaml(String serviceName) {
+        V1Pod pod = null;
+        try {
+            Object podYamlObj = Yaml.load(new File("./yaml/" + serviceName + ".yaml"));
+            if (podYamlObj.getClass().getSimpleName().equals("V1Pod")) {
+                pod = (V1Pod) podYamlObj;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return pod;
     }
 }

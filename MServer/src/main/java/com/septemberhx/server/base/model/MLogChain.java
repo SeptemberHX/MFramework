@@ -46,7 +46,7 @@ public class MLogChain {
         MServiceBaseLog lastLog = this.logList.get(this.logList.size() - 1);
 
         long executingTimeInMillis = 0;
-        for (int i = 1; i < this.logList.size() - 1; i+=2) {
+        for (int i = 1; i < this.logList.size() - 1; i+=1) {
             if (this.logList.get(i).getLogType() == MLogType.FUNCTION_CALL &&
                     this.logList.get(i + 1).getLogType() == MLogType.FUNCTION_CALL_END &&
                     this.logList.get(i).getLogObjectId().equals(this.logList.get(i + 1).getLogObjectId())) {
@@ -55,6 +55,19 @@ public class MLogChain {
         }
 
         return lastLog.getLogDateTime().getMillis() - firstLog.getLogDateTime().getMillis() - executingTimeInMillis;
+    }
+
+    public List<String> getNotMetDemandIdList() {
+        List<String> demandIdList = new ArrayList<>();
+        for (int i = 0; i < this.logList.size() - 1; ++i) {
+            if (this.logList.get(i).getLogType() == MLogType.FUNCTION_CALL &&
+                MServiceInstanceManager.checkIfInstanceIsGateway(this.logList.get(i).getLogObjectId()) &&
+                MServiceInstanceManager.checkIfInstanceIsGateway(this.logList.get(i+1).getLogObjectId())) {
+                demandIdList.add(this.logList.get(i).getLogMethodName());
+            }
+        }
+
+        return demandIdList;
     }
 
     public List<MSInterface> getConnections() {

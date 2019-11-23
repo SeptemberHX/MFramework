@@ -57,6 +57,7 @@ public class MAnalyser {
         }
 
         Map<String, List<MLogChain>> userId2LogChainList = this.analyseLogChains(logList);
+        analyserResult.setDemandNotAssignedSet(this.getDemandsNotAssigned(userId2LogChainList));
         analyserResult.setCallGraph(this.buildCallGraph(userId2LogChainList));
 
         Map<String, Double> userId2AvgTime = this.analyseAvgResTimePerReqOnEachUser(userId2LogChainList);
@@ -181,6 +182,19 @@ public class MAnalyser {
             }
         }
         return interfaceGraph;
+    }
+
+    private Map<String, List<String>> getDemandsNotAssigned(Map<String, List<MLogChain>> userId2LogChainListMap) {
+        Map<String, List<String>> result = new HashMap<>();
+        for (String userId : userId2LogChainListMap.keySet()) {
+            for (MLogChain logChain : userId2LogChainListMap.get(userId)) {
+                if (!result.containsKey(userId)) {
+                    result.put(userId, new ArrayList<>());
+                }
+                result.get(userId).addAll(logChain.getNotMetDemandIdList());
+            }
+        }
+        return result;
     }
 
     private Map<String, List<MLogChain>> analyseLogChains(List<MServiceBaseLog> logList) {

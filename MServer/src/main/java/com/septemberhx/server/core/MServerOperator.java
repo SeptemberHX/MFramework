@@ -305,7 +305,7 @@ public class MServerOperator extends MObjectManager<MServerState> {
                 }
             }
         });
-        this.addNewJob(new MDeployJob(nodeId, serviceId, instanceId, null));
+        this.addNewJob(new MDeployJob(nodeId, serviceId, instanceId));
         return instance;
     }
 
@@ -889,7 +889,7 @@ public class MServerOperator extends MObjectManager<MServerState> {
 
             for (String currId : currInstanceIdSet) {
                 if (!oldInstanceIdSet.contains(currId)) {
-                    newJobList.add(new MDeployJob(node.getId(), this.getInstanceById(currId).getServiceId(), currId, null));
+                    newJobList.add(new MDeployJob(node.getId(), this.getInstanceById(currId).getServiceId(), currId));
                 }
             }
             for (String oldId : oldInstanceIdSet) {
@@ -1257,5 +1257,86 @@ public class MServerOperator extends MObjectManager<MServerState> {
 
     public MServiceInterface getServiceInterface(String interfaceId) {
         return this.serviceManager.getInterfaceById(interfaceId);
+    }
+
+    /*
+     * Compare current operator with the previous operator
+     * and get the job lists which can evolve from previous one to current one.
+     */
+    public List<MBaseJob> calcJobList(MServerOperator rawOperator) {
+        List<MBaseJob> baseJobList = new ArrayList<>();
+
+        // build composition service
+        for (MService service : this.serviceManager.getAllComServices()) {
+            if (!rawOperator.getServiceManager().containsById(service.getId())) {
+                baseJobList.add(this.getBuildJob(service));
+            }
+        }
+
+        // deploy new instance
+        Map<String, List<MServiceInstance>> currInstanceMap = new HashMap<>();
+        for (MServiceInstance serviceInstance : this.getAllInstances()) {
+            if (!currInstanceMap.containsKey(serviceInstance.getServiceId())) {
+                currInstanceMap.put(serviceInstance.getServiceId(), new ArrayList<>());
+            }
+            currInstanceMap.get(serviceInstance.getServiceId()).add(serviceInstance);
+        }
+
+        Map<String, List<MServiceInstance>> oldInstanceMap = new HashMap<>();
+        for (MServiceInstance oldInstance : this.getAllInstances()) {
+            if (!oldInstanceMap.containsKey(oldInstance.getServiceId())) {
+                oldInstanceMap.put(oldInstance.getServiceId(), new ArrayList<>());
+            }
+            oldInstanceMap.get(oldInstance.getServiceId()).add(oldInstance);
+        }
+
+        for (String currServiceId : currInstanceMap.keySet()) {
+            if (!oldInstanceMap.containsKey(currServiceId)) {
+                for (MServiceInstance instance : currInstanceMap.get(currServiceId)) {
+                    baseJobList.add(new MDeployJob(
+                            instance.getNodeId(), instance.getServiceName(), instance.getId()
+                    ));
+                }
+            } else {
+                Set<String> oldInstanceIdSet = oldInstanceMap.get(currServiceId).stream().map(MServiceInstance::getId).collect(Collectors.toSet());
+                Set<String> currInstanceIdSet = currInstanceMap.get(currServiceId).stream().map(MServiceInstance::getId).collect(Collectors.toSet());
+
+                Set<String> retainSet = new HashSet<>(currInstanceIdSet);
+                retainSet.retainAll(oldInstanceIdSet);  // do nothing about this instance
+
+                // deal with others
+                // todo: We will reuse old instance if possible
+                oldInstanceIdSet.removeAll(retainSet);
+                currInstanceIdSet.removeAll(retainSet);
+
+                for (String oldInstanceId : oldInstanceIdSet) {
+                    MServiceInstance instance = rawOperator.getInstanceById(oldInstanceId);
+                    baseJobList.add(
+                            new MDeleteJob(oldInstanceId, instance.getServiceId(), instance.getNodeId())
+                    );
+                }
+
+                for (String currInstanceId : currInstanceIdSet) {
+                    MServiceInstance instance = this.getInstanceById(currInstanceId);
+                    baseJobList.add(
+                            new MDeployJob(instance.getNodeId(), instance.getServiceName(), instance.getId())
+                    );
+                }
+            }
+        }
+
+        for (MDemandState currDemandState : this.demandStateManager.getAllValues()) {
+            if (rawOperator.getDemandStateManager().containsById(currDemandState.getId())) {
+                MDemandState oldState = rawOperator.getDemandStateManager().getById(currDemandState.getId()).get();
+                if (oldState.getUserId().equals(currDemandState.getUserId()) && oldState.getInstanceId().equals(currDemandState.getUserId())) {
+                    continue;
+                }
+            }
+
+            baseJobList.add(
+                    new MSwitchJob(currDemandState.getId(), currDemandState.getInstanceId(), null)
+            );
+        }
+        return baseJobList;
     }
 }

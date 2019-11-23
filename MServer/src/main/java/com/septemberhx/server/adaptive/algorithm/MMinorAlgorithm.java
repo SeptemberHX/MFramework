@@ -70,6 +70,15 @@ public class MMinorAlgorithm implements MAlgorithmInterface {
             }
         }
 
+        // not assigned user demands
+        for (String userId : data.getDemandNotAssignedSet().keySet()) {
+            for (String demandId : new HashSet<>(data.getDemandNotAssignedSet().get(userId))) {
+                if (allDemandIdSet.contains(demandId)) {
+                    demandList.add(MSystemModel.getIns().getUserManager().getUserDemandByUserAndDemandId(userId, demandId));
+                }
+            }
+        }
+
         // deal with all not good demands
         MDemandAssignHA.calc(demandList, serverOperator);
         serverOperator.printStatus();
