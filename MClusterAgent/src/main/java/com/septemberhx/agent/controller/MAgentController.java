@@ -4,6 +4,7 @@ import com.netflix.appinfo.InstanceInfo;
 import com.septemberhx.agent.utils.ElasticSearchUtils;
 import com.septemberhx.agent.utils.MClientUtils;
 import com.septemberhx.common.base.MUpdateCacheBean;
+import com.septemberhx.common.base.MUser;
 import com.septemberhx.common.base.MUserDemand;
 import com.septemberhx.common.bean.*;
 import com.septemberhx.common.utils.MRequestUtils;
@@ -13,6 +14,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -77,6 +79,21 @@ public class MAgentController {
             System.out.println(uri.toString());
             MRequestUtils.sendRequest(uri, cacheBean, null, RequestMethod.POST);
         }
+    }
+
+    @ResponseBody
+    @RequestMapping(path = "/allUser", method = RequestMethod.POST)
+    public MAllUserBean getAllUser() {
+        List<MUser> allUserList = new ArrayList<>();
+        for (InstanceInfo info : this.clientUtils.getAllGatewayInstance()) {
+            URI uri = MUrlUtils.getMGatewayAllUserUri(info.getIPAddr(), info.getPort());
+            System.out.println(uri.toString());
+            MAllUserBean userListBean = MRequestUtils.sendRequest(uri, null, MAllUserBean.class, RequestMethod.POST);
+            if (userListBean != null) {
+                allUserList.addAll(userListBean.getAllUserList());
+            }
+        }
+        return new MAllUserBean(allUserList);
     }
 
     @ResponseBody
@@ -148,8 +165,8 @@ public class MAgentController {
         response.setLogList(ElasticSearchUtils.getLogsBetween(
                 this.esClient,
                 new String[]{"logstash-*"},
-                request.getStartTime(),
-                request.getEndTime()
+                new DateTime(request.getStartTime()),
+                new DateTime(request.getEndTime())
         ));
         return response;
     }

@@ -1,6 +1,10 @@
 package com.septemberhx.server.adaptive;
 
+import com.septemberhx.common.base.MUser;
+import com.septemberhx.common.log.MBaseLog;
 import com.septemberhx.common.log.MServiceBaseLog;
+import com.septemberhx.server.base.MAnalyserInput;
+import com.septemberhx.server.utils.MServerUtils;
 import org.joda.time.DateTime;
 
 import java.util.ArrayList;
@@ -39,5 +43,23 @@ public class MMonitor {
 
         Collections.sort(resultLogList);
         return resultLogList;
+    }
+
+    public List<MBaseLog> fetchLogFromCluster(DateTime startTime, DateTime endTime) {
+        List<MBaseLog> logList = new ArrayList<>();
+        for (String logStr : MServerUtils.fetchClusterLogsByDatetime(startTime, endTime)) {
+            logList.add(MBaseLog.getLogFromStr(logStr));
+        }
+        return logList;
+    }
+
+    public List<MUser> fetchUserInfoFromCluster() {
+        return MServerUtils.fetchClusterUsers();
+    }
+
+    public MAnalyserInput monitor(DateTime startTime, DateTime endTime) {
+        List<MBaseLog> logList = this.fetchLogFromCluster(startTime, endTime);
+        List<MUser> userList = this.fetchUserInfoFromCluster();
+        return new MAnalyserInput(userList, logList);
     }
 }

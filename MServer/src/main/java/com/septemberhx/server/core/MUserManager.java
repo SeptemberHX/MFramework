@@ -14,6 +14,11 @@ import java.util.List;
  * @date 2019/9/15
  */
 public class MUserManager extends MObjectManager<MUser> {
+
+    public void clear() {
+        this.objectMap.clear();
+    }
+
     public MUserDemand getUserDemandByUserAndDemandId(String userId, String demandId) {
         if (this.objectMap.containsKey(userId)) {
             MUser mUser = this.objectMap.get(userId);

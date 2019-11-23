@@ -39,7 +39,7 @@ public class MMinorAlgorithm implements MAlgorithmInterface {
         // DO NOT CHANGE THE ORDER ABOVE.
 
         // Below, do the calc job
-        Map<String, List<MDemandState>> notMetMap = data.getAffectedUserId2MDemandStateBySla();
+        Map<String, List<MUserDemand>> notMetMap = data.getAffectedUserId2MUserDemandsBySla();
         Set<String> longResTimeUserIdSet = data.getAffectedUserIdByAvgTime();
 
         // replace composition services, and collect all demands of the longResTime users together
@@ -55,16 +55,19 @@ public class MMinorAlgorithm implements MAlgorithmInterface {
 
         // collect all notMet user demands, too
         for (String userId : notMetMap.keySet()) {
-            for (MDemandState demandState : notMetMap.get(userId)) {
-                MUserDemand userDemand = MSystemModel.getIns().getUserManager()
-                        .getUserDemandByUserAndDemandId(demandState.getUserId(), demandState.getInstanceId());
-                demandList.add(userDemand);
-            }
+            demandList.addAll(notMetMap.get(userId));
         }
 
-        // collect all user demands that have no status
-        for (MUser user : MSystemModel.getIns().getUserManager().getAllValues()) {
-            demandList.addAll(serverOperator.filterNotIn(user.getAllDemands()));
+        // clean old, not used demand state
+        List<MUserDemand> userDemandList = MSystemModel.getIns().getUserManager().getAllUserDemands();
+        Set<String> allDemandIdSet = new HashSet<>();
+        for (MUserDemand userDemand : userDemandList) {
+            allDemandIdSet.add(userDemand.getId());
+        }
+        for (MDemandState demandState : serverOperator.getDemandStateManager().getAllValues()) {
+            if (!allDemandIdSet.contains(demandState.getId())) {
+                serverOperator.removeDemandState(demandState);
+            }
         }
 
         // deal with all not good demands

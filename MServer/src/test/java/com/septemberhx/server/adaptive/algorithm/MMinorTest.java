@@ -20,7 +20,7 @@ public class MMinorTest {
     @Test
     void calc() {
         MAnalyser analyser = new MAnalyser(MSystemModel.getIns().getOperator());
-        MAnalyserResult analyserResult = analyser.analyse(new ArrayList<>(), new ArrayList<>());
+        MAnalyserResult analyserResult = analyser.analyse(new ArrayList<>());
 
         MMinorAlgorithm minorAlgorithm = new MMinorAlgorithm();
         minorAlgorithm.calc(analyserResult, new MServerOperator());

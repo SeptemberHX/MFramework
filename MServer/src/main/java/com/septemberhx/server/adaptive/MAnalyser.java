@@ -4,6 +4,7 @@ import com.google.common.graph.*;
 import com.septemberhx.common.base.MDemandChain;
 import com.septemberhx.common.base.MUser;
 import com.septemberhx.common.base.MUserDemand;
+import com.septemberhx.common.log.MBaseLog;
 import com.septemberhx.common.log.MLogType;
 import com.septemberhx.common.log.MServiceBaseLog;
 import com.septemberhx.server.adaptive.algorithm.MEvolveType;
@@ -48,7 +49,7 @@ public class MAnalyser {
      * @param demandStates: All demand state at this time
      * @return the result of the analysing
      */
-    public MAnalyserResult analyse(List<MServiceBaseLog> logList, List<MDemandState> demandStates) {
+    public MAnalyserResult analyse(List<MServiceBaseLog> logList) {
         MAnalyserResult analyserResult = new MAnalyserResult();
 
         if (Configuration.COMPOSITION_ALL_ENABLED) {
@@ -62,14 +63,16 @@ public class MAnalyser {
         Set<String> affectedUserIdByAvgTime = this.getUserIdWithWorseAvgTime(userId2AvgTime);
         analyserResult.setAffectedUserIdByAvgTime(affectedUserIdByAvgTime);
 
-        Map<String, List<MDemandState>> affectedUserId2MDemandStateBySla = this.getUserId2MDemandStateWithWorseSla(demandStates);
-        affectedUserIdByAvgTime.addAll(affectedUserId2MDemandStateBySla.keySet());
-        analyserResult.setAffectedUserId2MDemandStateBySla(affectedUserId2MDemandStateBySla);
+        Map<String, List<MUserDemand>> affectedUserId2MUserDemandsBySla = this.getUserId2MUserDemandWithWorseSla();
+        affectedUserIdByAvgTime.addAll(affectedUserId2MUserDemandsBySla.keySet());
+        analyserResult.setAffectedUserId2MUserDemandsBySla(affectedUserId2MUserDemandsBySla);
 
         // judge the type of the evolution
         MEvolveType evolveType = MEvolveType.NO_NEED;
-        if (affectedUserIdByAvgTime.size() > MAdaptiveSystem.MINOR_THRESHOLD
-                && affectedUserIdByAvgTime.size() < MAdaptiveSystem.MAJOR_THRESHOLD) {
+        int userSize = MSystemModel.getIns().getUserManager().getAllValues().size();
+        if ((affectedUserIdByAvgTime.size() > MAdaptiveSystem.MINOR_THRESHOLD * userSize
+                && affectedUserIdByAvgTime.size() < MAdaptiveSystem.MAJOR_THRESHOLD * userSize)
+                || affectedUserIdByAvgTime.size() < 1000) {
             evolveType = MEvolveType.MINOR;
         } else {
             evolveType = MEvolveType.MAJOR;
@@ -189,7 +192,7 @@ public class MAnalyser {
             userId2logList.get(baseLog.getLogUserId()).add(baseLog);
         }
         for (String userId : userId2logList.keySet()) {
-            Collections.sort(userId2logList.get(userId));
+            Collections.sort(userId2logList.get(userId), Comparator.comparing(MBaseLog::getLogDateTime));
         }
 
         Map<String, List<MLogChain>> userId2ChainList = new HashMap<>();
@@ -225,24 +228,29 @@ public class MAnalyser {
         return userIdNeedAdjustSet;
     }
 
-    private Map<String, List<MDemandState>> getUserId2MDemandStateWithWorseSla(List<MDemandState> demandStates) {
-        Map<String, List<MDemandState>> userId2MDemandState = new HashMap<>();
-        for (MDemandState demandState : demandStates) {
-            if (!MDemandStateManager.checkIfDemandSatisfied(demandState)) {
-                if (!userId2MDemandState.containsKey(demandState.getUserId())) {
-                    userId2MDemandState.put(demandState.getUserId(), new ArrayList<>());
+    private Map<String, List<MUserDemand>> getUserId2MUserDemandWithWorseSla() {
+        MDemandStateManager demandStateManager = MSystemModel.getIns().getDemandStateManager();
+        List<MUser> currUserList = MSystemModel.getIns().getUserManager().getAllValues();
+        Map<String, List<MUserDemand>> userId2MUserDemands = new HashMap<>();
+        for (MUser user : currUserList) {
+            for (MUserDemand demand : user.getAllDemands()) {
+                if (!demandStateManager.containsById(demand.getId()) ||
+                    !MDemandStateManager.checkIfDemandSatisfied(demandStateManager.getById(demand.getId()).get())) {
+                    if (!userId2MUserDemands.containsKey(user.getId())) {
+                        userId2MUserDemands.put(user.getId(), new ArrayList<>());
+                    }
+                    userId2MUserDemands.get(user.getId()).add(demand);
                 }
-                userId2MDemandState.get(demandState.getUserId()).add(demandState);
             }
         }
-        return userId2MDemandState;
+        return userId2MUserDemands;
     }
 
     private List<MLogChain> splitLogsByEachRequestChains(List<MServiceBaseLog> logList) {
         List<MLogChain> logChainList = new ArrayList<>();
         MLogChain currLogChain = new MLogChain();
         for (MServiceBaseLog serviceLog : logList) {
-            if (MServiceInstanceManager.checkIfInstanceIsGateway(serviceLog.getLogIpAddr())) {
+            if (MServiceInstanceManager.checkIfInstanceIsGateway(serviceLog.getLogObjectId())) {
                 if (serviceLog.getLogType() == MLogType.FUNCTION_CALL) {
                     currLogChain = new MLogChain();
                     currLogChain.addLog(serviceLog);

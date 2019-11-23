@@ -1,5 +1,6 @@
 package com.septemberhx.server.utils;
 
+import com.septemberhx.common.base.MUser;
 import com.septemberhx.common.bean.*;
 import com.septemberhx.common.log.MBaseLog;
 import com.septemberhx.common.log.MServiceBaseLog;
@@ -15,14 +16,12 @@ import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.net.URI;
 import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 
 @Component
@@ -70,14 +69,26 @@ public class MServerUtils {
 
     public static List<String> fetchClusterLogsByDatetime(DateTime startTime, DateTime endTime) {
         MFetchLogsBetweenTimeRequest request = new MFetchLogsBetweenTimeRequest();
-        request.setStartTime(startTime);
-        request.setEndTime(endTime);
+        request.setStartTime(startTime.getMillis());
+        request.setEndTime(endTime.getMillis());
         return MRequestUtils.sendRequest(
                 MUrlUtils.getMClusterAgentFetchLogsByTime(mClusterIpAddr, mClusterPort),
                 request,
                 MFetchLogsResponse.class,
                 RequestMethod.POST
         ).getLogList();
+    }
+
+    public static List<MUser> fetchClusterUsers() {
+        MAllUserBean userBean = MRequestUtils.sendRequest(
+                MUrlUtils.getMClusterAllUserUrl(mClusterIpAddr, mClusterPort), null, MAllUserBean.class, RequestMethod.POST
+        );
+
+        if (userBean != null) {
+            return userBean.getAllUserList();
+        } else {
+            return new ArrayList<>();
+        }
     }
 
     public static void notifyAddNewRemoteUri(String instanceId, String mObjectId, String funcName) {

@@ -103,6 +103,14 @@ public class MUrlUtils {
         return MUrlUtils.getRemoteUri(ipAddr, port, MClusterConfig.MGATEWAY_UPDATE_URI);
     }
 
+    public static URI getMGatewayAllUserUri(String ipAddr, int port) {
+        return MUrlUtils.getRemoteUri(ipAddr, port, MClusterConfig.MGATEWAY_ALL_USER_URI);
+    }
+
+    public static URI getMClusterAllUserUrl(String ipAddr, int port) {
+        return MUrlUtils.getRemoteUri(ipAddr, port, MClusterConfig.MCLUSTERAGENT_ALL_USER_URL);
+    }
+
     public static URI getRemoteUri(String ipAddr, int port, String path) {
         URI uri = null;
         try {

@@ -26,7 +26,7 @@ public class MExperiment {
 
         // create previous placement and assignment with heuristic algorithm
         MAnalyser analyser = new MAnalyser(new MServerOperator());
-        MAnalyserResult analyserResult = analyser.analyse(new ArrayList<>(), new ArrayList<>());
+        MAnalyserResult analyserResult = analyser.analyse(new ArrayList<>());
 
         MMinorAlgorithm minorAlgorithm = new MMinorAlgorithm();
         MPlannerResult result = minorAlgorithm.calc(analyserResult, MSystemModel.getIns().getOperator().shallowClone());
@@ -46,7 +46,7 @@ public class MExperiment {
         serverOperator.printStatus();
 
         MAnalyser analyser = new MAnalyser(serverOperator);
-        MAnalyserResult analyserResult = analyser.analyse(new ArrayList<>(), new ArrayList<>());
+        MAnalyserResult analyserResult = analyser.analyse(new ArrayList<>());
 
         MMajorAlgorithm mMajorAlgorithm = new MMajorAlgorithm(gaType);
         mMajorAlgorithm.calc(analyserResult, serverOperator);

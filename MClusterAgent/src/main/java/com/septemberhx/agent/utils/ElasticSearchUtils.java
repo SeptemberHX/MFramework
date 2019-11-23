@@ -53,7 +53,7 @@ public class ElasticSearchUtils {
         BoolQueryBuilder boolQueryBuilder = new BoolQueryBuilder();
         boolQueryBuilder.must(QueryBuilders.existsQuery("mclient"));
         boolQueryBuilder.must(
-                QueryBuilders.rangeQuery("mclient.logTimeInMills").from(startTime.getMillis()).to(endTime.getMillis()));
+                QueryBuilders.rangeQuery("mclient.logDateTimeInMills").from(startTime.getMillis()).to(endTime.getMillis()));
         searchSourceBuilder.query(boolQueryBuilder).size(100);
         sr.source(searchSourceBuilder);
 

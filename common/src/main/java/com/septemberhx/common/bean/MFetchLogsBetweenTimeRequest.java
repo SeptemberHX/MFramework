@@ -9,6 +9,6 @@ import java.util.Date;
 @Getter
 @Setter
 public class MFetchLogsBetweenTimeRequest {
-    private DateTime startTime;
-    private DateTime endTime;
+    private long startTime;
+    private long endTime;
 }

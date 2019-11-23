@@ -7,7 +7,9 @@ import com.septemberhx.common.utils.MUrlUtils;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -44,6 +46,10 @@ public class MGatewayCache {
 
     public void addUser(MUser user) {
         this.userMap.put(user.getId(), user);
+    }
+
+    public List<MUser> getAllUser() {
+        return new ArrayList<>(this.userMap.values());
     }
 
     public boolean isCached(String demandId) {

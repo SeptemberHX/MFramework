@@ -44,7 +44,17 @@ public class MLogChain {
     public long getFullResponseTime() {
         MServiceBaseLog firstLog = this.logList.get(0);
         MServiceBaseLog lastLog = this.logList.get(this.logList.size() - 1);
-        return lastLog.getLogDateTime().getMillis() - firstLog.getLogDateTime().getMillis();
+
+        long executingTimeInMillis = 0;
+        for (int i = 1; i < this.logList.size() - 1; i+=2) {
+            if (this.logList.get(i).getLogType() == MLogType.FUNCTION_CALL &&
+                    this.logList.get(i + 1).getLogType() == MLogType.FUNCTION_CALL_END &&
+                    this.logList.get(i).getLogObjectId().equals(this.logList.get(i + 1).getLogObjectId())) {
+                executingTimeInMillis = this.logList.get(i + 1).getLogDateTime().getMillis() - this.logList.get(i).getLogDateTime().getMillis();
+            }
+        }
+
+        return lastLog.getLogDateTime().getMillis() - firstLog.getLogDateTime().getMillis() - executingTimeInMillis;
     }
 
     public List<MSInterface> getConnections() {

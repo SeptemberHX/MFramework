@@ -36,7 +36,7 @@ public class MFunctionCalledLog extends MServiceBaseLog {
     protected void fillInfo(Map<String, Object> logMap) {
         super.fillInfo(logMap);
         this.logFromIpAddr = (String) logMap.get("logFromIpAddr");
-        this.logFromPort = Integer.valueOf((String) logMap.get("logFromPort"));
+        this.logFromPort = (Integer) logMap.get("logFromPort");
     }
 
     @Override

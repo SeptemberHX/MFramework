@@ -27,6 +27,7 @@ public class MClusterConfig {
     public final static String MCLUSTERAGENT_FETCH_LOGS = "/magent/fetchLogsBetweenTime";
     public static final String MCLUSTERAGENT_DELETE_URI = "/magent/deleteInstance";
     public final static String MCLUSTERAGNET_FETCH_REQUEST_URL = "/magent/fetchRequestUrl";
+    public final static String MCLUSTERAGENT_ALL_USER_URL = "/magent/allUser";
 
     public final static String MCLUSTERAGENT_FETCH_CLIENT_INFO = "/mclient/info";
     public final static String MSERVER_GET_REMOTE_URI = "/mserver/remoteuri";
@@ -44,6 +45,7 @@ public class MClusterConfig {
     public final static String BUILD_CENTER_CBUILD_URI = "/buildcenter/cbuild";
 
     public final static String MGATEWAY_UPDATE_URI = "/update";
+    public final static String MGATEWAY_ALL_USER_URI = "/allUser";
 
 
     public final static String K8S_NAMESPACE = "kube-test";

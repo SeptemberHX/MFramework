@@ -1,11 +1,15 @@
 package com.septemberhx.server.adaptive;
 
+import com.septemberhx.common.base.MUser;
+import com.septemberhx.common.log.MBaseLog;
 import com.septemberhx.common.log.MServiceBaseLog;
 import com.septemberhx.server.adaptive.algorithm.MAlgorithmInterface;
 import com.septemberhx.server.adaptive.algorithm.MEvolveType;
+import com.septemberhx.server.adaptive.algorithm.MMinorAlgorithm;
 import com.septemberhx.server.adaptive.executor.MBuildExecutor;
 import com.septemberhx.server.adaptive.executor.MClusterExecutor;
 import com.septemberhx.server.adaptive.executor.MExecutor;
+import com.septemberhx.server.base.MAnalyserInput;
 import com.septemberhx.server.base.MAnalyserResult;
 import com.septemberhx.server.base.MPlannerResult;
 import com.septemberhx.server.core.MSystemModel;
@@ -13,7 +17,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * The main part of the self-adaptive system.
@@ -38,6 +44,7 @@ public class MAdaptiveSystem {
     public static Long UNAVAILABLE_TRANSFORM_TIME = 1000000L;
 
     public static double ALPHA = 0.1;
+    public static int timeIntervalInMin = 5;
 
     public MAdaptiveSystem() {
         this.monitor = new MMonitor();
@@ -57,22 +64,32 @@ public class MAdaptiveSystem {
      * The main work flow of the self-adaptive system.
      */
     public void evolve() {
+        // fetch the logs from the cluster
+        DateTime now = DateTime.now();
+        MAnalyserInput analyserInput = this.monitor.monitor(now.minusMinutes(timeIntervalInMin), now);
+
+        // replace the users we just got from the cluster
+        MSystemModel.getIns().getUserManager().clear();
+        for (MUser user : analyserInput.getUserList()) {
+            MSystemModel.getIns().getUserManager().add(user);
+        }
+
         // analyze the system to check whether an evolution is needed
-        MAnalyserResult analyserResult = this.analyze();
+        MAnalyserResult analyserResult = this.analyze(analyserInput);
         if (analyserResult.getEvolveType() == MEvolveType.NO_NEED) {
             return;
         }
 
         // do the plan until successfully get the plan which meets the requirements defined in the MPlanner
         MPlannerResult result = this.plan(analyserResult);
-        while (!result.isSuccess()) {
-            // todo: collect the data from the 'result' and pass it to analyzer
-            analyserResult = this.analyze();
-            if (analyserResult.getEvolveType() == MEvolveType.NO_NEED) {
-                logger.warn("Evolve type cannot be NO_NEED in the while loop!");
-            }
-            result = this.plan(analyserResult);
-        }
+//        while (!result.isSuccess()) {
+//            // todo: collect the data from the 'result' and pass it to analyzer
+//            analyserResult = this.analyze();
+//            if (analyserResult.getEvolveType() == MEvolveType.NO_NEED) {
+//                logger.warn("Evolve type cannot be NO_NEED in the while loop!");
+//            }
+//            result = this.plan(analyserResult);
+//        }
 
         // execute the evolution plan
         this.evolve(result);
@@ -93,12 +110,16 @@ public class MAdaptiveSystem {
      * Get the logs according to the time window defined in the MAnalyser from MMonitor
      * @return MAnalyserResult: the result of the analyzing
      */
-    private MAnalyserResult analyze() {
+    private MAnalyserResult analyze(MAnalyserInput analyserInput) {
         MAnalyser analyser = this.turnToAnalyser();
-        DateTime logEndTime = DateTime.now();
-        DateTime logStartTime = logEndTime.minus(analyser.getTimeWindowInMillis());
-        List<MServiceBaseLog> logList = this.monitor.getLogBetweenDateTime(logStartTime, logEndTime);
-        return analyser.analyse(logList, MSystemModel.getIns().getDemandStateManager().getAllValues());
+
+        List<MServiceBaseLog> logList = new ArrayList<>();
+        for (MBaseLog baseLog : analyserInput.getLogList()) {
+            if (baseLog instanceof  MServiceBaseLog) {
+                logList.add((MServiceBaseLog) baseLog);
+            }
+        }
+        return analyser.analyse(logList);
     }
 
     /**
@@ -108,7 +129,13 @@ public class MAdaptiveSystem {
      */
     private MPlannerResult plan(MAnalyserResult analyserResult) {
         MPlanner planner = this.turnToPlanner();
-        return planner.plan(analyserResult, this.algorithm);
+        if (analyserResult.getEvolveType() == MEvolveType.MINOR) {
+            return planner.plan(analyserResult, new MMinorAlgorithm());
+        } else if (analyserResult.getEvolveType() == MEvolveType.MAJOR) {
+            return planner.plan(analyserResult, this.algorithm);
+        } else {
+            return new MPlannerResult();
+        }
     }
 
     /**

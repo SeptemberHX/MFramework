@@ -1,5 +1,5 @@
 server:
-  port: 46832
+  port: 8080
 eureka:
   instance:
     prefer-ip-address: true

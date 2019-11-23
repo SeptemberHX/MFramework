@@ -2,6 +2,7 @@ package com.septemberhx.server.controller;
 
 import com.septemberhx.common.base.MUserDemand;
 import com.septemberhx.common.bean.*;
+import com.septemberhx.server.adaptive.MAdaptiveSystem;
 import com.septemberhx.server.base.model.MServiceInstance;
 import com.septemberhx.server.core.MServerSkeleton;
 import com.septemberhx.server.job.*;
@@ -20,6 +21,13 @@ import java.util.List;
 public class MServerController {
 
     private static Logger logger = LogManager.getLogger(MServerController.class);
+
+    @ResponseBody
+    @RequestMapping(path = "/evolve", method = RequestMethod.GET)
+    public void evolve() {
+        MAdaptiveSystem adaptiveSystem = new MAdaptiveSystem();
+        adaptiveSystem.evolve();
+    }
 
     @ResponseBody
     @RequestMapping(path = "/fetchRequestUrl", method = RequestMethod.POST)

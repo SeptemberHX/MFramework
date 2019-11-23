@@ -115,19 +115,11 @@ public class MServiceInstanceManager extends MObjectManager<MServiceInstance> {
     }
 
     /**
-     * Check whether the given ip address is an instance of Gateway.
-     * @param ipAddr: The ip address of the given instance
+     * Check whether the given objectId is an instance of Gateway.
+     * @param objectId: given object id
      * @return Boolean
      */
-    public static boolean checkIfInstanceIsGateway(String ipAddr) {
-        Optional<MServiceInstance> serviceInstanceOptional =
-                MSystemModel.getIns().getMSIManager().getInstanceByIpAddr(ipAddr);
-        if (!serviceInstanceOptional.isPresent()) {
-            logger.warn("The log came from an nonexistent instance : " + ipAddr);
-            return false;
-        }
-
-        MServiceInstance serviceInstance = serviceInstanceOptional.get();
-        return MService.checkIfInstanceIsGatewayByServiceName(serviceInstance.getServiceName());
+    public static boolean checkIfInstanceIsGateway(String objectId) {
+        return objectId.equalsIgnoreCase("MGateway");
     }
 }

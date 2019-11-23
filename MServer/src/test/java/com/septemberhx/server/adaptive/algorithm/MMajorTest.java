@@ -20,7 +20,7 @@ class MMajorTest {
     @Test
     void wsga() {
         MAnalyser analyser = new MAnalyser(MSystemModel.getIns().getOperator());
-        MAnalyserResult analyserResult = analyser.analyse(new ArrayList<>(), new ArrayList<>());
+        MAnalyserResult analyserResult = analyser.analyse(new ArrayList<>());
 
         MMajorAlgorithm mMajorAlgorithm = new MMajorAlgorithm(MMajorAlgorithm.GA_TYPE.WSGA);
         mMajorAlgorithm.calc(analyserResult, new MServerOperator());
@@ -29,7 +29,7 @@ class MMajorTest {
     @Test
     void nsga_ii() {
         MAnalyser analyser = new MAnalyser(MSystemModel.getIns().getOperator());
-        MAnalyserResult analyserResult = analyser.analyse(new ArrayList<>(), new ArrayList<>());
+        MAnalyserResult analyserResult = analyser.analyse(new ArrayList<>());
 
         MMajorAlgorithm mMajorAlgorithm = new MMajorAlgorithm(MMajorAlgorithm.GA_TYPE.NSGA_II);
         mMajorAlgorithm.calc(analyserResult, new MServerOperator());
@@ -38,7 +38,7 @@ class MMajorTest {
     @Test
     void moea_d() {
         MAnalyser analyser = new MAnalyser(MSystemModel.getIns().getOperator());
-        MAnalyserResult analyserResult = analyser.analyse(new ArrayList<>(), new ArrayList<>());
+        MAnalyserResult analyserResult = analyser.analyse(new ArrayList<>());
 
         MMajorAlgorithm mMajorAlgorithm = new MMajorAlgorithm(MMajorAlgorithm.GA_TYPE.MODE_A);
         mMajorAlgorithm.calc(analyserResult, new MServerOperator());

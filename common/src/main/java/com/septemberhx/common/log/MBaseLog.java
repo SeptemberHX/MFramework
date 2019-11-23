@@ -62,7 +62,7 @@ public abstract class MBaseLog implements Comparable<MBaseLog> {
      * @param logMap: the log info map
      */
     protected void fillInfo(Map<String, Object> logMap) {
-        this.logDateTime = DateTime.parse((String) logMap.get("logDateTimeInMills"));
+        this.logDateTime = new DateTime(logMap.get("logDateTimeInMills"));
         this.logType = MLogType.valueOf((String) logMap.get("logType"));
         this.logIpAddr = (String) logMap.get("logIpAddr");
     }
@@ -132,5 +132,20 @@ public abstract class MBaseLog implements Comparable<MBaseLog> {
         } else {
             return null;
         }
+    }
+
+    public static void main(String[] args) {
+        Map<String, Object> testMap = new HashMap<>();
+        testMap.put("logType", "FUNCTION_CALL_END");
+        testMap.put("logIpAddr", "10.244.0.1");
+        testMap.put("logFromIpAddr", "10.244.0.1");
+        testMap.put("logObjectId", "MGateway");
+        testMap.put("logMethodName", "user_01_pay_function");
+        testMap.put("logUserId", "user_01");
+        testMap.put("logDateTimeInMills", 1574497241787L);
+        testMap.put("logFromPort", 57845);
+
+        MBaseLog baseLog = MBaseLog.getLogFromMap(testMap);
+        System.out.println(baseLog.toString());
     }
 }
