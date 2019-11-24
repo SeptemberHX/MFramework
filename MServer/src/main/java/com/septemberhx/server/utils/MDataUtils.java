@@ -3,11 +3,8 @@ package com.septemberhx.server.utils;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-import com.septemberhx.server.base.MNodeConnectionInfo;
-import com.septemberhx.server.base.model.MServerNode;
-import com.septemberhx.server.base.model.MService;
+import com.septemberhx.common.base.*;
 import com.septemberhx.server.base.model.MServiceInstance;
-import com.septemberhx.common.base.MUser;
 import com.septemberhx.server.core.*;
 
 import java.io.File;
@@ -182,36 +179,6 @@ public class MDataUtils {
         MUserManager userManager = MDataUtils.loadUserManager("D:\\Workspace\\git\\MFramework\\MServer\\src\\test\\data\\user.json");
         for (MUser user : userManager.getAllValues()) {
             System.out.println(user.toString());
-        }
-    }
-
-    class MConnectionJson {
-        private String successor;
-        private String predecessor;
-        private MNodeConnectionInfo connection;
-
-        public String getSuccessor() {
-            return successor;
-        }
-
-        public void setSuccessor(String successor) {
-            this.successor = successor;
-        }
-
-        public String getPredecessor() {
-            return predecessor;
-        }
-
-        public void setPredecessor(String predecessor) {
-            this.predecessor = predecessor;
-        }
-
-        public MNodeConnectionInfo getConnection() {
-            return connection;
-        }
-
-        public void setConnection(MNodeConnectionInfo connection) {
-            this.connection = connection;
         }
     }
 }

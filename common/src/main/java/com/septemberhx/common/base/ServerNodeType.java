@@ -1,4 +1,4 @@
-package com.septemberhx.server.base.model;
+package com.septemberhx.common.base;
 
 public enum ServerNodeType {
     CLOUD,

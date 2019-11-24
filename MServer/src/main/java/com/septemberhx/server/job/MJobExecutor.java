@@ -1,5 +1,6 @@
 package com.septemberhx.server.job;
 
+import com.septemberhx.common.base.MService;
 import com.septemberhx.common.bean.MApiContinueRequest;
 import com.septemberhx.common.bean.MApiSplitBean;
 import com.septemberhx.common.bean.MS2CSetApiCStatus;
@@ -7,6 +8,7 @@ import com.septemberhx.common.base.MClassFunctionPair;
 import com.septemberhx.server.base.model.MServiceInstance;
 import com.septemberhx.server.core.MRepoManager;
 import com.septemberhx.server.core.MServerSkeleton;
+import com.septemberhx.server.core.MSystemModel;
 import com.septemberhx.server.utils.MServerUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -38,7 +40,7 @@ public class MJobExecutor {
                 break;
             case DEPLOY:
                 MDeployJob deployJob = (MDeployJob) job;
-                MServerUtils.sendDeployInfo(deployJob.toMDeployPodRequest());
+                MJobExecutor.doDeployJob(deployJob);
                 deployJob.markAsDoing();
                 logger.info("Deploy job info send");
                 break;
@@ -61,6 +63,12 @@ public class MJobExecutor {
             default:
                 break;
         }
+    }
+
+    private static void doDeployJob(MDeployJob deployJob) {
+        List<MService> services = MSystemModel.getIns().getServiceManager().getAllServicesByServiceName(deployJob.getServiceName());
+        deployJob.setImageName(services.get(0).getDockerImageUrl());
+        MServerUtils.sendDeployInfo(deployJob.toMDeployPodRequest());
     }
 
     private static void doNotifyJob(MNotifyJob notifyJob) {
@@ -106,6 +114,12 @@ public class MJobExecutor {
                     break;
             }
         });
+    }
+
+    public static void doNextJobs() {
+        for (MBaseJob baseJob : MServerSkeleton.getInstance().getJobManager().getNextJobList()) {
+            MJobExecutor.doJob(baseJob);
+        }
     }
 
     public static void doNextJobs(String prevJobId) {

@@ -69,26 +69,29 @@ public class MSystemModel {
         String nodeId = null;
         if (instanceInfo.getDockerInfo() != null) {
             nodeId = instanceInfo.getDockerInfo().getHostIp();
-        }
 
-        // check if the instance is alive. The mObjectIdMap will not be null if alive
-        // todo: get actual serviceId of the service instance
-        String ourInstanceId = MIDUtils.tranClusterInstanceIdToOurs(instanceInfo.getDockerInfo().getInstanceId());
-        if (instanceInfo.getMObjectIdMap() != null) {
-            this.mSIManager.update(new MServiceInstance(
-                    instanceInfo.getParentIdMap(),
-                    nodeId,
-                    instanceInfo.getIp(),
-                    instanceInfo.getPort(),
-                    ourInstanceId,
-                    instanceInfo.getMObjectIdMap(),
-                    instanceInfo.getId(),
-                    instanceInfo.getId(),
-                    instanceInfo.getDockerInfo().getInstanceId()
-            ));
-        } else if (this.mSIManager.containsById(ourInstanceId)){
-            // remove the useless info when the instance is dead
-            this.mSIManager.remove(ourInstanceId);
+            // check if the instance is alive. The mObjectIdMap will not be null if alive
+            // todo: get actual serviceId of the service instance
+            String ourInstanceId = MIDUtils.tranClusterInstanceIdToOurs(instanceInfo.getDockerInfo().getInstanceId());
+            if (instanceInfo.getMObjectIdMap() != null) {
+                this.mSIManager.update(new MServiceInstance(
+                        instanceInfo.getParentIdMap(),
+                        nodeId,
+                        instanceInfo.getIp(),
+                        instanceInfo.getPort(),
+                        ourInstanceId,
+                        instanceInfo.getMObjectIdMap(),
+                        instanceInfo.getId(),
+                        instanceInfo.getId(),
+                        instanceInfo.getDockerInfo().getInstanceId()
+                ));
+            }
+        } else {
+            String ourInstanceId = MIDUtils.tranSpringCloudIdToOurs(instanceInfo.getId());
+            if (this.mSIManager.containsById(ourInstanceId)){
+                // remove the useless info when the instance is dead
+                this.mSIManager.remove(ourInstanceId);
+            }
         }
     }
 

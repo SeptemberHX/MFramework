@@ -1,9 +1,5 @@
-package com.septemberhx.server.base.model;
+package com.septemberhx.common.base;
 
-import com.septemberhx.common.base.MBaseObject;
-import com.septemberhx.common.base.MArchitectInfo;
-import com.septemberhx.common.base.MServiceInterface;
-import com.septemberhx.common.base.MUserDemand;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -27,6 +23,7 @@ public class MService extends MBaseObject {
     private MResource resource;
     private Integer maxUserCap;
     private MArchitectInfo artifactInfo;
+    private String dockerImageUrl;
     private String rId;                             // same service will have different rId if require different resources
                                                     // and it should be ordered. Small stands for low resources, low sla
                                                     // Big stands for high resources, high sla
@@ -41,6 +38,8 @@ public class MService extends MBaseObject {
         this.maxUserCap = 0;
         this.artifactInfo = new MArchitectInfo();
     }
+
+    public MService() { }
 
     public void verify() {
         for (String interfaceId : this.interfaceMap.keySet()) {

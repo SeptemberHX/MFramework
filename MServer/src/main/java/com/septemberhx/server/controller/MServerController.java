@@ -1,10 +1,13 @@
 package com.septemberhx.server.controller;
 
-import com.septemberhx.common.base.MUserDemand;
+import com.septemberhx.common.base.*;
 import com.septemberhx.common.bean.*;
+import com.septemberhx.common.bean.server.MRegisterNodesBean;
+import com.septemberhx.common.bean.server.MRegisterServicesBean;
 import com.septemberhx.server.adaptive.MAdaptiveSystem;
 import com.septemberhx.server.base.model.MServiceInstance;
 import com.septemberhx.server.core.MServerSkeleton;
+import com.septemberhx.server.core.MSystemModel;
 import com.septemberhx.server.job.*;
 import com.septemberhx.server.utils.MServerUtils;
 import org.apache.logging.log4j.LogManager;
@@ -21,6 +24,40 @@ import java.util.List;
 public class MServerController {
 
     private static Logger logger = LogManager.getLogger(MServerController.class);
+
+    @ResponseBody
+    @RequestMapping(path = "/registerServices", method = RequestMethod.POST)
+    public void registerServices(@RequestBody MRegisterServicesBean servicesBean) {
+        if (servicesBean.isClearOldFlag()) {
+            MSystemModel.getIns().getServiceManager().reset();
+        }
+
+        for (MService service : servicesBean.getServiceList()) {
+            MSystemModel.getIns().getServiceManager().add(service);
+        }
+    }
+
+    @ResponseBody
+    @RequestMapping(path = "/registerNodes", method = RequestMethod.POST)
+    public void registerNodesInfo(@RequestBody MRegisterNodesBean nodesBean) {
+        MSystemModel.getIns().getMSNManager().reset();
+
+        for (MServerNode serverNode : nodesBean.getNodeList()) {
+            MSystemModel.getIns().getMSNManager().add(serverNode);
+        }
+        for (MConnectionJson connectionInfo : nodesBean.getConnectionInfoList()) {
+            MSystemModel.getIns().getMSNManager().addConnectionInfo(
+                    connectionInfo.getConnection(),
+                    connectionInfo.getPredecessor(),
+                    connectionInfo.getSuccessor()
+            );
+            MSystemModel.getIns().getMSNManager().addConnectionInfo(
+                    connectionInfo.getConnection(),
+                    connectionInfo.getSuccessor(),
+                    connectionInfo.getPredecessor()
+            );
+        }
+    }
 
     @ResponseBody
     @RequestMapping(path = "/evolve", method = RequestMethod.GET)
@@ -76,13 +113,13 @@ public class MServerController {
     public void jobNotify(@RequestParam("jobId") String buildJobId) {
         logger.info("Job " + buildJobId + " notify accepted");
         MJobExecutor.concludeWork(buildJobId, null);
-        MJobExecutor.doNextJobs(buildJobId);
+        MJobExecutor.doNextJobs();
     }
 
     @RequestMapping(path = "/notifyDeployJob", method = RequestMethod.POST)
     public void deployJobNotify(@RequestBody MDeployNotifyRequest deployNotifyRequest) {
         MJobExecutor.concludeWork(deployNotifyRequest.getId(), new MDeployJobResult(deployNotifyRequest));
-        MJobExecutor.doNextJobs(deployNotifyRequest.getId());
+        MJobExecutor.doNextJobs();
     }
 
     @RequestMapping(path = "/test", method = RequestMethod.POST)

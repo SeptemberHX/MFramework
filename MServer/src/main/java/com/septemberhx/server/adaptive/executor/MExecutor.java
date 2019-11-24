@@ -1,8 +1,17 @@
 package com.septemberhx.server.adaptive.executor;
 
+import com.septemberhx.common.base.MService;
 import com.septemberhx.server.base.MPlannerResult;
+import com.septemberhx.server.core.MServerSkeleton;
+import com.septemberhx.server.core.MSystemModel;
+import com.septemberhx.server.job.*;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -20,7 +29,66 @@ public class MExecutor {
     }
 
     public void execute(MPlannerResult plannerOutput) {
-        // todo: the logic
+        List<MBaseJob> baseJobList = plannerOutput.getJobList();
+        MServerSkeleton.getInstance().getJobManager().reset();
+        for (MBaseJob baseJob : baseJobList) {
+            System.out.println(baseJob.toString());
+            MServerSkeleton.getInstance().getJobManager().addJob(baseJob);
+        }
+
+        // delete job has the highest priority
+        // the switch job has the lowest priority
+        // For one service, if it's docker image doesn't exist or there is a build job about it,
+        //    then the deploy job has lower priority than build job.
+        //    Otherwise they has the same priority with delete job
+        int currPriority = 1;
+        Map<String, MBaseJob> serviceId2BuildJob = new HashMap<>();
+        List<MBaseJob> switchJobList = new ArrayList<>();
+        for (MBaseJob baseJob : baseJobList) {
+            if (baseJob.getType() == MJobType.DELETE) {
+                baseJob.setPriority(currPriority);
+            }
+
+            // for com-service build
+            if (baseJob.getType() == MJobType.CBUILD) {
+                baseJob.setPriority(currPriority);
+                serviceId2BuildJob.put(((MCBuildJob) baseJob).getCompositionRequest().getName(), baseJob);
+            }
+
+            // for simple service build
+            if (baseJob.getType() == MJobType.BUILD) {
+                baseJob.setPriority(currPriority);
+                serviceId2BuildJob.put(((MBuildJob) baseJob).getServiceName(), baseJob);
+            }
+
+            if (baseJob.getType() == MJobType.SWITCH) {
+                switchJobList.add(baseJob);
+            }
+        }
+
+        for (MBaseJob baseJob : baseJobList) {
+            if (baseJob.getType() == MJobType.DEPLOY) {
+                MDeployJob deployJob = (MDeployJob) baseJob;
+                if (serviceId2BuildJob.containsKey(deployJob.getServiceName())) {
+                    deployJob.setPriority(currPriority + 1);
+                } else {
+                    List<MService> serviceList = MSystemModel.getIns().getServiceManager().getAllServicesByServiceName(deployJob.getServiceName());
+                    if (serviceList.size() > 0 && serviceList.get(0).getDockerImageUrl() != null) {
+                        deployJob.setPriority(currPriority);
+                    }
+                }
+            }
+        }
+
+        for (MBaseJob baseJob : switchJobList) {
+            baseJob.setPriority(currPriority + 2);
+        }
+
+        List<MBaseJob> nextJobs = MServerSkeleton.getInstance().getJobManager().getNextJobList();
+        for (MBaseJob baseJob : nextJobs) {
+            MJobExecutor.doJob(baseJob);
+        }
+
         return;
     }
 }

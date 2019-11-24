@@ -17,6 +17,7 @@ public class MBuildJob extends MBaseJob {
     private String gitTag;
     private String branch;
     private String imageTag;
+    private String serviceName;
 
     private static String OWNER = "192.168.1.104:5000/septemberhx";
 

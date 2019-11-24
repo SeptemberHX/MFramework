@@ -1,7 +1,7 @@
 package com.septemberhx.server.core;
 
 import com.septemberhx.common.base.MObjectManager;
-import com.septemberhx.server.base.model.MService;
+import com.septemberhx.common.base.MService;
 import com.septemberhx.common.base.MServiceInterface;
 import com.septemberhx.common.base.MUserDemand;
 import lombok.Setter;
@@ -33,6 +33,11 @@ public class MServiceManager extends MObjectManager<MService> {
         for (MService service : this.getAllValues()) {
             service.verify();
         }
+    }
+
+    public void reset() {
+        this.objectMap.clear();
+        this.interfaceMap.clear();
     }
 
     public MServiceManager shallowClone() {

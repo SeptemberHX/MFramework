@@ -4,7 +4,7 @@ import com.septemberhx.common.base.*;
 import com.septemberhx.common.bean.MCompositionRequest;
 import com.septemberhx.server.adaptive.MAdaptiveSystem;
 import com.septemberhx.server.adaptive.algorithm.ga.Configuration;
-import com.septemberhx.server.base.MNodeConnectionInfo;
+import com.septemberhx.common.base.MNodeConnectionInfo;
 import com.septemberhx.server.base.model.*;
 import com.septemberhx.server.job.*;
 import com.septemberhx.server.utils.MIDUtils;
@@ -1283,7 +1283,7 @@ public class MServerOperator extends MObjectManager<MServerState> {
         }
 
         Map<String, List<MServiceInstance>> oldInstanceMap = new HashMap<>();
-        for (MServiceInstance oldInstance : this.getAllInstances()) {
+        for (MServiceInstance oldInstance : rawOperator.getAllInstances()) {
             if (!oldInstanceMap.containsKey(oldInstance.getServiceId())) {
                 oldInstanceMap.put(oldInstance.getServiceId(), new ArrayList<>());
             }

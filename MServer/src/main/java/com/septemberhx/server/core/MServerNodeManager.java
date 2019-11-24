@@ -4,10 +4,10 @@ import com.google.common.graph.EndpointPair;
 import com.google.common.graph.MutableValueGraph;
 import com.google.common.graph.ValueGraphBuilder;
 import com.septemberhx.server.adaptive.MAdaptiveSystem;
-import com.septemberhx.server.base.MNodeConnectionInfo;
+import com.septemberhx.common.base.MNodeConnectionInfo;
 import com.septemberhx.common.base.MObjectManager;
 import com.septemberhx.common.base.MPosition;
-import com.septemberhx.server.base.model.MServerNode;
+import com.septemberhx.common.base.MServerNode;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -19,6 +19,11 @@ import java.util.stream.Collectors;
 public class MServerNodeManager extends MObjectManager<MServerNode> {
 
     private MutableValueGraph<String, MNodeConnectionInfo> serverNodeGraph;
+
+    public void reset() {
+        this.objectMap.clear();
+        this.serverNodeGraph = ValueGraphBuilder.directed().allowsSelfLoops(true).build();
+    }
 
     public MServerNodeManager() {
         this.serverNodeGraph = ValueGraphBuilder.directed().allowsSelfLoops(true).build();

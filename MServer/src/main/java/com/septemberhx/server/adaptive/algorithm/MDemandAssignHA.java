@@ -1,8 +1,6 @@
 package com.septemberhx.server.adaptive.algorithm;
 
-import com.septemberhx.common.base.MServiceInterface;
-import com.septemberhx.common.base.MUser;
-import com.septemberhx.common.base.MUserDemand;
+import com.septemberhx.common.base.*;
 import com.septemberhx.server.base.model.*;
 import com.septemberhx.server.core.MServerOperator;
 import com.septemberhx.server.core.MSystemModel;

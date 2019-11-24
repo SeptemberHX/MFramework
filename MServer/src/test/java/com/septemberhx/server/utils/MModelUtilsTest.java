@@ -1,10 +1,6 @@
 package com.septemberhx.server.utils;
 
-import com.septemberhx.common.base.MDemandChain;
-import com.septemberhx.common.base.MServiceInterface;
-import com.septemberhx.common.base.MUser;
-import com.septemberhx.common.base.MUserDemand;
-import com.septemberhx.server.base.model.*;
+import com.septemberhx.common.base.*;
 import com.septemberhx.server.core.MServiceManager;
 import com.septemberhx.server.core.MUserManager;
 import org.javatuples.Triplet;

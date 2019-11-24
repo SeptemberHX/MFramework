@@ -1,9 +1,9 @@
 package com.septemberhx.server.adaptive.algorithm.ga;
 
 import com.septemberhx.common.base.MDemandChain;
+import com.septemberhx.common.base.MService;
 import com.septemberhx.common.base.MUser;
 import com.septemberhx.server.adaptive.MAdaptiveSystem;
-import com.septemberhx.server.base.model.*;
 import com.septemberhx.server.core.MServerOperator;
 import com.septemberhx.server.core.MSystemModel;
 import com.septemberhx.server.job.MBaseJob;

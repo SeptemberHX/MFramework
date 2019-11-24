@@ -80,11 +80,17 @@ public class MMinorAlgorithm implements MAlgorithmInterface {
         }
 
         // deal with all not good demands
-        MDemandAssignHA.calc(demandList, serverOperator);
+        // filter the repeated demand out
+        Map<String, MUserDemand> notSolvedDemandMap = new HashMap<>();
+        for (MUserDemand demand : demandList) {
+            notSolvedDemandMap.put(demand.getId(), demand);
+        }
+
+        MDemandAssignHA.calc(new ArrayList<>(notSolvedDemandMap.values()), serverOperator);
         serverOperator.printStatus();
 
         MPlannerResult plannerResult = new MPlannerResult();
-        plannerResult.addJobs(serverOperator.getJobList());
+        plannerResult.setJobList(serverOperator.calcJobList(rawOperator));
         plannerResult.setServerOperator(serverOperator);
         return plannerResult;
     }

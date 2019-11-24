@@ -1,5 +1,8 @@
 package com.septemberhx.common.base;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -10,6 +13,8 @@ import java.util.Map;
  * @version 0.1
  * @date 2019/9/22
  */
+@Getter
+@Setter
 public class MDemandChain {
 
     private List<String> demandIdList;          // This stands for a intact demand chains

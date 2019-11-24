@@ -2,6 +2,7 @@ package com.septemberhx.server.adaptive.algorithm;
 
 import com.google.common.graph.EndpointPair;
 import com.google.common.graph.MutableValueGraph;
+import com.septemberhx.common.base.MService;
 import com.septemberhx.common.base.MServiceInterface;
 import com.septemberhx.common.base.MUser;
 import com.septemberhx.common.base.MUserDemand;

@@ -51,4 +51,8 @@ public class MIDUtils {
     public static String tranClusterInstanceIdToOurs(String clusterInstanceId) {
         return clusterInstanceId.substring(0, clusterInstanceId.lastIndexOf('-'));
     }
+
+    public static String tranSpringCloudIdToOurs(String springId) {
+        return tranClusterInstanceIdToOurs(springId.substring(0, springId.indexOf(':')));
+    }
 }

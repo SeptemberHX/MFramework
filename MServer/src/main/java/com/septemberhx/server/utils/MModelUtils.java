@@ -1,9 +1,9 @@
 package com.septemberhx.server.utils;
 
 import com.septemberhx.common.base.MDemandChain;
+import com.septemberhx.common.base.MService;
 import com.septemberhx.common.base.MServiceInterface;
 import com.septemberhx.common.base.MUserDemand;
-import com.septemberhx.server.base.model.*;
 import com.septemberhx.server.core.MServiceManager;
 import io.kubernetes.client.models.V1Pod;
 import io.kubernetes.client.util.Yaml;
@@ -120,7 +120,7 @@ public class MModelUtils {
     public static V1Pod readPodYaml(String serviceName) {
         V1Pod pod = null;
         try {
-            Object podYamlObj = Yaml.load(new File("./yaml/" + serviceName + ".yaml"));
+            Object podYamlObj = Yaml.load(new File("/data/hexiang/yaml/" + serviceName + ".yaml"));
             if (podYamlObj.getClass().getSimpleName().equals("V1Pod")) {
                 pod = (V1Pod) podYamlObj;
             }
@@ -128,5 +128,10 @@ public class MModelUtils {
             e.printStackTrace();
         }
         return pod;
+    }
+
+    public static void main(String[] args) {
+        V1Pod v1Pod = MModelUtils.readPodYaml("shunfeng_service");
+        System.out.println(v1Pod.toString());
     }
 }

@@ -1,7 +1,6 @@
 package com.septemberhx.server.core;
 
 import com.septemberhx.common.base.MObjectManager;
-import com.septemberhx.server.base.model.MService;
 import com.septemberhx.server.base.model.MServiceInstance;
 import lombok.Setter;
 import org.apache.logging.log4j.LogManager;
@@ -18,7 +17,10 @@ public class MServiceInstanceManager extends MObjectManager<MServiceInstance> {
 
     public MServiceInstanceManager shallowClone() {
         MServiceInstanceManager cloneObject = new MServiceInstanceManager();
-        Map<String, MServiceInstance> instanceMap = new HashMap<>(this.objectMap);  // do not need deep clone here !
+        Map<String, MServiceInstance> instanceMap = new HashMap<>();  // do not need deep clone here !
+        for (MServiceInstance instance : this.objectMap.values()) {
+            instanceMap.put(instance.getId(), instance);
+        }
         cloneObject.setObjectMap(instanceMap);
 
         Map<String, Set<String>> cloneNodeId2InsIdSet = new HashMap<>();

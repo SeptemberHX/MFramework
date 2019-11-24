@@ -1,8 +1,6 @@
 package com.septemberhx.server.core;
 
-import com.septemberhx.common.base.MArchitectInfo;
-import com.septemberhx.common.base.MClassFunctionPair;
-import com.septemberhx.common.base.MUserDemand;
+import com.septemberhx.common.base.*;
 import com.septemberhx.server.base.model.*;
 import com.septemberhx.server.utils.MDataUtils;
 import com.septemberhx.server.utils.MIDUtils;
