@@ -151,4 +151,13 @@ public class MServerNodeManager extends MObjectManager<MServerNode> {
         }
         return r;
     }
+
+    public MServerNode getByIp(String ip) {
+        for (MServerNode node : this.objectMap.values()) {
+            if (ip.equals(node.getIp())) {
+                return node;
+            }
+        }
+        return null;
+    }
 }

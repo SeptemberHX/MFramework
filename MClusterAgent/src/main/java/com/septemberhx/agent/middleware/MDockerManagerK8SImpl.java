@@ -133,7 +133,7 @@ public class MDockerManagerK8SImpl implements MDockerManager {
         podBody.getSpec().getNodeSelector().put("node", nodeId);
 
         if (instanceId != null) {
-            podBody.getMetadata().setGenerateName(instanceId+"-");
+            podBody.getMetadata().setName(instanceId);
         }
 
         V1Pod resultPod = null;

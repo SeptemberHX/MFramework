@@ -1,5 +1,6 @@
 package com.septemberhx.server.core;
 
+import com.septemberhx.common.base.MServerNode;
 import com.septemberhx.common.bean.MInstanceInfoBean;
 import com.septemberhx.server.base.model.MServiceInstance;
 import com.septemberhx.server.base.model.MSystemIndex;
@@ -68,13 +69,16 @@ public class MSystemModel {
     public void loadInstanceInfo(MInstanceInfoBean instanceInfo) {
         String nodeId = null;
         if (instanceInfo.getDockerInfo() != null) {
-            nodeId = instanceInfo.getDockerInfo().getHostIp();
+            MServerNode node = MSystemModel.getIns().getMSNManager().getByIp(instanceInfo.getDockerInfo().getHostIp());
+            if (node != null) {
+                nodeId = node.getId();
+            }
 
             // check if the instance is alive. The mObjectIdMap will not be null if alive
             // todo: get actual serviceId of the service instance
-            String ourInstanceId = MIDUtils.tranClusterInstanceIdToOurs(instanceInfo.getDockerInfo().getInstanceId());
+            String ourInstanceId = instanceInfo.getDockerInfo().getInstanceId();
             if (instanceInfo.getMObjectIdMap() != null) {
-                this.mSIManager.update(new MServiceInstance(
+                MServiceInstance instance = new MServiceInstance(
                         instanceInfo.getParentIdMap(),
                         nodeId,
                         instanceInfo.getIp(),
@@ -84,7 +88,14 @@ public class MSystemModel {
                         instanceInfo.getId(),
                         instanceInfo.getId(),
                         instanceInfo.getDockerInfo().getInstanceId()
-                ));
+                );
+                if (MSystemModel.getIns().getOperator().getInstanceManager().containsById(instance.getId())) {
+                    MServiceInstance currInstance = MSystemModel.getIns().getOperator().getInstanceById(instance.getId());
+                    instance.setServiceId(currInstance.getServiceId());
+                    instance.setServiceName(currInstance.getServiceName());
+                }
+
+                this.mSIManager.add(instance);
             }
         } else {
             String ourInstanceId = MIDUtils.tranSpringCloudIdToOurs(instanceInfo.getId());

@@ -11,6 +11,7 @@ public class MServerNode extends MBaseObject {
     private MPosition position;
     private Long delay;  // delay between direct user and node
     private Long bandwidth;  // bandwidth between direct user and node
+    private String ip;
 
     @Override
     public String toString() {
@@ -20,6 +21,7 @@ public class MServerNode extends MBaseObject {
                 ", position=" + position +
                 ", delay=" + delay +
                 ", bandwidth=" + bandwidth +
+                ", ip='" + ip + '\'' +
                 ", id='" + id + '\'' +
                 '}';
     }

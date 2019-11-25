@@ -8,6 +8,10 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author SeptemberHX
@@ -30,7 +34,11 @@ public class MGatewayProcess {
             try {
                 String url = MGatewayCache.getInstance().getUrl(userDemand.getId());
                 URI uri = new URI(url);
-                response = MRequestUtils.sendRequest(uri, data, MResponse.class, RequestMethod.POST);
+                Map<String, List<String>> customHeaderMap = new HashMap<>();
+                List<String> userIdHeaderValue = new ArrayList<>();
+                userIdHeaderValue.add(userDemand.getUserId());
+                customHeaderMap.put("userId", userIdHeaderValue);
+                response = MRequestUtils.sendRequest(uri, data, MResponse.class, RequestMethod.POST, customHeaderMap);
             } catch (Exception e) {
                 e.printStackTrace();
             }

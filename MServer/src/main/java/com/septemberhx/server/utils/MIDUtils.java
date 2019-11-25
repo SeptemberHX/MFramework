@@ -72,6 +72,6 @@ public class MIDUtils {
     }
 
     public static String tranSpringCloudIdToOurs(String springId) {
-        return tranClusterInstanceIdToOurs(springId.substring(0, springId.indexOf(':')));
+        return springId.substring(0, springId.indexOf(':'));
     }
 }
