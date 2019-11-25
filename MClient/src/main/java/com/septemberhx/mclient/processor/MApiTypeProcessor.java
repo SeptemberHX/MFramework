@@ -55,8 +55,8 @@ public class MApiTypeProcessor extends AbstractProcessor {
             JCTree.JCMethodDecl jcMethodDecl = (JCTree.JCMethodDecl) elementUtils.getTree(element);
             JCTree.JCClassDecl jcClassDecl = (JCTree.JCClassDecl) elementUtils.getTree((element.getEnclosingElement()));
 
-            JCTree.JCMethodDecl newMethodDecl = makeRestOverloadFunction(jcMethodDecl);
-            jcClassDecl.defs = jcClassDecl.defs.prepend(newMethodDecl);
+//            JCTree.JCMethodDecl newMethodDecl = makeRestOverloadFunction(jcMethodDecl);
+//            jcClassDecl.defs = jcClassDecl.defs.prepend(newMethodDecl);
 
             if (this.addHttpServletRequestToFunctionParameter(jcMethodDecl)) {
                 JCTree.JCMethodDecl newMethodDecl1 = makeOverloadFunctionWithoutRequester(jcMethodDecl);
@@ -82,9 +82,9 @@ public class MApiTypeProcessor extends AbstractProcessor {
     private JCTree.JCVariableDecl makeVarDef(JCTree.JCModifiers modifiers, String name, JCTree.JCExpression vartype, JCTree.JCExpression init) {
         return treeMaker.VarDef(
                 modifiers,
-                getNameFromString(name), //名字
-                vartype, //类型
-                init //初始化语句
+                getNameFromString(name), // name
+                vartype, // type
+                init // init
         );
     }
 
