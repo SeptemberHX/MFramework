@@ -1,5 +1,10 @@
 package com.septemberhx.server.utils;
 
+import org.apache.commons.lang.RandomStringUtils;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -9,6 +14,15 @@ import java.util.UUID;
  */
 public class MIDUtils {
 
+    private static Set<String> usedInstanceRandomIdSet = new HashSet<>();
+
+    public static void reset(List<String> existedInstanceIdList) {
+        usedInstanceRandomIdSet.clear();
+        for (String instanceId : existedInstanceIdList) {
+            usedInstanceRandomIdSet.add(instanceId.substring(instanceId.lastIndexOf('-') + 1));
+        }
+    }
+
     /**
      * The instance id is built with three parts: nodeID, serviceId, noId. The noId should start from 1 and increases
      *   by 1 each time. When create a new instance, the smallest usable noId should be used.
@@ -17,7 +31,12 @@ public class MIDUtils {
      * @return String
      */
     public static String generateInstanceId(String nodeId, String serviceId) {
-        return String.format("%s-%s-%s", nodeId, serviceId, UUID.randomUUID());
+        String randomSuffix = null;
+        do {
+            randomSuffix = RandomStringUtils.randomAlphanumeric(8).toLowerCase();
+        } while (usedInstanceRandomIdSet.contains(randomSuffix));
+        usedInstanceRandomIdSet.add(randomSuffix);
+        return String.format("%s-%s-%s", nodeId, serviceId, randomSuffix);
     }
 
     public static String getNodeIdFromInstanceId(String instanceId) {

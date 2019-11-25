@@ -108,4 +108,9 @@ public class MDemandStateManager extends MObjectManager<MDemandState> {
         }
         this.objectMap.put(newState.getId(), newState);
     }
+
+    public void reset() {
+        this.instanceId2StateIdList.clear();
+        this.objectMap.clear();
+    }
 }

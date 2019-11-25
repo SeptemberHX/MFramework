@@ -28,6 +28,7 @@ public class MClusterConfig {
     public static final String MCLUSTERAGENT_DELETE_URI = "/magent/deleteInstance";
     public final static String MCLUSTERAGNET_FETCH_REQUEST_URL = "/magent/fetchRequestUrl";
     public final static String MCLUSTERAGENT_ALL_USER_URL = "/magent/allUser";
+    public final static String MCLUSTERAGENT_UPDATE_GATEWAYS = "/magent/updateGateways";
 
     public final static String MCLUSTERAGENT_FETCH_CLIENT_INFO = "/mclient/info";
     public final static String MSERVER_GET_REMOTE_URI = "/mserver/remoteuri";

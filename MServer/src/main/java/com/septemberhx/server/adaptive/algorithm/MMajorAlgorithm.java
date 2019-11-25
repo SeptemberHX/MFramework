@@ -3,10 +3,14 @@ package com.septemberhx.server.adaptive.algorithm;
 import com.septemberhx.server.adaptive.algorithm.ga.*;
 import com.septemberhx.server.base.MAnalyserResult;
 import com.septemberhx.server.base.MPlannerResult;
+import com.septemberhx.server.base.model.MServiceInstance;
 import com.septemberhx.server.core.MServerOperator;
 import com.septemberhx.server.core.MSystemModel;
+import com.septemberhx.server.utils.MIDUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.util.stream.Collectors;
 
 /**
  * @author SeptemberHX
@@ -42,6 +46,7 @@ public class MMajorAlgorithm implements MAlgorithmInterface {
         // First, init operator
         MServerOperator serverOperator = MSystemModel.getIns().getOperator();
         serverOperator.reInit();
+        MIDUtils.reset(serverOperator.getAllInstances().stream().map(MServiceInstance::getId).collect(Collectors.toList()));
         // Then, do the composition job behind initialization. It will modify system model by operator
         MCompositionAlgorithmInCommon.doCompositionPart(data.getCallGraph(), rawOperator, serverOperator);
         if (Configuration.COMPOSITION_ALL_ENABLED) {

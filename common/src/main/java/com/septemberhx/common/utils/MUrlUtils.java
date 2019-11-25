@@ -111,6 +111,10 @@ public class MUrlUtils {
         return MUrlUtils.getRemoteUri(ipAddr, port, MClusterConfig.MCLUSTERAGENT_ALL_USER_URL);
     }
 
+    public static URI getMClusterUpdateGateways(String ipAddr, int port) {
+        return MUrlUtils.getRemoteUri(ipAddr, port, MClusterConfig.MCLUSTERAGENT_UPDATE_GATEWAYS);
+    }
+
     public static URI getRemoteUri(String ipAddr, int port, String path) {
         URI uri = null;
         try {

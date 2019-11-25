@@ -40,15 +40,20 @@ public class MServerSkeleton {
         this.repoManager = MRepoManager.loadFromFile("./project.json");
     }
 
-    public static String fetchRequestUrl(MUserDemand demand) {
-        Optional<MDemandState> demandStateOptional = MSystemModel.getIns().getDemandStateManager().getById(demand.getId());
+    public static String fetchRequestUrl(String demandId) {
+        Optional<MDemandState> demandStateOptional = MSystemModel.getIns().getDemandStateManager().getById(demandId);
         if (demandStateOptional.isPresent()) {
             MDemandState demandState = demandStateOptional.get();
             Optional<MServiceInstance> instanceOptional = MSystemModel.getIns().getInstanceById(demandState.getInstanceId());
             if (instanceOptional.isPresent()) {
                 MServiceInstance serviceInstance = instanceOptional.get();
                 MServiceInterface mServiceInterface = MSystemModel.getIns().getServiceManager().getInterfaceById(demandState.getInterfaceId());
-                URI uri = MUrlUtils.getRemoteUri(serviceInstance.getIp(), serviceInstance.getPort(), mServiceInterface.getPatternUrl());
+
+                String patternUrl = mServiceInterface.getPatternUrl();
+                if (!patternUrl.startsWith("/")) {
+                    patternUrl = "/" + patternUrl;
+                }
+                URI uri = MUrlUtils.getRemoteUri(serviceInstance.getIp(), serviceInstance.getPort(), patternUrl);
                 return uri.toString();
             }
         }

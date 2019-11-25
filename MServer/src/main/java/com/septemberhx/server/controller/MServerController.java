@@ -69,7 +69,7 @@ public class MServerController {
     @ResponseBody
     @RequestMapping(path = "/fetchRequestUrl", method = RequestMethod.POST)
     public String fetchRequestUrl(@RequestBody MUserDemand userDemand) {
-        return MServerSkeleton.fetchRequestUrl(userDemand);
+        return MServerSkeleton.fetchRequestUrl(userDemand.getId());
     }
 
     @ResponseBody

@@ -33,7 +33,10 @@ public class MExecutor {
         MServerSkeleton.getInstance().getJobManager().reset();
         for (MBaseJob baseJob : baseJobList) {
             System.out.println(baseJob.toString());
-            MServerSkeleton.getInstance().getJobManager().addJob(baseJob);
+            // all the switch jobs will be in a MBigSwitch job.
+            if (baseJob.getType() != MJobType.SWITCH) {
+                MServerSkeleton.getInstance().getJobManager().addJob(baseJob);
+            }
         }
 
         // delete job has the highest priority
@@ -80,9 +83,10 @@ public class MExecutor {
             }
         }
 
-        for (MBaseJob baseJob : switchJobList) {
-            baseJob.setPriority(currPriority + 2);
-        }
+        MBigSwitchJob bigSwitchJob = new MBigSwitchJob();
+        bigSwitchJob.setPriority(currPriority + 2);
+        bigSwitchJob.setSwitchJobList(switchJobList);
+        MServerSkeleton.getInstance().getJobManager().addJob(bigSwitchJob);
 
         List<MBaseJob> nextJobs = MServerSkeleton.getInstance().getJobManager().getNextJobList();
         for (MBaseJob baseJob : nextJobs) {

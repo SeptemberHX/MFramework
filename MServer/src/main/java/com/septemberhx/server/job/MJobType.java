@@ -11,5 +11,6 @@ public enum MJobType {
     NOTIFY,
     SPLIT,
     SWITCH,
+    BIGSWITCH,  // all the switch jobs
     COMPOSITE
 }

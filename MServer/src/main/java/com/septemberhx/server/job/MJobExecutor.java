@@ -1,6 +1,8 @@
 package com.septemberhx.server.job;
 
+import com.septemberhx.common.base.MServerNode;
 import com.septemberhx.common.base.MService;
+import com.septemberhx.common.base.MUpdateCacheBean;
 import com.septemberhx.common.bean.MApiContinueRequest;
 import com.septemberhx.common.bean.MApiSplitBean;
 import com.septemberhx.common.bean.MS2CSetApiCStatus;
@@ -13,9 +15,7 @@ import com.septemberhx.server.utils.MServerUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 public class MJobExecutor {
 
@@ -50,6 +50,12 @@ public class MJobExecutor {
                 deleteJob.markAsDoing();
                 logger.info("Delete job info send");
                 break;
+            case BIGSWITCH:
+                MBigSwitchJob switchJob = (MBigSwitchJob) job;
+                MJobExecutor.doBigSwitchJob(switchJob);
+                switchJob.markAsDone();
+                MJobExecutor.doNextJobs();
+                break;
             case NOTIFY:
                 doNotifyJob((MNotifyJob) job);
                 break;
@@ -69,6 +75,20 @@ public class MJobExecutor {
         List<MService> services = MSystemModel.getIns().getServiceManager().getAllServicesByServiceName(deployJob.getServiceName());
         deployJob.setImageName(services.get(0).getDockerImageUrl());
         MServerUtils.sendDeployInfo(deployJob.toMDeployPodRequest());
+    }
+
+    private static void doBigSwitchJob(MBigSwitchJob bigSwitchJob) {
+        // Here, we need copy all the demand state from the operator to MServerModel
+        MSystemModel.getIns().setDemandStateManager(MSystemModel.getIns().getOperator().getDemandStateManager().shallowClone());
+
+        MUpdateCacheBean updateCacheBean = new MUpdateCacheBean();
+        Map<String, String> urlMap = new HashMap<>();
+        for (MBaseJob baseJob : bigSwitchJob.getSwitchJobList()) {
+            MSwitchJob switchJob = (MSwitchJob) baseJob;
+            urlMap.put(switchJob.getUserDemandId(), MServerSkeleton.fetchRequestUrl(switchJob.getUserDemandId()));
+        }
+        updateCacheBean.setDemandId2Url(urlMap);
+        MServerUtils.sendUpdateCache(updateCacheBean);
     }
 
     private static void doNotifyJob(MNotifyJob notifyJob) {
@@ -117,8 +137,14 @@ public class MJobExecutor {
     }
 
     public static void doNextJobs() {
-        for (MBaseJob baseJob : MServerSkeleton.getInstance().getJobManager().getNextJobList()) {
-            MJobExecutor.doJob(baseJob);
+        List<MBaseJob> baseJobs = MServerSkeleton.getInstance().getJobManager().getNextJobList();
+        if (baseJobs.size() > 0) {
+            for (MBaseJob baseJob : baseJobs) {
+                MJobExecutor.doJob(baseJob);
+            }
+        } else {
+            logger.info("All jobs are finished.");
+            System.out.println("All jobs are finished");
         }
     }
 

@@ -23,10 +23,9 @@ public class MGatewayProcess {
             MGatewayCache.getInstance().updateCacheFromServer(userDemand);
         }
 
-        MResponse response = new MResponse("Fail");
+        MResponse response = null;
         if (!MGatewayCache.getInstance().isCached(userDemand.getId())) {
             logger.warn("Failed to doRequest for demand " + userDemand.getId());
-            // todo: mark as fail, and log to logger. So the server can notice that
         } else {
             try {
                 String url = MGatewayCache.getInstance().getUrl(userDemand.getId());
@@ -36,6 +35,11 @@ public class MGatewayProcess {
                 e.printStackTrace();
             }
         }
+
+        if (response == null) {
+            response = new MResponse("Fail");
+        }
+
         return response;
     }
 }

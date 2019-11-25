@@ -1,5 +1,6 @@
 package com.septemberhx.server.utils;
 
+import com.septemberhx.common.base.MUpdateCacheBean;
 import com.septemberhx.common.base.MUser;
 import com.septemberhx.common.bean.*;
 import com.septemberhx.common.log.MBaseLog;
@@ -153,7 +154,6 @@ public class MServerUtils {
     public static void sendDeployInfo(MDeployPodRequest mDeployPodRequest) {
         URI deployUri = MUrlUtils.getMClientAgentDeployUri(mClusterIpAddr, mClusterPort);
         MRequestUtils.sendRequest(deployUri, mDeployPodRequest, null, RequestMethod.POST);
-        logger.info(mDeployPodRequest);
     }
 
     public static void sendSetApiCSInfo(MS2CSetApiCStatus ms2CSetApiCStatus) {
@@ -179,5 +179,10 @@ public class MServerUtils {
             MRequestUtils.sendRequest(deleteUri, paras, null, RequestMethod.GET);
             logger.info("Delete instance " + deleteJob.getInstanceId());
         }
+    }
+
+    public static void sendUpdateCache(MUpdateCacheBean updateCacheBean) {
+        URI updateGatewaysUri = MUrlUtils.getMClusterUpdateGateways(mClusterIpAddr, mClusterPort);
+        MRequestUtils.sendRequest(updateGatewaysUri, updateCacheBean, null, RequestMethod.POST);
     }
 }
