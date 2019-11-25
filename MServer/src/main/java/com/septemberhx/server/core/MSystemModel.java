@@ -101,7 +101,7 @@ public class MSystemModel {
             String ourInstanceId = MIDUtils.tranSpringCloudIdToOurs(instanceInfo.getId());
             if (this.mSIManager.containsById(ourInstanceId)){
                 // remove the useless info when the instance is dead
-                this.mSIManager.remove(ourInstanceId);
+                this.mSIManager.delete(ourInstanceId);
             }
         }
     }

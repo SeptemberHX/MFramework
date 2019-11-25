@@ -265,7 +265,9 @@ public class MServerOperator extends MObjectManager<MServerState> {
 
     public void removeDemandState(MDemandState oldState) {
         if (this.demandStateManager.containsById(oldState.getId())) {
-            this.insId2LeftCap.put(oldState.getInstanceId(), this.insId2LeftCap.get(oldState.getInstanceId()) + 1);
+            if (this.insId2LeftCap.containsKey(oldState.getInstanceId())) {
+                this.insId2LeftCap.put(oldState.getInstanceId(), this.insId2LeftCap.get(oldState.getInstanceId()) + 1);
+            }
             this.demandStateManager.deleteById(oldState.getId());
         }
     }
