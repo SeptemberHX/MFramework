@@ -11,14 +11,16 @@ import lombok.ToString;
 public class MDeployPodRequest {
     private String id;
     private String nodeId;
-    private V1Pod podBody;
     private String uniqueId;
+    private String serviceName;
+    private String imageUrl;
 
-    public MDeployPodRequest(String id, String nodeId, String uniqueId, V1Pod podBody) {
+    public MDeployPodRequest(String id, String nodeId, String uniqueId, String serviceName, String imageUrl) {
         this.id = id;
         this.nodeId = nodeId;
-        this.podBody = podBody;
         this.uniqueId = uniqueId;
+        this.serviceName = serviceName;
+        this.imageUrl = imageUrl;
     }
 
     public MDeployPodRequest() {

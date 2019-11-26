@@ -46,8 +46,8 @@ public class MClientUtils {
         MRequestUtils.sendRequest(uri, infoBean, Object.class, RequestMethod.POST);
     }
 
-    public static void deleteInstanceById(String instanceId) {
-        dockerManager.deleteInstanceById(instanceId);
+    public static Boolean deleteInstanceById(String instanceId) {
+        return dockerManager.deleteInstanceById(instanceId);
     }
 
     public static V1Deployment buildDeployment(String serviceName, String serviceInstanceId, String nodeId, String image) {
@@ -216,7 +216,7 @@ public class MClientUtils {
 
     public void depoly(MDeployPodRequest mDeployPodRequest) {
         try {
-            V1Pod pod = dockerManager.deployInstanceOnNode(mDeployPodRequest.getNodeId(), mDeployPodRequest.getUniqueId(), mDeployPodRequest.getPodBody());
+            V1Pod pod = dockerManager.deployInstanceOnNode(mDeployPodRequest.getNodeId(), mDeployPodRequest.getUniqueId(), mDeployPodRequest.getServiceName(), mDeployPodRequest.getImageUrl());
             podDuringDeploying.put(pod.getMetadata().getName(), mDeployPodRequest);
             logger.info("Job " + mDeployPodRequest.getId() + " dispatched");
         } catch (Exception e) {
@@ -238,5 +238,12 @@ public class MClientUtils {
         logger.info("Job " + jobId + " finished and notified");
         this.podDuringDeploying.remove(instanceId);
         return true;
+    }
+
+    public synchronized void notifyDeleteJobFinished(String jobId) {
+        URI serverUri = MUrlUtils.getMServerNotifyJobUri(serverIpAddr, serverPort);
+        Map<String, String> params = new HashMap<>();
+        params.put("jobId", jobId);
+        MRequestUtils.sendRequest(serverUri, params, null, RequestMethod.GET);
     }
 }

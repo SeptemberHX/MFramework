@@ -51,4 +51,13 @@ public class MJobManager extends MObjectManager<MBaseJob> {
         }
         return baseJobs;
     }
+
+    public boolean hasUnfinishedJob() {
+        for (MBaseJob baseJob : this.getAllValues()) {
+            if (baseJob.isPending()) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

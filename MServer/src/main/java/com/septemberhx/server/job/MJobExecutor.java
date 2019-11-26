@@ -46,15 +46,13 @@ public class MJobExecutor {
                 break;
             case DELETE:
                 MDeleteJob deleteJob = (MDeleteJob) job;
-                MServerUtils.sendDeleteInfo(deleteJob);
-                deleteJob.markAsDoing();
-                logger.info("Delete job info send");
+                MJobExecutor.doDeleteJob(deleteJob);
+                deleteJob.markAsDone();
                 break;
             case BIGSWITCH:
                 MBigSwitchJob switchJob = (MBigSwitchJob) job;
                 MJobExecutor.doBigSwitchJob(switchJob);
                 switchJob.markAsDone();
-                MJobExecutor.doNextJobs();
                 break;
             case NOTIFY:
                 doNotifyJob((MNotifyJob) job);
@@ -75,6 +73,12 @@ public class MJobExecutor {
         List<MService> services = MSystemModel.getIns().getServiceManager().getAllServicesByServiceName(deployJob.getServiceName());
         deployJob.setImageName(services.get(0).getDockerImageUrl());
         MServerUtils.sendDeployInfo(deployJob.toMDeployPodRequest());
+    }
+
+    private static void doDeleteJob(MDeleteJob deleteJob) {
+        MServerUtils.sendDeleteInfo(deleteJob);
+        deleteJob.markAsDone();
+        logger.info("Delete job info send");
     }
 
     private static void doBigSwitchJob(MBigSwitchJob bigSwitchJob) {
@@ -143,8 +147,11 @@ public class MJobExecutor {
                 MJobExecutor.doJob(baseJob);
             }
         } else {
-            logger.info("All jobs are finished.");
-            System.out.println("All jobs are finished");
+            System.out.println("========> All Jobs finished <=======");
+        }
+
+        if (MServerSkeleton.getInstance().getJobManager().getNextJobList().size() > 0) {
+            MJobExecutor.doNextJobs();
         }
     }
 

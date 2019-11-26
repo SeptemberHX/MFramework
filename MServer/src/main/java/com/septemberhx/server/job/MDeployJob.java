@@ -28,11 +28,7 @@ public class MDeployJob extends MBaseJob {
     }
 
     public MDeployPodRequest toMDeployPodRequest() {
-        V1Pod pod = MModelUtils.readPodYaml(this.serviceName);
-        if (pod.getSpec().getContainers().size() > 0) {
-            pod.getSpec().getContainers().get(0).setImage(imageName);
-        }
-        return new MDeployPodRequest(id, nodeId, uniqueId, pod);
+        return new MDeployPodRequest(id, nodeId, uniqueId, serviceName, imageName);
     }
 
     public void newId() {

@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
+import static com.septemberhx.agent.utils.MClientUtils.readPodYaml;
 import static com.septemberhx.common.base.MClusterConfig.K8S_NAMESPACE;
 
 public class MDockerManagerK8SImpl implements MDockerManager {
@@ -99,8 +100,22 @@ public class MDockerManagerK8SImpl implements MDockerManager {
     }
 
     @Override
-    public void deleteInstanceById(String instanceId) {
+    public boolean deleteInstanceById(String instanceId) {
         try {
+            V1PodList podList = this.coreV1Api.listNamespacedPod(K8S_NAMESPACE, true, null,
+                    null, null, null, null,
+                    null, null, null);
+            boolean ifExists = false;
+            for (V1Pod pod : podList.getItems()) {
+                if (pod.getMetadata().getName().equals(instanceId)) {
+                    ifExists = true;
+                    break;
+                }
+            }
+            if (!ifExists) {
+                return false;
+            }
+
             // Because we control how the pods are deployed, we know that the pod we try to delete is deployed as a pod
             // So we can just delete it, and it will not be reborn.
             // In the future, we need to take a more elegant way to do this work.
@@ -122,15 +137,21 @@ public class MDockerManagerK8SImpl implements MDockerManager {
         } catch (Exception e) {
             ;
         }
+        return true;
     }
 
     @Override
-    public V1Pod deployInstanceOnNode(String nodeId, String instanceId, V1Pod podBody) {
+    public V1Pod deployInstanceOnNode(String nodeId, String instanceId, String serviceName, String imageUrl) {
+        V1Pod podBody = readPodYaml("template");
+
         // fill the node selector
         if (podBody.getSpec().getNodeSelector() == null) {
             podBody.getSpec().setNodeSelector(new HashMap<>());
         }
         podBody.getSpec().getNodeSelector().put("node", nodeId);
+        podBody.getMetadata().getLabels().put("app", serviceName);
+        podBody.getSpec().getContainers().get(0).setName(serviceName);
+        podBody.getSpec().getContainers().get(0).setImage(imageUrl);
 
         if (instanceId != null) {
             podBody.getMetadata().setName(instanceId);
@@ -147,7 +168,7 @@ public class MDockerManagerK8SImpl implements MDockerManager {
 
     public static void main(String[] args) {
 //        MDockerManagerK8SImpl dockerManager = new MDockerManagerK8SImpl("http://192.168.1.102:8082");
-        V1Pod pod = MClientUtils.readPodYaml("sampleservice");
+        V1Pod pod = readPodYaml("sampleservice");
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         System.out.println(gson.toJson(pod));
 //        dockerManager.deployInstanceOnNode("ices-104", pod);

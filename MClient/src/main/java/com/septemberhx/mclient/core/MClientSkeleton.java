@@ -169,9 +169,13 @@ public class MClientSkeleton {
         serviceBaseLog.setLogDateTime(DateTime.now());
         serviceBaseLog.setLogMethodName(functionName);
         serviceBaseLog.setLogObjectId(mObjectId);
-        serviceBaseLog.setLogFromIpAddr(request.getRemoteAddr());
-        serviceBaseLog.setLogFromPort(request.getRemotePort());
-        serviceBaseLog.setLogUserId(request.getHeader("userId"));
+
+        if (request != null) {
+            serviceBaseLog.setLogFromIpAddr(request.getRemoteAddr());
+            serviceBaseLog.setLogFromPort(request.getRemotePort());
+            serviceBaseLog.setLogUserId(request.getHeader("userId"));
+            serviceBaseLog.setLogIpAddr(request.getLocalAddr());
+        }
         // todo: get the ip address and set it to serviceBaseLog.logIpAddr
         MLogUtils.log(serviceBaseLog);
     }
@@ -181,9 +185,13 @@ public class MClientSkeleton {
         serviceBaseLog.setLogDateTime(DateTime.now());
         serviceBaseLog.setLogMethodName(functionName);
         serviceBaseLog.setLogObjectId(mObjectId);
-        serviceBaseLog.setLogFromIpAddr(request.getRemoteAddr());
-        serviceBaseLog.setLogFromPort(request.getRemotePort());
-        serviceBaseLog.setLogUserId(request.getHeader("userId"));
+
+        if (request != null) {
+            serviceBaseLog.setLogFromIpAddr(request.getRemoteAddr());
+            serviceBaseLog.setLogFromPort(request.getRemotePort());
+            serviceBaseLog.setLogUserId(request.getHeader("userId"));
+            serviceBaseLog.setLogIpAddr(request.getLocalAddr());
+        }
         // todo: get the ip address and set it to serviceBaseLog.logIpAddr
         MLogUtils.log(serviceBaseLog);
     }
