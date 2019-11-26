@@ -75,7 +75,7 @@ public class MAnalyser {
         if ((affectedUserIdByAvgTime.size() > MAdaptiveSystem.MINOR_THRESHOLD * userSize
                 && affectedUserIdByAvgTime.size() < MAdaptiveSystem.MAJOR_THRESHOLD * userSize)
                 || affectedUserIdByAvgTime.size() < 1000) {
-            evolveType = MEvolveType.MINOR;
+            evolveType = MEvolveType.MAJOR;
         } else {
             evolveType = MEvolveType.MAJOR;
         }

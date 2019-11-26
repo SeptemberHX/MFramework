@@ -73,6 +73,7 @@ public class MMajorAlgorithm implements MAlgorithmInterface {
 
         MPlannerResult plannerResult = new MPlannerResult();
         plannerResult.setServerOperator(operator);
+        plannerResult.setJobList(operator.calcJobList(rawOperator));
         return plannerResult;
     }
 

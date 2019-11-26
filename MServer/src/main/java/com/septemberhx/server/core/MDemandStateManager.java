@@ -20,6 +20,19 @@ public class MDemandStateManager extends MObjectManager<MDemandState> {
     @Getter
     private Map<String, List<String>> instanceId2StateIdList;
 
+    public void renameInstance(String oldId, String newId) {
+        if (instanceId2StateIdList.containsKey(oldId)) {
+            instanceId2StateIdList.put(newId, instanceId2StateIdList.get(oldId));
+            instanceId2StateIdList.remove(oldId);
+        }
+
+        for (MDemandState demandState : this.objectMap.values()) {
+            if (oldId.equals(demandState.getInstanceId())) {
+                demandState.replaceInstanceId(newId);
+            }
+        }
+    }
+
     public MDemandStateManager() {
         this.instanceId2StateIdList = new HashMap<>();
     }

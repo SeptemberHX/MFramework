@@ -99,10 +99,10 @@ public class MWSGAPopulation extends MBaseGA {
             this.population.setPopulace(nextG);
             ++currRound;
 
-            logger.info("Best: " + this.population.getPopulace().get(0).getNormWSGAFitness());
-            logger.info(this.population.getPopulace().get(0).getFitness());
-            logger.info(this.population.getPopulace().get(0).getCost());
-            this.population.getPopulace().get(0).getCurrOperator().printStatus();
+//            logger.info("Best: " + this.population.getPopulace().get(0).getNormWSGAFitness());
+//            logger.info(this.population.getPopulace().get(0).getFitness());
+//            logger.info(this.population.getPopulace().get(0).getCost());
+//            this.population.getPopulace().get(0).getCurrOperator().printStatus();
 
             if (currRound % 10 == 0) {
                 System.gc();

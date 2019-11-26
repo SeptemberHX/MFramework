@@ -88,10 +88,11 @@ public class MExecutor {
         bigSwitchJob.setSwitchJobList(switchJobList);
         MServerSkeleton.getInstance().getJobManager().addJob(bigSwitchJob);
 
-        List<MBaseJob> nextJobs = MServerSkeleton.getInstance().getJobManager().getNextJobList();
-        for (MBaseJob baseJob : nextJobs) {
-            MJobExecutor.doJob(baseJob);
-        }
+        // assign demands to instance
+        MSystemModel.getIns().setDemandStateManager(plannerOutput.getServerOperator().getDemandStateManager().shallowClone());
+        MSystemModel.getIns().setOperator(plannerOutput.getServerOperator());
+
+        MJobExecutor.doNextJobs();
 
         return;
     }

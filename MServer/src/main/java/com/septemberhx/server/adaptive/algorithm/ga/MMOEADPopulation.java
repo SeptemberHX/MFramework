@@ -125,7 +125,7 @@ public class MMOEADPopulation extends MBaseGA {
             logger.info("Best: " + bestOne.getNormWSGAFitness());
             logger.info(bestOne.getFitness());
             logger.info(bestOne.getCost());
-            bestOne.getCurrOperator().printStatus();
+//            bestOne.getCurrOperator().printStatus();
 
             if (i % 10 == 0) {
                 System.gc();

@@ -83,8 +83,6 @@ public class MJobExecutor {
 
     private static void doBigSwitchJob(MBigSwitchJob bigSwitchJob) {
         // Here, we need copy all the demand state from the operator to MServerModel
-        MSystemModel.getIns().setDemandStateManager(MSystemModel.getIns().getOperator().getDemandStateManager().shallowClone());
-
         MUpdateCacheBean updateCacheBean = new MUpdateCacheBean();
         Map<String, String> urlMap = new HashMap<>();
         for (MBaseJob baseJob : bigSwitchJob.getSwitchJobList()) {

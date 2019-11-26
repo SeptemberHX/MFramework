@@ -75,7 +75,6 @@ public class MSystemModel {
             }
 
             // check if the instance is alive. The mObjectIdMap will not be null if alive
-            // todo: get actual serviceId of the service instance
             String ourInstanceId = instanceInfo.getDockerInfo().getInstanceId();
             if (instanceInfo.getMObjectIdMap() != null) {
                 MServiceInstance instance = new MServiceInstance(
@@ -89,8 +88,9 @@ public class MSystemModel {
                         instanceInfo.getId(),
                         instanceInfo.getDockerInfo().getInstanceId()
                 );
-                if (MSystemModel.getIns().getOperator().getInstanceManager().containsById(instance.getId())) {
-                    MServiceInstance currInstance = MSystemModel.getIns().getOperator().getInstanceById(instance.getId());
+                // get actual serviceId of the service instance
+                if (MSystemModel.getIns().getOperator().getInstanceManager().containsById(ourInstanceId)) {
+                    MServiceInstance currInstance = MSystemModel.getIns().getOperator().getInstanceById(ourInstanceId);
                     instance.setServiceId(currInstance.getServiceId());
                     instance.setServiceName(currInstance.getServiceName());
                 }

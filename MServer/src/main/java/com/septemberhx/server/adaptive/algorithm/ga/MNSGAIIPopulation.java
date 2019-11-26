@@ -135,7 +135,7 @@ public class MNSGAIIPopulation extends MBaseGA {
             logger.info("Best: " + bestOne.getNormWSGAFitness());
             logger.info(bestOne.getFitness());
             logger.info(bestOne.getCost());
-            bestOne.getCurrOperator().printStatus();
+//            bestOne.getCurrOperator().printStatus();
 
             if (currRound % 10 == 0) {
                 System.gc();

@@ -1311,18 +1311,32 @@ public class MServerOperator extends MObjectManager<MServerState> {
                 oldInstanceIdSet.removeAll(retainSet);
                 currInstanceIdSet.removeAll(retainSet);
 
-                for (String oldInstanceId : oldInstanceIdSet) {
-                    MServiceInstance instance = rawOperator.getInstanceById(oldInstanceId);
-                    baseJobList.add(
-                            new MDeleteJob(oldInstanceId, instance.getServiceId(), instance.getNodeId())
-                    );
+                List<String> oldInstanceIdList = new ArrayList<>(oldInstanceIdSet);
+                List<String> currInstanceIdList = new ArrayList<>(currInstanceIdSet);
+
+                int currIndex = 0;
+                for (; currIndex < oldInstanceIdList.size() && currIndex < currInstanceIdList.size(); ++currIndex) {
+                    this.renameInstance(currInstanceIdList.get(currIndex), oldInstanceIdList.get(currIndex));
                 }
 
-                for (String currInstanceId : currInstanceIdSet) {
-                    MServiceInstance instance = this.getInstanceById(currInstanceId);
-                    baseJobList.add(
-                            new MDeployJob(instance.getNodeId(), instance.getServiceName(), instance.getId())
-                    );
+                if (currIndex < oldInstanceIdList.size()) {
+                    for (int j = currIndex; j < oldInstanceIdList.size(); ++j) {
+                        String oldInstanceId = oldInstanceIdList.get(j);
+                        MServiceInstance instance = rawOperator.getInstanceById(oldInstanceId);
+                        baseJobList.add(
+                                new MDeleteJob(oldInstanceId, instance.getServiceId(), instance.getNodeId())
+                        );
+                    }
+                }
+
+                if (currIndex < currInstanceIdList.size()) {
+                    for (int j = currIndex; j < currInstanceIdList.size(); ++j) {
+                        String currInstanceId = currInstanceIdList.get(j);
+                        MServiceInstance instance = this.getInstanceById(currInstanceId);
+                        baseJobList.add(
+                                new MDeployJob(instance.getNodeId(), instance.getServiceName(), instance.getId())
+                        );
+                    }
                 }
             }
         }
@@ -1340,5 +1354,14 @@ public class MServerOperator extends MObjectManager<MServerState> {
             );
         }
         return baseJobList;
+    }
+
+    public void renameInstance(String oldId, String newId) {
+        if (this.insId2LeftCap.containsKey(oldId)) {
+            this.insId2LeftCap.put(newId, this.insId2LeftCap.get(oldId));
+            this.insId2LeftCap.remove(oldId);
+        }
+        this.demandStateManager.renameInstance(oldId, newId);
+        this.instanceManager.renameInstance(oldId, newId);
     }
 }

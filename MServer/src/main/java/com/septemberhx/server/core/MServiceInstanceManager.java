@@ -15,6 +15,19 @@ public class MServiceInstanceManager extends MObjectManager<MServiceInstance> {
     private Map<String, Set<String>> nodeId2InsIdSet = new HashMap<>();
     private Map<String, Set<String>> serviceId2InsIdSet = new HashMap<>();
 
+    public void renameInstance(String oldId, String newId) {
+        MServiceInstance instance = this.getById(oldId).get();
+        this.objectMap.remove(oldId);
+        instance.setId(newId);
+        this.objectMap.put(newId, instance);
+
+        nodeId2InsIdSet.get(instance.getNodeId()).remove(oldId);
+        nodeId2InsIdSet.get(instance.getNodeId()).add(newId);
+
+        serviceId2InsIdSet.get(instance.getServiceId()).remove(oldId);
+        serviceId2InsIdSet.get(instance.getServiceId()).add(newId);
+    }
+
     public MServiceInstanceManager shallowClone() {
         MServiceInstanceManager cloneObject = new MServiceInstanceManager();
         Map<String, MServiceInstance> instanceMap = new HashMap<>();  // do not need deep clone here !

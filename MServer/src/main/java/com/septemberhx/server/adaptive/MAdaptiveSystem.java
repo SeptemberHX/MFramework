@@ -5,6 +5,7 @@ import com.septemberhx.common.log.MBaseLog;
 import com.septemberhx.common.log.MServiceBaseLog;
 import com.septemberhx.server.adaptive.algorithm.MAlgorithmInterface;
 import com.septemberhx.server.adaptive.algorithm.MEvolveType;
+import com.septemberhx.server.adaptive.algorithm.MMajorAlgorithm;
 import com.septemberhx.server.adaptive.algorithm.MMinorAlgorithm;
 import com.septemberhx.server.adaptive.executor.MBuildExecutor;
 import com.septemberhx.server.adaptive.executor.MClusterExecutor;
@@ -132,7 +133,7 @@ public class MAdaptiveSystem {
         if (analyserResult.getEvolveType() == MEvolveType.MINOR) {
             return planner.plan(analyserResult, new MMinorAlgorithm());
         } else if (analyserResult.getEvolveType() == MEvolveType.MAJOR) {
-            return planner.plan(analyserResult, this.algorithm);
+            return planner.plan(analyserResult, new MMajorAlgorithm());
         } else {
             return new MPlannerResult();
         }

@@ -88,4 +88,8 @@ public class MDemandState extends MBaseObject {
     public boolean isAssignAsComp() {
         return this.comAssignId != null;
     }
+
+    public void replaceInstanceId(String instanceId) {
+        this.instanceId = instanceId;
+    }
 }
