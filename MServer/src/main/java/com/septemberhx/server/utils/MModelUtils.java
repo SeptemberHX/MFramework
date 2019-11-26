@@ -80,8 +80,8 @@ public class MModelUtils {
     }
 
     public static MService compService(MService service1, MServiceInterface interface1, MService service2, MServiceInterface interface2) {
-        String serviceId = MIDUtils.generateServiceId(String.format("%s__%s", interface1.getInterfaceId(), interface2.getInterfaceId()),
-                String.format("%s_%s", service1.getId(), service2.getId()));
+        String serviceId = MIDUtils.generateServiceId(String.format("%s-%s", service1.getServiceName(), service2.getServiceName()),
+                String.valueOf(interface1.getInterfaceId().hashCode() + interface2.getInterfaceId().hashCode()));
 
         String serviceName = serviceId;
         String functionName = String.format("%s__%s", interface1.getFullFuncName(), interface2.getFullFuncName());
@@ -92,6 +92,9 @@ public class MModelUtils {
         newInterface.setServiceId(serviceId);
         newInterface.setInDataSize(interface1.getInDataSize());
         newInterface.setOutDataSize(interface2.getOutDataSize());
+
+        // todo: move this as a setting
+        newInterface.setPatternUrl("/test");
 
         List<String> compositionList = new ArrayList<>();
         if (interface1.isGenerated()) {

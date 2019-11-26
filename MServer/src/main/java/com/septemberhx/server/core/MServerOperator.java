@@ -559,7 +559,9 @@ public class MServerOperator extends MObjectManager<MServerState> {
     public void compositeService(MService service1, MServiceInterface interface1, MService service2, MServiceInterface interface2) {
         MService newService = MModelUtils.compService(service1, interface1, service2, interface2);
         this.addNewService(newService);
-        this.addNewJob(this.getBuildJob(newService));
+        MCBuildJob mcBuildJob = this.getBuildJob(newService);
+        newService.setDockerImageUrl(mcBuildJob.getImageFullName());
+        this.addNewJob(mcBuildJob);
     }
 
     /**
@@ -568,19 +570,17 @@ public class MServerOperator extends MObjectManager<MServerState> {
      * @return
      */
     private MCBuildJob getBuildJob(MService compositedService) {
-        MServerOperator operator = MSystemModel.getIns().getOperator();
         MCompositionRequest compositionRequest = new MCompositionRequest();
 
         String requestId = "";      // generated, random is ok
         String serviceName = compositedService.getServiceName();
-        String docker_owner = "";   // should be owned by system admin
-        String docker_tag = "";     // version tag
+        String docker_owner = "192.168.1.104:5000/septemberhx";   // should be owned by system admin
+        String docker_tag = "v1.0";     // version tag
         String docker_name = compositedService.getServiceName();
         String register_url = "";   // should be the register url of the cluster that wants to use this
-        List<MClassFunctionPair> classFunctionPairs = operator.getCallChainList(compositedService);    // build with the info in service repo
-        List<MArchitectInfo> dependencies = operator.getDependencies(compositedService);     // build with the info in service repo
+        List<MClassFunctionPair> classFunctionPairs = this.getCallChainList(compositedService);    // build with the info in service repo
+        List<MArchitectInfo> dependencies = this.getDependencies(compositedService);     // build with the info in service repo
 
-        compositionRequest.setId(requestId);
         compositionRequest.setName(serviceName);
         compositionRequest.setDocker_owner(docker_owner);
         compositionRequest.setDocker_tag(docker_tag);
@@ -590,6 +590,7 @@ public class MServerOperator extends MObjectManager<MServerState> {
         compositionRequest.setDependencies(dependencies);
 
         MCBuildJob mcBuildJob = new MCBuildJob();
+        compositionRequest.setId(mcBuildJob.getId());
         mcBuildJob.setCompositionRequest(compositionRequest);
 
         return mcBuildJob;
