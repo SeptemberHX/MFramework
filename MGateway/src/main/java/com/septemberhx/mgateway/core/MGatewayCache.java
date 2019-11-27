@@ -56,8 +56,8 @@ public class MGatewayCache {
         return demandId2Url.containsKey(demandId);
     }
 
-    public void updateCacheFromServer(MUserDemand userDemand) {
-        URI requestUri = MUrlUtils.getMClusterFetchRequestUrl("10.11.1.102", 9000);
+    public void updateCacheFromServer(MUserDemand userDemand, String clusterIpAddr, Integer clusterPort) {
+        URI requestUri = MUrlUtils.getMClusterFetchRequestUrl(clusterIpAddr, clusterPort);
         String url = MRequestUtils.sendRequest(requestUri, userDemand, String.class, RequestMethod.POST);
         if (url != null) {
             this.demandId2Url.put(userDemand.getId(), url);

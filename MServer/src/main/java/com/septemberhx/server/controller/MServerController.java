@@ -4,6 +4,7 @@ import com.septemberhx.common.base.*;
 import com.septemberhx.common.bean.*;
 import com.septemberhx.common.bean.server.MRegisterNodesBean;
 import com.septemberhx.common.bean.server.MRegisterServicesBean;
+import com.septemberhx.common.utils.MRequestUtils;
 import com.septemberhx.server.adaptive.MAdaptiveSystem;
 import com.septemberhx.server.base.model.MServiceInstance;
 import com.septemberhx.server.core.MServerSkeleton;
@@ -16,7 +17,7 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
-import java.util.List;
+import java.util.*;
 
 @RestController
 @EnableAutoConfiguration
@@ -24,6 +25,24 @@ import java.util.List;
 public class MServerController {
 
     private static Logger logger = LogManager.getLogger(MServerController.class);
+
+    @ResponseBody
+    @RequestMapping(path = "/doRequest", method = RequestMethod.POST)
+    public MResponse doRequest(@RequestBody MUserRequestBean requestBean) {
+        MResponse response = MResponse.failResponse();
+        try {
+            URI uri = new URI(Objects.requireNonNull(MServerSkeleton.fetchRequestUrl(requestBean.getUserDemand().getId(), ServerNodeType.CLOUD)));
+            Map<String, List<String>> customHeaderMap = new HashMap<>();
+            List<String> userIdHeaderValue = new ArrayList<>();
+            userIdHeaderValue.add(requestBean.getUserDemand().getUserId());
+            customHeaderMap.put("userId", userIdHeaderValue);
+            response = MRequestUtils.sendRequest(uri, requestBean.getData(), MResponse.class, RequestMethod.POST, customHeaderMap);
+        } catch (Exception e) {
+
+        }
+
+        return response;
+    }
 
     @ResponseBody
     @RequestMapping(path = "/registerServices", method = RequestMethod.POST)
@@ -69,7 +88,7 @@ public class MServerController {
     @ResponseBody
     @RequestMapping(path = "/fetchRequestUrl", method = RequestMethod.POST)
     public String fetchRequestUrl(@RequestBody MUserDemand userDemand) {
-        return MServerSkeleton.fetchRequestUrl(userDemand.getId());
+        return MServerSkeleton.fetchRequestUrl(userDemand.getId(), ServerNodeType.EDGE);
     }
 
     @ResponseBody

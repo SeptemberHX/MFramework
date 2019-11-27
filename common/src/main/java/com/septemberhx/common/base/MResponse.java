@@ -27,7 +27,9 @@ public class MResponse {
 
     }
 
-    public MResponse(String status) {
-        this.status = "Fail";
+    public static MResponse failResponse() {
+        MResponse response = new MResponse();
+        response.setStatus("Fail");
+        return response;
     }
 }

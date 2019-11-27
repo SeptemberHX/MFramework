@@ -1,12 +1,9 @@
 package com.septemberhx.server.job;
 
-import com.septemberhx.common.base.MServerNode;
-import com.septemberhx.common.base.MService;
-import com.septemberhx.common.base.MUpdateCacheBean;
+import com.septemberhx.common.base.*;
 import com.septemberhx.common.bean.MApiContinueRequest;
 import com.septemberhx.common.bean.MApiSplitBean;
 import com.septemberhx.common.bean.MS2CSetApiCStatus;
-import com.septemberhx.common.base.MClassFunctionPair;
 import com.septemberhx.server.base.model.MServiceInstance;
 import com.septemberhx.server.core.MRepoManager;
 import com.septemberhx.server.core.MServerSkeleton;
@@ -72,11 +69,13 @@ public class MJobExecutor {
     private static void doDeployJob(MDeployJob deployJob) {
         List<MService> services = MSystemModel.getIns().getServiceManager().getAllServicesByServiceName(deployJob.getServiceName());
         deployJob.setImageName(services.get(0).getDockerImageUrl());
-        MServerUtils.sendDeployInfo(deployJob.toMDeployPodRequest());
+        MServerNode targetNode = MSystemModel.getIns().getMSNManager().getById(deployJob.getNodeId()).get();
+        MServerUtils.sendDeployInfo(deployJob.toMDeployPodRequest(), targetNode.getNodeType());
     }
 
     private static void doDeleteJob(MDeleteJob deleteJob) {
-        MServerUtils.sendDeleteInfo(deleteJob);
+        MServerNode targetNode = MSystemModel.getIns().getMSNManager().getById(deleteJob.getNodeId()).get();
+        MServerUtils.sendDeleteInfo(deleteJob, targetNode.getNodeType());
         deleteJob.markAsDone();
         logger.info("Delete job info send");
     }
@@ -87,7 +86,7 @@ public class MJobExecutor {
         Map<String, String> urlMap = new HashMap<>();
         for (MBaseJob baseJob : bigSwitchJob.getSwitchJobList()) {
             MSwitchJob switchJob = (MSwitchJob) baseJob;
-            urlMap.put(switchJob.getUserDemandId(), MServerSkeleton.fetchRequestUrl(switchJob.getUserDemandId()));
+            urlMap.put(switchJob.getUserDemandId(), MServerSkeleton.fetchRequestUrl(switchJob.getUserDemandId(), ServerNodeType.CLOUD));
         }
         updateCacheBean.setDemandId2Url(urlMap);
         MServerUtils.sendUpdateCache(updateCacheBean);

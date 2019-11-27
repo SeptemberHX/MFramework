@@ -7,8 +7,13 @@ eureka:
     register-with-eureka: true
     fetch-registry: true
     service-url:
-      defaultZone: http://10.11.1.104:30761/eureka
+      defaultZone: http://${MCLUSTER_IP}:${MCLUSTER_PORT}/eureka
 
 spring:
   application:
     name: MGateway
+
+mgateway:
+  mcluster:
+    ip: ${MAGENT_IP}
+    port: ${MAGENT_PORT}

@@ -115,6 +115,14 @@ public class MUrlUtils {
         return MUrlUtils.getRemoteUri(ipAddr, port, MClusterConfig.MCLUSTERAGENT_UPDATE_GATEWAYS);
     }
 
+    public static URI getMServerDoRequestUri(String ipAddr, int port) {
+        return MUrlUtils.getRemoteUri(ipAddr, port, MClusterConfig.MSERVER_DO_REQUEST_URL);
+    }
+
+    public static URI getMClusterDoRequestUri(String ipAddr, int port) {
+        return MUrlUtils.getRemoteUri(ipAddr, port, MClusterConfig.MCLUSTERAGENT_DO_REQUEST_URL);
+    }
+
     public static URI getRemoteUri(String ipAddr, int port, String path) {
         URI uri = null;
         try {

@@ -23,6 +23,15 @@ spec:
           volumeMounts:
             - mountPath: /var/log/mclient
               name: log-volume
+          env:
+            - name: MCLUSTER_IP
+              value: "192.168.1.104"
+            - name: MCLUSTER_PORT
+              value: "30761"
+            - name: MAGENT_IP
+              value: "10.11.1.102"
+            - name: MAGENT_PORT
+              value: "9000"
       volumes:
         - name: log-volume
           hostPath:

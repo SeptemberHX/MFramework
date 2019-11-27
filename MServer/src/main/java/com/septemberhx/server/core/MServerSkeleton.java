@@ -1,8 +1,7 @@
 package com.septemberhx.server.core;
 
 
-import com.septemberhx.common.base.MServiceInterface;
-import com.septemberhx.common.base.MUserDemand;
+import com.septemberhx.common.base.*;
 import com.septemberhx.common.bean.MGetRemoteUriRequest;
 import com.septemberhx.common.bean.MInstanceInfoBean;
 import com.septemberhx.common.bean.MSetRestInfoRequest;
@@ -40,13 +39,20 @@ public class MServerSkeleton {
         this.repoManager = MRepoManager.loadFromFile("./project.json");
     }
 
-    public static String fetchRequestUrl(String demandId) {
+    public static String fetchRequestUrl(String demandId, ServerNodeType requesterType) {
         Optional<MDemandState> demandStateOptional = MSystemModel.getIns().getDemandStateManager().getById(demandId);
         if (demandStateOptional.isPresent()) {
             MDemandState demandState = demandStateOptional.get();
             Optional<MServiceInstance> instanceOptional = MSystemModel.getIns().getInstanceById(demandState.getInstanceId());
             if (instanceOptional.isPresent()) {
                 MServiceInstance serviceInstance = instanceOptional.get();
+                MServerNode targetNode = MSystemModel.getIns().getMSNManager().getById(serviceInstance.getNodeId()).get();
+
+                // if the instance is on the cloud side, and it is the edge side that asks for the url
+                // then we should tell the requester that you should send the request to the cloud
+                if (targetNode.getNodeType() == ServerNodeType.CLOUD && requesterType == ServerNodeType.EDGE) {
+                    return MClusterConfig.REQUEST_SHOULD_SEND_TO_CLOUD;
+                }
                 MServiceInterface mServiceInterface = MSystemModel.getIns().getServiceManager().getInterfaceById(demandState.getInterfaceId());
 
                 String patternUrl = mServiceInterface.getPatternUrl();

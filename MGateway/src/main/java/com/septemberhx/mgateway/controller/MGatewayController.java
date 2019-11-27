@@ -7,16 +7,16 @@ import com.septemberhx.common.bean.MAllUserBean;
 import com.septemberhx.common.log.MFunctionCallEndLog;
 import com.septemberhx.common.log.MFunctionCalledLog;
 import com.septemberhx.common.utils.MLogUtils;
-import com.septemberhx.mgateway.bean.MUserRequestBean;
+import com.septemberhx.common.bean.MUserRequestBean;
+import com.septemberhx.mgateway.bean.MUserListBean;
 import com.septemberhx.mgateway.core.MGatewayCache;
 import com.septemberhx.mgateway.core.MGatewayProcess;
 import org.joda.time.DateTime;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -26,6 +26,18 @@ import java.util.Map;
  */
 @RestController
 public class MGatewayController {
+
+    @Value("${mgateway.mcluster.ip}")
+    private String clusterAgentIp;
+
+    @Value("${mgateway.mcluster.port}")
+    private Integer clusterAgentPort;
+
+    @PostConstruct
+    public void init() {
+        MGatewayProcess.clusterAgentIp = clusterAgentIp;
+        MGatewayProcess.clusterAgentPort = clusterAgentPort;
+    }
 
     @ResponseBody
     @RequestMapping(path = "/allUser", method = RequestMethod.POST)
@@ -40,6 +52,14 @@ public class MGatewayController {
     }
 
     @ResponseBody
+    @RequestMapping(path = "/registerUserList", method = RequestMethod.POST)
+    public void registerUsers(@RequestBody MUserListBean userListBean) {
+        for (MUser user : userListBean.getUserList()) {
+            MGatewayCache.getInstance().addUser(user);
+        }
+    }
+
+    @ResponseBody
     @RequestMapping(path = "/request", method = RequestMethod.POST)
     public MResponse doRequest(@RequestBody MUserRequestBean requestBean, HttpServletRequest request) {
         MFunctionCalledLog callLog = new MFunctionCalledLog();
@@ -51,7 +71,7 @@ public class MGatewayController {
         callLog.setLogMethodName(requestBean.getUserDemand().getId());
         callLog.setLogObjectId("MGateway");
         MLogUtils.log(callLog);
-        MResponse response = MGatewayProcess.doRequest(requestBean.getUserDemand(), requestBean.getData());
+        MResponse response = MGatewayProcess.doRequest(requestBean);
 
         MFunctionCallEndLog endLog = new MFunctionCallEndLog();
         endLog.setLogDateTime(DateTime.now());

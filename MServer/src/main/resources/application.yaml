@@ -8,5 +8,8 @@ mserver:
   buildcenter:
     ip: 192.168.1.102
     port: 54321
+  cloudagent:
+    ip: localhost
+    port: 9000
   deploy:
     dir: /home/hexiang/workspace/idea/MFramework/yaml

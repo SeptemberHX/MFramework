@@ -1,4 +1,4 @@
-package com.septemberhx.mgateway.bean;
+package com.septemberhx.common.bean;
 
 import com.septemberhx.common.base.MResponse;
 import com.septemberhx.common.base.MUserDemand;

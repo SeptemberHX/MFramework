@@ -3,6 +3,7 @@ package com.septemberhx.agent.controller;
 import com.netflix.appinfo.InstanceInfo;
 import com.septemberhx.agent.utils.ElasticSearchUtils;
 import com.septemberhx.agent.utils.MClientUtils;
+import com.septemberhx.common.base.MResponse;
 import com.septemberhx.common.base.MUpdateCacheBean;
 import com.septemberhx.common.base.MUser;
 import com.septemberhx.common.base.MUserDemand;
@@ -62,6 +63,13 @@ public class MAgentController {
                         new HttpHost(this.elasticsearchIpAddr, this.elasticsearchPort)
                 )
         );
+    }
+
+    @ResponseBody
+    @RequestMapping(path = "/doRequest", method = RequestMethod.POST)
+    public MResponse doRequest(@RequestBody MUserRequestBean requestBean) {
+        URI uri = MUrlUtils.getMServerDoRequestUri(this.serverIpAddr, this.serverPort);
+        return MRequestUtils.sendRequest(uri, requestBean, MResponse.class, RequestMethod.POST);
     }
 
     @ResponseBody
