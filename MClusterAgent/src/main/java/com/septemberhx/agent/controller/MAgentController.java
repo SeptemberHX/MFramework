@@ -25,7 +25,9 @@ import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 @RestController
@@ -51,6 +53,8 @@ public class MAgentController {
     private MClientUtils clientUtils;
 
     private RestHighLevelClient esClient;
+
+    private static Map<String, MInstanceInfoBean> instanceInfoBeanMap = new HashMap<>();  // use it to record who send the instance info to server
 
     public MAgentController() {
     }
@@ -151,12 +155,13 @@ public class MAgentController {
         }
 
         URI serverLoadUri = MUrlUtils.getMServerLoadInstanceInfoUri(this.serverIpAddr, this.serverPort);
-        logger.info(infoBean.toString());
 
         try {
+            logger.info(infoBean.toString());
             MRequestUtils.sendRequest(serverLoadUri, infoBean, null, RequestMethod.POST);
             this.clientUtils.notifyDeployJobFinished(infoBean);
         } catch (Exception e) {
+            e.printStackTrace();
             logger.warn("Failed to notify server with data in MAgentController::instanceRegistered");
         }
     }
@@ -177,5 +182,17 @@ public class MAgentController {
                 new DateTime(request.getEndTime())
         ));
         return response;
+    }
+
+    synchronized private boolean checkIfInstanceInfoHasSend(MInstanceInfoBean infoBean) {
+        return instanceInfoBeanMap.containsKey(infoBean.getId()) && instanceInfoBeanMap.get(infoBean.getId()).equals(infoBean);
+    }
+
+    synchronized private void recordInstanceInfo(MInstanceInfoBean infoBean) {
+        if (instanceInfoBeanMap.size() > 1000) {
+            instanceInfoBeanMap.clear();
+        }
+
+        instanceInfoBeanMap.put(infoBean.getId(), infoBean);
     }
 }

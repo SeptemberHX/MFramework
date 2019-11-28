@@ -1,12 +1,15 @@
 package com.septemberhx.server.core;
 
 import com.septemberhx.common.base.MServerNode;
+import com.septemberhx.common.base.MService;
 import com.septemberhx.common.bean.MInstanceInfoBean;
 import com.septemberhx.server.base.model.MServiceInstance;
 import com.septemberhx.server.base.model.MSystemIndex;
 import com.septemberhx.server.utils.MIDUtils;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.List;
 import java.util.Optional;
@@ -55,6 +58,8 @@ public class MSystemModel {
         return ourInstance;
     }
 
+    private static Logger logger = LogManager.getLogger(MSystemModel.class);
+
     private MSystemModel() {
         this.mSIManager = new MServiceInstanceManager();
         this.mSNManager = new MServerNodeManager();
@@ -88,20 +93,30 @@ public class MSystemModel {
                         instanceInfo.getId(),
                         instanceInfo.getDockerInfo().getInstanceId()
                 );
+
                 // get actual serviceId of the service instance
                 if (MSystemModel.getIns().getOperator().getInstanceManager().containsById(ourInstanceId)) {
                     MServiceInstance currInstance = MSystemModel.getIns().getOperator().getInstanceById(ourInstanceId);
                     instance.setServiceId(currInstance.getServiceId());
                     instance.setServiceName(currInstance.getServiceName());
+                } else {  // this means the instance was created in before running. We have to get the real serviceId of it
+                    String serviceId = MIDUtils.getServiceIdFromInstanceId(ourInstanceId, nodeId);
+                    Optional<MService> serviceOptional = MSystemModel.getIns().getServiceManager().getById(serviceId);
+                    if (serviceOptional.isPresent()) {
+                        instance.setServiceName(serviceOptional.get().getServiceName());
+                        instance.setServiceId(serviceOptional.get().getId());
+                    }
                 }
 
                 this.mSIManager.add(instance);
+                logger.info(String.format("Instance %s is added to the instance map in server", ourInstanceId));
             }
         } else {
             String ourInstanceId = MIDUtils.tranSpringCloudIdToOurs(instanceInfo.getId());
             if (this.mSIManager.containsById(ourInstanceId)){
                 // remove the useless info when the instance is dead
                 this.mSIManager.delete(ourInstanceId);
+                logger.info(String.format("Instance %s is deleted due to empty docker info", ourInstanceId));
             }
         }
     }

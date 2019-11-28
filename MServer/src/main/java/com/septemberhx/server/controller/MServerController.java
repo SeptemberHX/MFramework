@@ -94,7 +94,7 @@ public class MServerController {
     @ResponseBody
     @RequestMapping(path = "/loadInstanceInfo", method = RequestMethod.POST)
     public void loadInstanceInfo(@RequestBody MInstanceInfoBean instanceInfo) {
-        logger.info(instanceInfo);
+        logger.info(String.format("Instance %s has sent its info to server.", instanceInfo.getId()));
         MServerSkeleton.getInstance().updateInstanceInfo(instanceInfo);
     }
 

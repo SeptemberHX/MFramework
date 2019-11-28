@@ -4,6 +4,7 @@ package com.septemberhx.server.adaptive;
 import com.septemberhx.server.adaptive.algorithm.MAlgorithmInterface;
 import com.septemberhx.server.base.MAnalyserResult;
 import com.septemberhx.server.base.MPlannerResult;
+import com.septemberhx.server.core.MServerOperator;
 import com.septemberhx.server.core.MSystemModel;
 
 /**
@@ -12,6 +13,8 @@ import com.septemberhx.server.core.MSystemModel;
 public class MPlanner {
 
     public MPlannerResult plan(MAnalyserResult info, MAlgorithmInterface algorithm) {
-        return algorithm.calc(info, MSystemModel.getIns().getOperator().shallowClone());
+        MServerOperator rawOperator = MSystemModel.getIns().getOperator().shallowClone();
+        rawOperator.reInit();
+        return algorithm.calc(info, rawOperator);
     }
 }

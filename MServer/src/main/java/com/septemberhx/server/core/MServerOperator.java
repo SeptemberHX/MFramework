@@ -1308,7 +1308,7 @@ public class MServerOperator extends MObjectManager<MServerState> {
                 retainSet.retainAll(oldInstanceIdSet);  // do nothing about this instance
 
                 // deal with others
-                // todo: We will reuse old instance if possible
+                // We will reuse old instance if possible
                 oldInstanceIdSet.removeAll(retainSet);
                 currInstanceIdSet.removeAll(retainSet);
 
@@ -1339,6 +1339,19 @@ public class MServerOperator extends MObjectManager<MServerState> {
                         );
                     }
                 }
+            }
+        }
+
+        // remove the instances of services that not in the calculated result
+        for (String oldServiceId : oldInstanceMap.keySet()) {
+            if (currInstanceMap.containsKey(oldServiceId)) {
+                continue;
+            }
+
+            for (MServiceInstance instance : oldInstanceMap.get(oldServiceId)) {
+                baseJobList.add(
+                        new MDeleteJob(instance.getId(), instance.getServiceId(), instance.getNodeId())
+                );
             }
         }
 

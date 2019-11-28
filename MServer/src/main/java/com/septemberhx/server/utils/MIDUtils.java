@@ -26,6 +26,9 @@ public class MIDUtils {
     /**
      * The instance id is built with three parts: nodeID, serviceId, noId. The noId should start from 1 and increases
      *   by 1 each time. When create a new instance, the smallest usable noId should be used.
+     *
+     *   The instance id is consist of : HOSTNAME that the container running or + '-' + serviceId + '-' + random alphanumeric suffix
+     *
      * @param nodeId: node id
      * @param serviceId: service Id
      * @return String
@@ -39,11 +42,19 @@ public class MIDUtils {
         return String.format("%s-%s-%s", nodeId, serviceId, randomSuffix);
     }
 
+    // ATTENTION: DO NOT USE THIS FUNCTION because '-' can be in the hostname !!!
     public static String getNodeIdFromInstanceId(String instanceId) {
         if (instanceId == null) {
             return "";
         }
         return instanceId.split("-")[0];
+    }
+
+    /*
+     * Get the service id from the instance id.
+     */
+    public static String getServiceIdFromInstanceId(String instanceId, String serviceId) {
+        return instanceId.substring(serviceId.length() + 1, instanceId.lastIndexOf('-'));
     }
 
     public static String generateSpecificInstanceIdForTest(String nodeId, String serviceId) {

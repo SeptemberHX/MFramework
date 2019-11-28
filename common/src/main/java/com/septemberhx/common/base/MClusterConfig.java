@@ -30,6 +30,7 @@ public class MClusterConfig {
     public final static String MCLUSTERAGENT_ALL_USER_URL = "/magent/allUser";
     public final static String MCLUSTERAGENT_UPDATE_GATEWAYS = "/magent/updateGateways";
     public final static String MCLUSTERAGENT_DO_REQUEST_URL = "/magent/doRequest";
+    public final static String MCLUSTERAGENT_INSTANCE_REGISTER_URL = "/magent/registered";
 
     public final static String MCLUSTERAGENT_FETCH_CLIENT_INFO = "/mclient/info";
     public final static String MSERVER_GET_REMOTE_URI = "/mserver/remoteuri";
@@ -52,6 +53,7 @@ public class MClusterConfig {
 
 
     public final static String K8S_NAMESPACE = "kube-test";
+    public final static String MCLUSTERAGENT_NAME = "MClusterAgent";
 
     public final static String REQUEST_SHOULD_SEND_TO_CLOUD = "request should send to cloud";
 
