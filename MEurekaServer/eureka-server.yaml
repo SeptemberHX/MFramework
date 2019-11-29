@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: eureka-server
-          image: 192.168.1.104:5000/septemberhx/meurekaserver:v1.3
+          image: septemberhx/meurekaserver:v1.3
           ports:
             - containerPort: 8761
 ---

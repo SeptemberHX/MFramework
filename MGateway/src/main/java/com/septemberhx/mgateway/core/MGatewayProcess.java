@@ -6,6 +6,7 @@ import com.septemberhx.common.base.MUserDemand;
 import com.septemberhx.common.bean.MUserRequestBean;
 import com.septemberhx.common.utils.MRequestUtils;
 import com.septemberhx.common.utils.MUrlUtils;
+import com.septemberhx.mgateway.utils.MGatewayUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,11 +24,7 @@ import java.util.Map;
  * @version 0.1
  * @date 2019/11/22
  */
-@Component
 public class MGatewayProcess {
-
-    public static String clusterAgentIp;
-    public static Integer clusterAgentPort;
 
     private static Logger logger = LogManager.getLogger(MGatewayProcess.class);
 
@@ -35,7 +32,7 @@ public class MGatewayProcess {
         MUserDemand userDemand = requestBean.getUserDemand();
         MResponse data = requestBean.getData();
         if (!MGatewayCache.getInstance().isCached(userDemand.getId())) {
-            MGatewayCache.getInstance().updateCacheFromServer(userDemand, clusterAgentIp, clusterAgentPort);
+            MGatewayCache.getInstance().updateCacheFromServer(userDemand);
         }
 
         MResponse response = null;
@@ -45,8 +42,7 @@ public class MGatewayProcess {
             String url = MGatewayCache.getInstance().getUrl(userDemand.getId());
 
             if (url.equals(MClusterConfig.REQUEST_SHOULD_SEND_TO_CLOUD)) {
-                URI requestUri = MUrlUtils.getMClusterDoRequestUri(clusterAgentIp, clusterAgentPort);
-                response = MRequestUtils.sendRequest(requestUri, requestBean, MResponse.class, RequestMethod.POST);
+                response = MGatewayUtils.clusterAgentClient.doRequest(requestBean);
             } else {
                 try {
                     URI uri = new URI(url);

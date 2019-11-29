@@ -4,6 +4,10 @@ import com.septemberhx.common.base.MUser;
 import com.septemberhx.common.base.MUserDemand;
 import com.septemberhx.common.utils.MRequestUtils;
 import com.septemberhx.common.utils.MUrlUtils;
+import com.septemberhx.mgateway.client.MClusterAgentClient;
+import com.septemberhx.mgateway.utils.MGatewayUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.net.URI;
@@ -22,6 +26,7 @@ import java.util.Map;
  *
  * During the executing of an evolution plan, the cache will be updated by the MServer
  */
+@Component
 public class MGatewayCache {
 
     private static volatile MGatewayCache instance;
@@ -56,9 +61,8 @@ public class MGatewayCache {
         return demandId2Url.containsKey(demandId);
     }
 
-    public void updateCacheFromServer(MUserDemand userDemand, String clusterIpAddr, Integer clusterPort) {
-        URI requestUri = MUrlUtils.getMClusterFetchRequestUrl(clusterIpAddr, clusterPort);
-        String url = MRequestUtils.sendRequest(requestUri, userDemand, String.class, RequestMethod.POST);
+    public void updateCacheFromServer(MUserDemand userDemand) {
+        String url = MGatewayUtils.clusterAgentClient.fetchRequestUrl(userDemand);
         if (url != null) {
             this.demandId2Url.put(userDemand.getId(), url);
         } else {

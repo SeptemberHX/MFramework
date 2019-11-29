@@ -8,10 +8,14 @@ import com.septemberhx.common.log.MFunctionCallEndLog;
 import com.septemberhx.common.log.MFunctionCalledLog;
 import com.septemberhx.common.utils.MLogUtils;
 import com.septemberhx.common.bean.MUserRequestBean;
+import com.septemberhx.mgateway.MGatewayMain;
 import com.septemberhx.mgateway.bean.MUserListBean;
+import com.septemberhx.mgateway.client.MClusterAgentClient;
 import com.septemberhx.mgateway.core.MGatewayCache;
 import com.septemberhx.mgateway.core.MGatewayProcess;
+import com.septemberhx.mgateway.utils.MGatewayUtils;
 import org.joda.time.DateTime;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,16 +31,12 @@ import java.util.Map;
 @RestController
 public class MGatewayController {
 
-    @Value("${mgateway.mcluster.ip}")
-    private String clusterAgentIp;
-
-    @Value("${mgateway.mcluster.port}")
-    private Integer clusterAgentPort;
+    @Autowired
+    private MClusterAgentClient clusterAgentClient;
 
     @PostConstruct
     public void init() {
-        MGatewayProcess.clusterAgentIp = clusterAgentIp;
-        MGatewayProcess.clusterAgentPort = clusterAgentPort;
+        MGatewayUtils.clusterAgentClient = clusterAgentClient;
     }
 
     @ResponseBody
