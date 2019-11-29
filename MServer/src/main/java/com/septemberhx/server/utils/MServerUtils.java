@@ -75,7 +75,7 @@ public class MServerUtils {
 
     public static MInstanceInfoResponse fetchAllInstanceInfo() {
         return MRequestUtils.sendRequest(
-                MUrlUtils.getMclusterFetchInstanceInfoUri(),
+                MUrlUtils.getMclusterFetchInstanceInfoUri(mClusterIpAddr, mClusterPort),
                 null,
                 MInstanceInfoResponse.class,
                 RequestMethod.GET);

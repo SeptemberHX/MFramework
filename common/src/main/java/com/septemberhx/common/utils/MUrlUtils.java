@@ -21,10 +21,10 @@ public class MUrlUtils {
      * Construct the uri to fetch all the instance info in the cluster
      * @return URI
      */
-    public static URI getMclusterFetchInstanceInfoUri() {
+    public static URI getMclusterFetchInstanceInfoUri(String ipAddr, int port) {
             return MUrlUtils.getRemoteUri(
-                    MClusterConfig.getInstance().getMClusterHost(),
-                    MClusterConfig.getInstance().getMClusterPort(),
+                    ipAddr,
+                    port,
                     MClusterConfig.MCLUSTER_FETCH_INSTANCE_INFO
             );
     }
