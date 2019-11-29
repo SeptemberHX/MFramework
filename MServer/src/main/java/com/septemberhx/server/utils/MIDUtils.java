@@ -54,6 +54,8 @@ public class MIDUtils {
      * Get the service id from the instance id.
      */
     public static String getServiceIdFromInstanceId(String instanceId, String serviceId) {
+        if (serviceId == null || instanceId == null || instanceId.length() < serviceId.length()) return "";
+
         return instanceId.substring(serviceId.length() + 1, instanceId.lastIndexOf('-'));
     }
 

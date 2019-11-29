@@ -1,15 +1,17 @@
+server:
+  port: 8080
 spring:
   application:
     name: MServerApplication
 mserver:
   mcluster:
-    ip: 192.168.1.102
-    port: 9000
+    ip: ${CLUSTER_AGENT_IP}
+    port: ${CLUSTER_AGENT_PORT}
   buildcenter:
-    ip: 192.168.1.102
-    port: 54321
+    ip: ${BUILD_CENTER_IP}
+    port: ${BUILD_CENTER_PORT}
   cloudagent:
-    ip: localhost
-    port: 9000
+    ip: ${CLOUD_AGENT_IP}
+    port: ${CLOUD_AGENT_PORT}
   deploy:
     dir: /home/hexiang/workspace/idea/MFramework/yaml

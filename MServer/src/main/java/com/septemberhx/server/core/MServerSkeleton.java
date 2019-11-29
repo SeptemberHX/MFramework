@@ -36,7 +36,6 @@ public class MServerSkeleton {
 
     private MServerSkeleton() {
         this.remoteInstanceIdMap = new HashMap<>();
-        this.repoManager = MRepoManager.loadFromFile("./project.json");
     }
 
     public static String fetchRequestUrl(String demandId, ServerNodeType requesterType) {
