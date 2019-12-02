@@ -81,7 +81,7 @@ public class MModelUtils {
 
     public static MService compService(MService service1, MServiceInterface interface1, MService service2, MServiceInterface interface2) {
         String serviceId = MIDUtils.generateServiceId(String.format("%s-%s", service1.getServiceName(), service2.getServiceName()),
-                String.valueOf(interface1.getInterfaceId().hashCode() + interface2.getInterfaceId().hashCode()));
+                String.valueOf(Math.abs(interface1.getInterfaceId().hashCode() + interface2.getInterfaceId().hashCode())));
 
         String serviceName = serviceId;
         String functionName = String.format("%s__%s", interface1.getFullFuncName(), interface2.getFullFuncName());

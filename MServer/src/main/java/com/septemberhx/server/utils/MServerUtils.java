@@ -64,12 +64,12 @@ public class MServerUtils {
     }
 
     @Value("${mserver.cloudagent.ip}")
-    public static void setCloudAgentIpAddr(String cloudAgentIpAddr) {
+    public void setCloudAgentIpAddr(String cloudAgentIpAddr) {
         MServerUtils.cloudAgentIpAddr = cloudAgentIpAddr;
     }
 
     @Value("${mserver.cloudagent.port}")
-    public static void setCloudAgentPort(Integer cloudAgentPort) {
+    public void setCloudAgentPort(Integer cloudAgentPort) {
         MServerUtils.cloudAgentPort = cloudAgentPort;
     }
 

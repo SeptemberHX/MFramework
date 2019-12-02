@@ -19,7 +19,7 @@ public class MBuildJob extends MBaseJob {
     private String imageTag;
     private String serviceName;
 
-    private static String OWNER = "192.168.1.104:5000/septemberhx";
+    public static String OWNER = "192.168.1.104:5000/septemberhx";
 
     public MBuildJob() {
         type = MJobType.BUILD;

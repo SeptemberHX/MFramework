@@ -574,7 +574,7 @@ public class MServerOperator extends MObjectManager<MServerState> {
 
         String requestId = "";      // generated, random is ok
         String serviceName = compositedService.getServiceName();
-        String docker_owner = "192.168.1.104:5000/septemberhx";   // should be owned by system admin
+        String docker_owner = MBuildJob.OWNER;   // should be owned by system admin
         String docker_tag = "v1.0";     // version tag
         String docker_name = compositedService.getServiceName();
         String register_url = "";   // should be the register url of the cluster that wants to use this

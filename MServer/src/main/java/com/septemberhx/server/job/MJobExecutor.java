@@ -86,7 +86,7 @@ public class MJobExecutor {
         Map<String, String> urlMap = new HashMap<>();
         for (MBaseJob baseJob : bigSwitchJob.getSwitchJobList()) {
             MSwitchJob switchJob = (MSwitchJob) baseJob;
-            urlMap.put(switchJob.getUserDemandId(), MServerSkeleton.fetchRequestUrl(switchJob.getUserDemandId(), ServerNodeType.CLOUD));
+            urlMap.put(switchJob.getUserDemandId(), MServerSkeleton.fetchRequestUrl(switchJob.getUserDemandId(), ServerNodeType.EDGE));
         }
         updateCacheBean.setDemandId2Url(urlMap);
         MServerUtils.sendUpdateCache(updateCacheBean);
