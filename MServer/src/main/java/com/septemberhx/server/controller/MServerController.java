@@ -6,6 +6,7 @@ import com.septemberhx.common.bean.server.MRegisterNodesBean;
 import com.septemberhx.common.bean.server.MRegisterServicesBean;
 import com.septemberhx.common.utils.MRequestUtils;
 import com.septemberhx.server.adaptive.MAdaptiveSystem;
+import com.septemberhx.server.base.MSystemInfoBean;
 import com.septemberhx.server.base.model.MServiceInstance;
 import com.septemberhx.server.core.MServerSkeleton;
 import com.septemberhx.server.core.MSystemModel;
@@ -25,6 +26,12 @@ import java.util.*;
 public class MServerController {
 
     private static Logger logger = LogManager.getLogger(MServerController.class);
+
+    @ResponseBody
+    @RequestMapping(path = "/systemInfo", method = RequestMethod.POST)
+    public MSystemInfoBean systemInfo() {
+        return MSystemModel.getIns().getSystemInfo();
+    }
 
     @ResponseBody
     @RequestMapping(path = "/doRequest", method = RequestMethod.POST)

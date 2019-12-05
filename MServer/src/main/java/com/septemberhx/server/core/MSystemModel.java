@@ -1,8 +1,11 @@
 package com.septemberhx.server.core;
 
+import com.septemberhx.common.base.MResource;
 import com.septemberhx.common.base.MServerNode;
 import com.septemberhx.common.base.MService;
+import com.septemberhx.common.base.MUserDemand;
 import com.septemberhx.common.bean.MInstanceInfoBean;
+import com.septemberhx.server.base.MSystemInfoBean;
 import com.septemberhx.server.base.model.MServiceInstance;
 import com.septemberhx.server.base.model.MSystemIndex;
 import com.septemberhx.server.utils.MIDUtils;
@@ -11,8 +14,8 @@ import lombok.Setter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * This class stores everything the system needs.
@@ -131,5 +134,45 @@ public class MSystemModel {
 
     public Optional<MServiceInstance> getInstanceByMObjectId(String mObjectId) {
         return this.mSIManager.getInstanceByMObjectId(mObjectId);
+    }
+
+    public MSystemInfoBean getSystemInfo() {
+        MSystemInfoBean infoBean = new MSystemInfoBean();
+        List<MUserDemand> userDemandList = this.userManager.getAllUserDemands();
+        infoBean.setTotalDemandNum(userDemandList.size());
+
+        Set<String> serviceNameSet = userDemandList.stream().map(MUserDemand::getServiceId).collect(Collectors.toSet());
+        infoBean.setTotalDemandServiceNum(serviceNameSet.size());
+
+        Map<String, Map<String, Set<Integer>>> serviceName2Function2SlaMap = new HashMap<>();
+        for (MUserDemand userDemand : userDemandList) {
+            if (!serviceName2Function2SlaMap.containsKey(userDemand.getServiceId())) {
+                serviceName2Function2SlaMap.put(userDemand.getServiceId(), new HashMap<>());
+            }
+
+            if (!serviceName2Function2SlaMap.get(userDemand.getServiceId()).containsKey(userDemand.getFunctionId())) {
+                serviceName2Function2SlaMap.get(userDemand.getServiceId()).put(userDemand.getFunctionId(), new HashSet<>());
+            }
+            serviceName2Function2SlaMap.get(userDemand.getServiceId()).get(userDemand.getFunctionId()).add(userDemand.getSlaLevel());
+        }
+        int totalDemandKindSize = 0;
+        for (String serviceName : serviceName2Function2SlaMap.keySet()) {
+            for (String functionId : serviceName2Function2SlaMap.get(serviceName).keySet()) {
+                totalDemandKindSize += serviceName2Function2SlaMap.get(serviceName).get(functionId).size();
+            }
+        }
+        infoBean.setTotalDemandKindNum(totalDemandKindSize);
+
+        for (MServerNode node : this.mSNManager.getAllValues()) {
+            MResource usedResource = new MResource();
+            List<MServiceInstance> instanceList = this.mSIManager.getInstancesOnNode(node.getId());
+            for (MServiceInstance instance : instanceList) {
+                MService service = this.serviceManager.getById(instance.getServiceId()).get();
+                usedResource = usedResource.add(service.getResource());
+            }
+            infoBean.getNodeCpuUsagePercentMap().put(node.getId(), usedResource.getCpu() * 1.0 / node.getResource().getCpu());
+            infoBean.getNodeRamUsagePercentMap().put(node.getId(), usedResource.getRam() * 1.0 / node.getResource().getRam());
+        }
+        return infoBean;
     }
 }
