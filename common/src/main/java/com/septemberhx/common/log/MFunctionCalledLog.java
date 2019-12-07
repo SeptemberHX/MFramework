@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.json.JSONObject;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -14,7 +15,7 @@ import java.util.Map;
 @Getter
 @Setter
 public class MFunctionCalledLog extends MServiceBaseLog {
-    private String logFromIpAddr = "";
+    private String logFromIpAddr;
     private Integer logFromPort = 0;
 
     public MFunctionCalledLog() {
