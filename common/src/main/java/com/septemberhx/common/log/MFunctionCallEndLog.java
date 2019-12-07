@@ -15,7 +15,7 @@ import java.util.Map;
 @Setter
 public class MFunctionCallEndLog extends MServiceBaseLog {
     private String logFromIpAddr;
-    private Integer logFromPort;
+    private Integer logFromPort = 0;
 
     public MFunctionCallEndLog() {
         this.logType = MLogType.FUNCTION_CALL_END;

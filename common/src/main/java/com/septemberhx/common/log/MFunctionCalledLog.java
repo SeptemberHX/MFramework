@@ -15,7 +15,7 @@ import java.util.Map;
 @Setter
 public class MFunctionCalledLog extends MServiceBaseLog {
     private String logFromIpAddr;
-    private Integer logFromPort;
+    private Integer logFromPort = 0;
 
     public MFunctionCalledLog() {
         this.logType = MLogType.FUNCTION_CALL;
