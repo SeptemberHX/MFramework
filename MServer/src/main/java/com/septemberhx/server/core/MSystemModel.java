@@ -108,6 +108,8 @@ public class MSystemModel {
                     if (serviceOptional.isPresent()) {
                         instance.setServiceName(serviceOptional.get().getServiceName());
                         instance.setServiceId(serviceOptional.get().getId());
+                    } else {
+                        return;  // if we can't recognise the service, then ignore it
                     }
                 }
 

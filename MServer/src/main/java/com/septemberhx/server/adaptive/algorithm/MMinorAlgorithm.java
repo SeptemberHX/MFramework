@@ -77,7 +77,10 @@ public class MMinorAlgorithm implements MAlgorithmInterface {
         for (String userId : data.getDemandNotAssignedSet().keySet()) {
             for (String demandId : new HashSet<>(data.getDemandNotAssignedSet().get(userId))) {
                 if (allDemandIdSet.contains(demandId)) {
-                    demandList.add(MSystemModel.getIns().getUserManager().getUserDemandByUserAndDemandId(userId, demandId));
+                    MUserDemand tmpDemand = MSystemModel.getIns().getUserManager().getUserDemandByUserAndDemandId(userId, demandId);
+                    if (tmpDemand != null) {  // remove old, not used demands
+                        demandList.add(tmpDemand);
+                    }
                 }
             }
         }
