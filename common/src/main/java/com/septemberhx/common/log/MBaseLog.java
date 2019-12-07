@@ -19,7 +19,7 @@ import java.util.Map;
 public abstract class MBaseLog implements Comparable<MBaseLog> {
     protected DateTime logDateTime;
     protected MLogType logType;
-    protected String logIpAddr;
+    protected String logIpAddr = "";
 
     @Override
     public int compareTo(MBaseLog o) {
