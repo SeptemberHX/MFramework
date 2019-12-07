@@ -31,6 +31,7 @@ import java.util.*;
 public class MAnalyser {
 
     private static Logger logger = LogManager.getLogger(MAnalyser.class);
+    private static int minorTime = 0;
 
     @Getter
     private long timeWindowInMillis;
@@ -62,6 +63,8 @@ public class MAnalyser {
         analyserResult.setCallGraph(this.buildCallGraph(userId2LogChainList));
 
         Map<String, Double> userId2AvgTime = this.analyseAvgResTimePerReqOnEachUser(userId2LogChainList);
+        MSystemModel.getIns().getLastSystemIndex().setUserId2AvgResTimeEachReq(userId2AvgTime);
+
         Set<String> affectedUserIdByAvgTime = this.getUserIdWithWorseAvgTime(userId2AvgTime);
         analyserResult.setAffectedUserIdByAvgTime(affectedUserIdByAvgTime);
 
@@ -72,12 +75,14 @@ public class MAnalyser {
         // judge the type of the evolution
         MEvolveType evolveType = MEvolveType.NO_NEED;
         int userSize = MSystemModel.getIns().getUserManager().getAllValues().size();
-        if ((affectedUserIdByAvgTime.size() > MAdaptiveSystem.MINOR_THRESHOLD * userSize
+        if (minorTime < 10 && (affectedUserIdByAvgTime.size() > MAdaptiveSystem.MINOR_THRESHOLD * userSize
                 && affectedUserIdByAvgTime.size() < MAdaptiveSystem.MAJOR_THRESHOLD * userSize)
                 || affectedUserIdByAvgTime.size() < 1000) {
             evolveType = MEvolveType.MINOR;
+            minorTime += 1;
         } else {
             evolveType = MEvolveType.MAJOR;
+            minorTime = 0;
         }
         analyserResult.setEvolveType(evolveType);
 

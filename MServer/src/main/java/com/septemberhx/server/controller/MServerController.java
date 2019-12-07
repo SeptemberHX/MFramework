@@ -6,6 +6,7 @@ import com.septemberhx.common.bean.server.MRegisterNodesBean;
 import com.septemberhx.common.bean.server.MRegisterServicesBean;
 import com.septemberhx.common.utils.MRequestUtils;
 import com.septemberhx.server.adaptive.MAdaptiveSystem;
+import com.septemberhx.server.adaptive.algorithm.MEvolveType;
 import com.septemberhx.server.base.MSystemInfoBean;
 import com.septemberhx.server.base.model.MServiceInstance;
 import com.septemberhx.server.core.MServerSkeleton;
@@ -87,9 +88,18 @@ public class MServerController {
 
     @ResponseBody
     @RequestMapping(path = "/evolve", method = RequestMethod.GET)
-    public void evolve() {
+    public void evolve(@RequestParam("type") int evolveType) {
         MAdaptiveSystem adaptiveSystem = new MAdaptiveSystem();
-        adaptiveSystem.evolve();
+        MEvolveType type = MEvolveType.NO_NEED;
+        switch (evolveType) {
+            case 1:
+                type = MEvolveType.MINOR;
+                break;
+            case 2:
+                type = MEvolveType.MAJOR;
+                break;
+        }
+        adaptiveSystem.evolve(type);
     }
 
     @ResponseBody

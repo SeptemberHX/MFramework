@@ -64,7 +64,7 @@ public class MAdaptiveSystem {
     /**
      * The main work flow of the self-adaptive system.
      */
-    public void evolve() {
+    public void evolve(MEvolveType type) {
         // fetch the logs from the cluster
         DateTime now = DateTime.now();
         MAnalyserInput analyserInput = this.monitor.monitor(now.minusMinutes(timeIntervalInMin), now);
@@ -79,6 +79,10 @@ public class MAdaptiveSystem {
         MAnalyserResult analyserResult = this.analyze(analyserInput);
         if (analyserResult.getEvolveType() == MEvolveType.NO_NEED) {
             return;
+        }
+
+        if (type != MEvolveType.NO_NEED) {
+            analyserResult.setEvolveType(type);
         }
 
         // do the plan until successfully get the plan which meets the requirements defined in the MPlanner
@@ -104,7 +108,7 @@ public class MAdaptiveSystem {
         this.monitor.acceptLog(serviceLog);
 
         // todo: conditions to decide whether to do the analyse
-        this.evolve();
+        this.evolve(MEvolveType.NO_NEED);
     }
 
     /**

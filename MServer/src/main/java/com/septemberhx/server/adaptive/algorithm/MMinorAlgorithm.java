@@ -51,7 +51,7 @@ public class MMinorAlgorithm implements MAlgorithmInterface {
             Optional<MUser> mUserOptional = MSystemModel.getIns().getUserManager().getById(userId);
             if (mUserOptional.isPresent()) {
                 for (MDemandChain chain : mUserOptional.get().getDemandChainList()) {
-                    demandList.addAll(this.replaceCompositionPart(chain.getDemandList()));
+                    demandList.addAll(chain.getDemandList());
                 }
             }
         }
@@ -92,7 +92,7 @@ public class MMinorAlgorithm implements MAlgorithmInterface {
             notSolvedDemandMap.put(demand.getId(), demand);
         }
 
-        MDemandAssignHA.calc(new ArrayList<>(notSolvedDemandMap.values()), serverOperator);
+        MDemandAssignHA.calc_compVersion(new ArrayList<>(notSolvedDemandMap.values()), serverOperator);
         serverOperator.printStatus();
 
         MPlannerResult plannerResult = new MPlannerResult();
