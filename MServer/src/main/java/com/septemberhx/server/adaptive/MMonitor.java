@@ -1,5 +1,7 @@
 package com.septemberhx.server.adaptive;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.septemberhx.common.base.MUser;
 import com.septemberhx.common.log.MBaseLog;
 import com.septemberhx.common.log.MServiceBaseLog;
@@ -7,6 +9,7 @@ import com.septemberhx.server.base.MAnalyserInput;
 import com.septemberhx.server.utils.MServerUtils;
 import org.joda.time.DateTime;
 
+import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -60,6 +63,16 @@ public class MMonitor {
     public MAnalyserInput monitor(DateTime startTime, DateTime endTime) {
         List<MBaseLog> logList = this.fetchLogFromCluster(startTime, endTime);
         List<MUser> userList = this.fetchUserInfoFromCluster();
+
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        try {
+            FileWriter fw = new FileWriter("/log/" + startTime.getMillis());
+            fw.write(gson.toJson(userList));
+            fw.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         return new MAnalyserInput(userList, logList);
     }
 }
