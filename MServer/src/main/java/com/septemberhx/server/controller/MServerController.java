@@ -16,6 +16,7 @@ import com.septemberhx.server.utils.MServerUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.RequestDispatcher;
@@ -112,6 +113,12 @@ public class MServerController {
                 break;
         }
         adaptiveSystem.evolve(type);
+    }
+
+    @ResponseBody
+    @RequestMapping(path = "/getDemand", method = RequestMethod.GET)
+    public MUserDemand getDemand(@RequestParam("userId") String userId, @RequestParam("demandId") String demandId) {
+        return MSystemModel.getIns().getUserManager().getUserDemandByUserAndDemandId(userId, demandId);
     }
 
     @ResponseBody

@@ -43,7 +43,7 @@ public class MGatewayCache {
         this.demandId2Url = new HashMap<>();
     }
 
-    public static MGatewayCache getInstance() {
+    public synchronized static MGatewayCache getInstance() {
         if (instance == null) {
             synchronized (MGatewayCache.class) {
                 if (instance == null) {
