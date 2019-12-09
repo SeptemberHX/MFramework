@@ -45,7 +45,7 @@ public class MAdaptiveSystem {
     public static Long UNAVAILABLE_TRANSFORM_TIME = 1000000L;
 
     public static double ALPHA = 0.1;
-    public static int timeIntervalInMin = 5;
+    public static int timeIntervalInMin = 1;
 
     public MAdaptiveSystem() {
         this.monitor = new MMonitor();
