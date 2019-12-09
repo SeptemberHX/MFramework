@@ -153,12 +153,22 @@ public class MServerOperator extends MObjectManager<MServerState> {
         for (MServerNode node : MSystemModel.getIns().getMSNManager().getAllValues()) {
             this.nodeId2ResourceLeft.put(node.getId(), node.getResource().deepClone());
         }
-        // and sub the used resources
+        // and sub the used resources; now not used because we didn't update the MServerState
         for (MServerState serverState : this.objectMap.values()) {
             Optional<MServerNode> nodeOptional = MSystemModel.getIns().getMSNManager().getById(serverState.getId());
             nodeOptional.ifPresent(serverNode ->
                 this.nodeId2ResourceLeft.put(serverState.getId(), serverNode.getResource().sub(serverState.getResource()))
             );
+        }
+        // we calculate the used resources by removing all the resources used by instances
+        for (MServiceInstance instance : this.instanceManager.getAllValues()) {
+            MService service = this.serviceManager.getById(instance.getId()).get();
+            if (this.nodeId2ResourceLeft.containsKey(instance.getNodeId())) {
+                this.nodeId2ResourceLeft.put(
+                        instance.getNodeId(),
+                        this.nodeId2ResourceLeft.get(instance.getNodeId()).sub(service.getResource())
+                );
+            }
         }
 
         this.generatedInterfaceList = this.serviceManager.getAllComInterfaces();
@@ -378,7 +388,9 @@ public class MServerOperator extends MObjectManager<MServerState> {
 
     public boolean moveInstance(String instanceId, String targetNodeId) {
         Optional<MServiceInstance> instanceOptional = this.instanceManager.getById(instanceId);
-        if (!instanceOptional.isPresent()) return false;
+        if (!instanceOptional.isPresent()) {
+            return false;
+        }
         MServiceInstance instance = instanceOptional.get();
         if (instance.getNodeId().equals(targetNodeId)) return true;
 

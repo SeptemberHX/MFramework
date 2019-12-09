@@ -30,7 +30,6 @@ public class MServerController {
 
     private static Logger logger = LogManager.getLogger(MServerController.class);
 
-
     @ResponseBody
     @RequestMapping(path = "/deletePods", method = RequestMethod.GET)
     public void deletePods() {
