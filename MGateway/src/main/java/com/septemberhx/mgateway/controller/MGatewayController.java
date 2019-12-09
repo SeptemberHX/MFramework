@@ -60,6 +60,12 @@ public class MGatewayController {
     }
 
     @ResponseBody
+    @RequestMapping(path = "/reset", method = RequestMethod.GET)
+    public void clearCache() {
+        MGatewayCache.getInstance().clear();
+    }
+
+    @ResponseBody
     @RequestMapping(path = "/request", method = RequestMethod.POST)
     public MResponse doRequest(@RequestBody MUserRequestBean requestBean, HttpServletRequest request) {
         MFunctionCalledLog callLog = new MFunctionCalledLog();

@@ -33,6 +33,11 @@ public class MGatewayCache {
     private Map<String, MUser> userMap;  // every user use the gateway should store their information here
     private Map<String, String> demandId2Url;  // demand id to url
 
+    public void clear() {
+        this.userMap.clear();
+        this.demandId2Url.clear();
+    }
+
     private MGatewayCache() {
         this.userMap = new HashMap<>();
         this.demandId2Url = new HashMap<>();
