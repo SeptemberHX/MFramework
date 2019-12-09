@@ -128,6 +128,12 @@ public class MServerController {
     }
 
     @ResponseBody
+    @RequestMapping(path = "/fetchUsers", method = RequestMethod.POST)
+    public List<MUser> fetchUser() {
+        return MServerUtils.fetchClusterUsers();
+    }
+
+    @ResponseBody
     @RequestMapping(path = "/loadInstanceInfo", method = RequestMethod.POST)
     public void loadInstanceInfo(@RequestBody MInstanceInfoBean instanceInfo) {
         logger.info(String.format("Instance %s has sent its info to server.", instanceInfo.getId()));
