@@ -64,7 +64,8 @@ public class MDockerManagerK8SImpl implements MDockerManager {
         try {
             V1PodList list = this.coreV1Api.listNamespacedPod(K8S_NAMESPACE, null, null, null, null, null, null, null, null, null);
             for (V1Pod item : list.getItems()) {
-                if (item.getStatus().getPodIP().equals(ipAddr)) {
+                System.out.println(item.getStatus().getPhase());
+                if (ipAddr.equals(item.getStatus().getPodIP())) {
                     if (item.getStatus().getPhase().equals("Running")) {
                         return true;
                     } else {

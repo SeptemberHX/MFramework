@@ -2,6 +2,7 @@ package com.septemberhx.agent.middleware;
 
 import com.google.gson.reflect.TypeToken;
 import com.septemberhx.agent.utils.MClientUtils;
+import com.septemberhx.common.bean.MInstanceInfoBean;
 import io.kubernetes.client.ApiClient;
 import io.kubernetes.client.ApiException;
 import io.kubernetes.client.Configuration;
@@ -12,6 +13,7 @@ import io.kubernetes.client.util.Watch;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -63,11 +65,12 @@ public class MWatchPodStatusThread extends Thread {
                             break;
                         case "MODIFIED":
                             if ("Running".equals(podStatus) && !lastPodStatusMap.get(podName).equals(podStatus)) {
-                                logger.info(podName + " now created");
+                                logger.info(podName + " now modified");
                                 MClientUtils.dealWithNewPodRunning(item.object);
                             }
                             break;
                         case "ADDED":
+                            logger.info(podName + " now created");
                             lastPodStatusMap.put(podName, podStatus);
                             break;
                         default:
