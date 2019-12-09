@@ -128,6 +128,12 @@ public class MServerController {
     }
 
     @ResponseBody
+    @RequestMapping(path = "/getUser", method = RequestMethod.GET)
+    public MUser fetchUser(@RequestParam("userId") String userId) {
+        return MSystemModel.getIns().getUserManager().getById(userId).get();
+    }
+
+    @ResponseBody
     @RequestMapping(path = "/fetchUsers", method = RequestMethod.POST)
     public List<MUser> fetchUser() {
         return MServerUtils.fetchClusterUsers();
