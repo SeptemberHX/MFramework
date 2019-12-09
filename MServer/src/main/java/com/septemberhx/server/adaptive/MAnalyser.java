@@ -170,7 +170,7 @@ public class MAnalyser {
                     // to reduce create useless chain, we will only composite the highest rid
                     // so the composite one will fit all sla levels
                     List<MService> serviceList = MSystemModel.getIns().getServiceManager().getAllServicesByServiceName(userDemand.getServiceId());
-                    serviceList.sort(Comparator.comparing(MService::getRId));
+                    serviceList.sort(Comparator.comparing(MService::getSlaId));
                     MService tService = serviceList.get(serviceList.size() - 1);
                     MSInterface msInterface = new MSInterface(
                         tService.getInterfaceMetUserDemand(userDemand).get(0).getInterfaceId(),
