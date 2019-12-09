@@ -162,7 +162,7 @@ public class MServerOperator extends MObjectManager<MServerState> {
         }
         // we calculate the used resources by removing all the resources used by instances
         for (MServiceInstance instance : this.instanceManager.getAllValues()) {
-            MService service = this.serviceManager.getById(instance.getId()).get();
+            MService service = this.serviceManager.getById(instance.getServiceId()).get();
             if (this.nodeId2ResourceLeft.containsKey(instance.getNodeId())) {
                 this.nodeId2ResourceLeft.put(
                         instance.getNodeId(),
