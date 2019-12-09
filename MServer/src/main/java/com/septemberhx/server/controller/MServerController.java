@@ -18,6 +18,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.RequestDispatcher;
 import java.net.URI;
 import java.util.*;
 
@@ -27,6 +28,17 @@ import java.util.*;
 public class MServerController {
 
     private static Logger logger = LogManager.getLogger(MServerController.class);
+
+
+    @ResponseBody
+    @RequestMapping(path = "/deletePods", method = RequestMethod.GET)
+    public void deletePods() {
+        for (MServiceInstance serviceInstance : MSystemModel.getIns().getAllServiceInstance()) {
+            MDeleteJob deleteJob = new MDeleteJob(serviceInstance.getId(), serviceInstance.getServiceId(), serviceInstance.getNodeId());
+            MServerNode node = MSystemModel.getIns().getMSNManager().getById(deleteJob.getNodeId()).get();
+            MServerUtils.sendDeleteInfo(deleteJob, node.getNodeType());
+        }
+    }
 
     @ResponseBody
     @RequestMapping(path = "/systemInfo", method = RequestMethod.POST)
