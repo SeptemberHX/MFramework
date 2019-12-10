@@ -52,7 +52,6 @@ public class MServerController {
     @RequestMapping(path = "/doRequest", method = RequestMethod.POST)
     public MResponse doRequest(@RequestBody MUserRequestBean requestBean) {
         MResponse response = MResponse.failResponse();
-        System.out.println(requestBean);
         try {
             URI uri = new URI(Objects.requireNonNull(MServerSkeleton.fetchRequestUrl(requestBean.getUserDemand().getId(), ServerNodeType.CLOUD)));
             Map<String, List<String>> customHeaderMap = new HashMap<>();
@@ -67,12 +66,11 @@ public class MServerController {
                 MService service = MSystemModel.getIns().getServiceManager().getById(serviceId).get();
                 generateStringInKBSize(service.getInterfaceById(demandState.getInterfaceId()).getOutDataSize(), response, 0);
             } catch (Exception e) {
-                
+
             }
         } catch (Exception e) {
 
         }
-
 
         return response;
     }
