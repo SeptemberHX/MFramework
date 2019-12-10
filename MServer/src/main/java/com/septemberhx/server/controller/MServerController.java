@@ -50,6 +50,7 @@ public class MServerController {
     @RequestMapping(path = "/doRequest", method = RequestMethod.POST)
     public MResponse doRequest(@RequestBody MUserRequestBean requestBean) {
         MResponse response = MResponse.failResponse();
+        System.out.println(requestBean);
         try {
             URI uri = new URI(Objects.requireNonNull(MServerSkeleton.fetchRequestUrl(requestBean.getUserDemand().getId(), ServerNodeType.CLOUD)));
             Map<String, List<String>> customHeaderMap = new HashMap<>();
@@ -61,7 +62,7 @@ public class MServerController {
         } catch (Exception e) {
 
         }
-
+        System.out.println(response);
         return response;
     }
 
