@@ -56,6 +56,7 @@ public class MServerController {
             List<String> userIdHeaderValue = new ArrayList<>();
             userIdHeaderValue.add(requestBean.getUserDemand().getUserId());
             customHeaderMap.put("userId", userIdHeaderValue);
+            requestBean.getData().set("interval", 0);
             response = MRequestUtils.sendRequest(uri, requestBean.getData(), MResponse.class, RequestMethod.POST, customHeaderMap);
         } catch (Exception e) {
 
