@@ -8,6 +8,7 @@ import com.septemberhx.common.utils.MRequestUtils;
 import com.septemberhx.server.adaptive.MAdaptiveSystem;
 import com.septemberhx.server.adaptive.algorithm.MEvolveType;
 import com.septemberhx.server.base.MSystemInfoBean;
+import com.septemberhx.server.base.model.MDemandState;
 import com.septemberhx.server.base.model.MServiceInstance;
 import com.septemberhx.server.core.MServerSkeleton;
 import com.septemberhx.server.core.MSystemModel;
@@ -15,6 +16,7 @@ import com.septemberhx.server.job.*;
 import com.septemberhx.server.utils.MServerUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.joda.time.DateTime;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -57,13 +59,37 @@ public class MServerController {
             List<String> userIdHeaderValue = new ArrayList<>();
             userIdHeaderValue.add(requestBean.getUserDemand().getUserId());
             customHeaderMap.put("userId", userIdHeaderValue);
-            requestBean.getData().set("interval", 0);
             response = MRequestUtils.sendRequest(uri, requestBean.getData(), MResponse.class, RequestMethod.POST, customHeaderMap);
+
+            try {
+                MDemandState demandState = MSystemModel.getIns().getDemandStateManager().getById(requestBean.getUserDemand().getId()).get();
+                String serviceId = MSystemModel.getIns().getInstanceById(demandState.getInstanceId()).get().getServiceId();
+                MService service = MSystemModel.getIns().getServiceManager().getById(serviceId).get();
+                generateStringInKBSize(service.getInterfaceById(demandState.getInterfaceId()).getOutDataSize(), response, 0);
+            } catch (Exception e) {
+                
+            }
         } catch (Exception e) {
 
         }
-        System.out.println(response);
+
+
         return response;
+    }
+
+    public static String generateStringInKBSize(long kbSize, MResponse response, int prevInterval) {
+        DateTime before = DateTime.now();
+        // 1 kb is 1024 characters
+        StringBuffer stringBuffer = new StringBuffer();
+        for (int i = 0; i < 1024 * kbSize; ++i) {
+            stringBuffer.append('+');
+        }
+        String str = stringBuffer.toString();
+        long interval = DateTime.now().getMillis() - before.getMillis() + prevInterval;
+        response.set("data", str);
+        response.set("interval", (int) interval);
+
+        return str;
     }
 
     @ResponseBody

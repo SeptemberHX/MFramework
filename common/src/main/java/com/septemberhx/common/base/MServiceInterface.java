@@ -1,6 +1,5 @@
 package com.septemberhx.common.base;
 
-import com.septemberhx.common.base.MClassFunctionPair;
 import lombok.Getter;
 import lombok.Setter;
 
