@@ -85,6 +85,9 @@ public class MDemandStateManager extends MObjectManager<MDemandState> {
         if (instanceOptional.isPresent()) {
             MServiceInterface serviceInterface = MSystemModel.getIns().getServiceManager()
                     .getServiceInterfaceByServiceAndInterfaceId(instanceOptional.get().getServiceId(), demandState.getInterfaceId());
+            if (serviceInterface == null) {
+                return false;
+            }
             return userDemand.isServiceInterfaceMet(serviceInterface);
         }
         return false;

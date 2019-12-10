@@ -83,6 +83,14 @@ public class MExecutor {
             }
         }
 
+        currPriority += 2;
+        for (MBaseJob baseJob : baseJobList) {
+            if (baseJob.getType() == MJobType.DELETE) {
+                baseJob.setPriority(currPriority);
+            }
+        }
+
+        ++currPriority;
         MBigSwitchJob bigSwitchJob = new MBigSwitchJob();
         bigSwitchJob.setPriority(currPriority + 2);
         bigSwitchJob.setSwitchJobList(switchJobList);
