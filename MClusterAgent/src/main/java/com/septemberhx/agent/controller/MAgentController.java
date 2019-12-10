@@ -79,8 +79,12 @@ public class MAgentController {
     @ResponseBody
     @RequestMapping(path = "/fetchRequestUrl", method = RequestMethod.POST)
     public String fetchRequestUrl(@RequestBody MUserDemand userDemand) {
-        URI requestUri = MUrlUtils.getMServerFetchRequestUrl(this.serverIpAddr, this.serverPort);
-        return MRequestUtils.sendRequest(requestUri, userDemand, String.class, RequestMethod.POST);
+        String result = null;
+        try {
+            URI requestUri = MUrlUtils.getMServerFetchRequestUrl(this.serverIpAddr, this.serverPort);
+            result = MRequestUtils.sendRequest(requestUri, userDemand, String.class, RequestMethod.POST);
+        } catch (Exception e) { }
+        return result;
     }
 
     @ResponseBody

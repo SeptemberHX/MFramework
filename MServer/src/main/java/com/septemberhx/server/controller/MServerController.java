@@ -24,6 +24,8 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.RequestDispatcher;
 import java.net.URI;
 import java.util.*;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 @RestController
 @EnableAutoConfiguration
@@ -31,6 +33,7 @@ import java.util.*;
 public class MServerController {
 
     private static Logger logger = LogManager.getLogger(MServerController.class);
+    private final static Executor executor = Executors.newCachedThreadPool();
 
     @ResponseBody
     @RequestMapping(path = "/deletePods", method = RequestMethod.GET)
@@ -127,17 +130,23 @@ public class MServerController {
     @ResponseBody
     @RequestMapping(path = "/evolve", method = RequestMethod.GET)
     public void evolve(@RequestParam("type") int evolveType) {
-        MAdaptiveSystem adaptiveSystem = new MAdaptiveSystem();
-        MEvolveType type = MEvolveType.NO_NEED;
-        switch (evolveType) {
-            case 1:
-                type = MEvolveType.MINOR;
-                break;
-            case 2:
-                type = MEvolveType.MAJOR;
-                break;
-        }
-        adaptiveSystem.evolve(type);
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                //另起线程执行逻辑
+                MAdaptiveSystem adaptiveSystem = new MAdaptiveSystem();
+                MEvolveType type = MEvolveType.NO_NEED;
+                switch (evolveType) {
+                    case 1:
+                        type = MEvolveType.MINOR;
+                        break;
+                    case 2:
+                        type = MEvolveType.MAJOR;
+                        break;
+                }
+                adaptiveSystem.evolve(type);
+            }
+        });
     }
 
     @ResponseBody
