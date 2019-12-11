@@ -114,7 +114,7 @@ public class MSystemModel {
                 }
 
                 this.mSIManager.add(instance);
-                logger.info(String.format("Instance %s is added to the instance map in server", ourInstanceId));
+//                logger.info(String.format("Instance %s is added to the instance map in server", ourInstanceId));
             }
         } else {
             String ourInstanceId = MIDUtils.tranSpringCloudIdToOurs(instanceInfo.getId());
