@@ -1390,4 +1390,17 @@ public class MServerOperator extends MObjectManager<MServerState> {
         this.demandStateManager.renameInstance(oldId, newId);
         this.instanceManager.renameInstance(oldId, newId);
     }
+
+    public void deleteEmptyInstance() {
+        for (MServiceInstance instance : this.getAllInstances()) {
+            if (this.insId2LeftCap.containsKey(instance.getId())) {
+                MService service = this.serviceManager.getById(instance.getId()).get();
+                if (service.getMaxUserCap() == this.insId2LeftCap.get(instance.getId())) {
+                    this.deleteInstance(instance.getId());
+                }
+            } else {
+                this.deleteInstance(instance.getId());
+            }
+        }
+    }
 }

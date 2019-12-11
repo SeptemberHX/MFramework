@@ -93,6 +93,15 @@ public class MMinorAlgorithm implements MAlgorithmInterface {
         }
 
         MDemandAssignHA.calc_compVersion(new ArrayList<>(notSolvedDemandMap.values()), serverOperator);
+        for (MDemandState demandState : serverOperator.getDemandStateManager().getAllValues()) {
+            if (MSystemModel.getIns().getUserManager().containsById(demandState.getUserId())) {
+                MUser user = MSystemModel.getIns().getUserManager().getById(demandState.getUserId()).get();
+                if (user.getDemandByDemandId(demandState.getId()) == null) {
+                    serverOperator.removeDemandState(demandState);
+                }
+            }
+        }
+        serverOperator.deleteEmptyInstance();
         serverOperator.printStatus();
 
         MPlannerResult plannerResult = new MPlannerResult();
