@@ -49,7 +49,7 @@ public class MExecutor {
         List<MBaseJob> switchJobList = new ArrayList<>();
         for (MBaseJob baseJob : baseJobList) {
             if (baseJob.getType() == MJobType.DELETE) {
-                baseJob.setPriority(currPriority);
+                baseJob.setPriority(currPriority + 1);
             }
 
             // for com-service build
@@ -83,14 +83,6 @@ public class MExecutor {
             }
         }
 
-        currPriority += 2;
-        for (MBaseJob baseJob : baseJobList) {
-            if (baseJob.getType() == MJobType.DELETE) {
-                baseJob.setPriority(currPriority);
-            }
-        }
-
-        ++currPriority;
         MBigSwitchJob bigSwitchJob = new MBigSwitchJob();
         bigSwitchJob.setPriority(currPriority + 2);
         bigSwitchJob.setSwitchJobList(switchJobList);
