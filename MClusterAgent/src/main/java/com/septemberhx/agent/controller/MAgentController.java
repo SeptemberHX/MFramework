@@ -152,7 +152,7 @@ public class MAgentController {
     @RequestMapping(path = "/registered", method = RequestMethod.POST)
     public void instanceRegistered(@RequestBody MInstanceRegisterNotifyRequest registerNotifyRequest) {
         InstanceInfo instanceInfo = registerNotifyRequest.getInstanceInfo();
-        System.out.println(instanceInfo.getAppName() + "|" + instanceInfo.getInstanceId() + "|" + instanceInfo.getIPAddr() + ":" + instanceInfo.getPort());
+//        System.out.println(instanceInfo.getAppName() + "|" + instanceInfo.getInstanceId() + "|" + instanceInfo.getIPAddr() + ":" + instanceInfo.getPort());
         MInstanceInfoBean infoBean = this.clientUtils.transformInstance(instanceInfo, registerNotifyRequest.getPort());
         if (infoBean == null) {
             return;
@@ -161,7 +161,7 @@ public class MAgentController {
         URI serverLoadUri = MUrlUtils.getMServerLoadInstanceInfoUri(this.serverIpAddr, this.serverPort);
 
         try {
-            logger.info(infoBean.toString());
+//            logger.info(infoBean.toString());
             MRequestUtils.sendRequest(serverLoadUri, infoBean, null, RequestMethod.POST);
             this.clientUtils.notifyDeployJobFinished(infoBean);
         } catch (Exception e) {
