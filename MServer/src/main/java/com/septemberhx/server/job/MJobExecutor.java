@@ -90,6 +90,7 @@ public class MJobExecutor {
         }
         updateCacheBean.setDemandId2Url(urlMap);
         MServerUtils.sendUpdateCache(updateCacheBean);
+        MSystemModel.getIns().setDemandStateManager(MSystemModel.getIns().getOperator().getDemandStateManager().shallowClone());
     }
 
     private static void doNotifyJob(MNotifyJob notifyJob) {

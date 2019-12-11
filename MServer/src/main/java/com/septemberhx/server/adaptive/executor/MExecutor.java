@@ -89,7 +89,6 @@ public class MExecutor {
         MServerSkeleton.getInstance().getJobManager().addJob(bigSwitchJob);
 
         // assign demands to instance
-        MSystemModel.getIns().setDemandStateManager(plannerOutput.getServerOperator().getDemandStateManager().shallowClone());
         MSystemModel.getIns().setOperator(plannerOutput.getServerOperator());
         MSystemModel.getIns().setServiceManager(plannerOutput.getServerOperator().getServiceManager().shallowClone());
 

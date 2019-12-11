@@ -23,7 +23,7 @@ public class MWSGAPopulation extends MBaseGA {
     public MWSGAPopulation(MServerOperator snapshotOperator, MServerOperator rawOperator) {
         super(snapshotOperator, rawOperator);
 
-        int maxThread = Math.min(50, Runtime.getRuntime().availableProcessors());
+        int maxThread = Math.min(30, Runtime.getRuntime().availableProcessors());
         this.fixedThreadPool = Executors.newFixedThreadPool(maxThread);
     }
 
