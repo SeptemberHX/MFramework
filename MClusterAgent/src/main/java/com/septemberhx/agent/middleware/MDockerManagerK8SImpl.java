@@ -64,7 +64,6 @@ public class MDockerManagerK8SImpl implements MDockerManager {
         try {
             V1PodList list = this.coreV1Api.listNamespacedPod(K8S_NAMESPACE, null, null, null, null, null, null, null, null, null);
             for (V1Pod item : list.getItems()) {
-                System.out.println(item.getStatus().getPhase());
                 if (ipAddr.equals(item.getStatus().getPodIP())) {
                     if (item.getStatus().getPhase().equals("Running")) {
                         return true;
@@ -91,8 +90,8 @@ public class MDockerManagerK8SImpl implements MDockerManager {
             this.coreV1Api = new CoreV1Api(this.client);
             this.extensionsV1beta1Api = new ExtensionsV1beta1Api(this.client);
 
-            Thread watchThread = new MWatchPodStatusThread(k8sClientUrl);
-            watchThread.start();
+//            Thread watchThread = new MWatchPodStatusThread(k8sClientUrl);
+//            watchThread.start();
 //            watchPodStatus();
 
         } catch (IOException e) {
