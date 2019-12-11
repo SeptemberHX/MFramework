@@ -1394,7 +1394,7 @@ public class MServerOperator extends MObjectManager<MServerState> {
     public void deleteEmptyInstance() {
         for (MServiceInstance instance : this.getAllInstances()) {
             if (this.insId2LeftCap.containsKey(instance.getId())) {
-                MService service = this.serviceManager.getById(instance.getId()).get();
+                MService service = this.serviceManager.getById(instance.getServiceId()).get();
                 if (service.getMaxUserCap() == this.insId2LeftCap.get(instance.getId())) {
                     this.deleteInstance(instance.getId());
                 }
