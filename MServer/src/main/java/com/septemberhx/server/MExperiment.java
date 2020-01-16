@@ -1,5 +1,7 @@
 package com.septemberhx.server;
 
+import com.septemberhx.common.base.MUser;
+import com.septemberhx.common.base.MUserDemand;
 import com.septemberhx.server.adaptive.MAdaptiveSystem;
 import com.septemberhx.server.adaptive.MAnalyser;
 import com.septemberhx.server.adaptive.algorithm.MMajorAlgorithm;
@@ -9,9 +11,12 @@ import com.septemberhx.server.base.MAnalyserResult;
 import com.septemberhx.server.base.MPlannerResult;
 import com.septemberhx.server.core.MServerOperator;
 import com.septemberhx.server.core.MSystemModel;
+import com.septemberhx.server.core.MUserManager;
 import com.septemberhx.server.utils.MDataUtils;
 
-import java.util.ArrayList;
+import java.awt.*;
+import java.util.*;
+import java.util.List;
 
 /**
  * @author SeptemberHX
@@ -54,6 +59,10 @@ public class MExperiment {
     }
 
     public static void main(String[] args) {
+        majorMain(args);
+    }
+
+    public static void majorMain(String[] args) {
 //        String data_version = "common";
 //        for (double i = 0.15; i <= 0.5; i+=0.1) {
 //            calcPrevSystemState(
@@ -61,6 +70,117 @@ public class MExperiment {
 //                String.format("D:\\Workspace\\gitlab\\mdata\\Lab2\\ExperimentData\\%s\\%.2f\\prev_system.json", data_version, i)
 //            );
 //        }
+        MMajorAlgorithm.GA_TYPE gaType = prepareParameters(args);
+        runExperiment(args[0], gaType);
+    }
+
+    public static void minor2MajorMain(String[] args) {
+        // default configuration
+        Configuration.POPULATION_SIZE = 200;
+        Configuration.COMPOSITION_ALL_ENABLED = true;
+        Configuration.VERIFY_EVERY_CHILD = false;
+        MAdaptiveSystem.COMPOSITION_THRESHOLD = 0.01;
+        MMajorAlgorithm.GA_TYPE gaType = MMajorAlgorithm.GA_TYPE.NSGA_II;
+        Configuration.NSGAII_MAX_ROUND = 400;
+
+        // todo: paramters that control the switch between the minor and major
+        runExperiment2(args[0], args[1], gaType);
+    }
+
+    public static void runExperiment2(String basicDirPath, String nextDirPath, MMajorAlgorithm.GA_TYPE gaType) {
+        MDataUtils.loadDataFromDir(basicDirPath, false);
+
+        // You should consider which part of the data is needed to load into the system
+        MServerOperator serverOperator = MDataUtils.loadServerOperator(basicDirPath + "/prev_system.json");
+        serverOperator.printStatus();
+
+        // read next demands lists from nextDirPath which will have a list of demand{NO}.json
+        Map<Integer, MUserManager> userManagerMap = MDataUtils.loadUserManagerMap(nextDirPath);
+        List<Integer> orderedTimeList = new ArrayList<>(userManagerMap.keySet());
+        Collections.sort(orderedTimeList);
+
+        // fetch the parameters
+        int maxMinorCount = 5;
+        double downTolerance = 0.1;
+
+        // keep doing the evolution
+        System.out.println("Experiment output 1: " + serverOperator.calcScore_v2());
+        long startTimestamp = System.currentTimeMillis();
+        boolean expEnd = false;
+        int currIndex = 0;
+        double lastResponseTime = serverOperator.calcScore_v2();
+        int minorCount = 0;
+        while (!expEnd) {
+            long currTimestamp = System.currentTimeMillis();
+            if (currTimestamp - startTimestamp < orderedTimeList.get(currIndex) * 1000) {
+                try {
+                    Thread.sleep(1000);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            } else {
+                MAnalyser analyser = new MAnalyser(serverOperator);
+                MAnalyserResult analyserResult = analyser.analyse(new ArrayList<>());
+                MServerOperator oldOperator = MSystemModel.getIns().getOperator();
+                System.out.println("Experiment affected demand size: " + affectedDemandSize(MSystemModel.getIns().getUserManager(), userManagerMap.get(orderedTimeList.get(currIndex))));
+                MSystemModel.getIns().setUserManager(userManagerMap.get(orderedTimeList.get(currIndex)));
+                MServerOperator nextOperator;
+                double nextDelay = 0;
+                if (minorCount < maxMinorCount) {
+                    minorCount += 1;
+                    MMinorAlgorithm minorAlgorithm = new MMinorAlgorithm();
+                    nextOperator = minorAlgorithm.calc(analyserResult, oldOperator).getServerOperator();
+                    nextDelay = nextOperator.calcScore_v2();
+                    System.out.println("Experiment use minor: " + nextDelay);
+                    if (nextDelay - lastResponseTime > lastResponseTime * downTolerance) {
+                        MMajorAlgorithm majorAlgorithm = new MMajorAlgorithm(MMajorAlgorithm.GA_TYPE.WSGA);
+                        nextOperator = majorAlgorithm.calc(analyserResult, oldOperator).getServerOperator();
+                        nextDelay = nextOperator.calcScore_v2();
+                        System.out.println("Experiment use major after minor: " + nextDelay);
+                        minorCount = 0;
+                    }
+                } else {
+                    minorCount = 0;
+                    MMajorAlgorithm majorAlgorithm = new MMajorAlgorithm(MMajorAlgorithm.GA_TYPE.WSGA);
+                    nextOperator = majorAlgorithm.calc(analyserResult, oldOperator).getServerOperator();
+                    nextDelay = nextOperator.calcScore_v2();
+                    System.out.println("Experiment use major: " + nextDelay);
+                }
+                System.out.println("Experiment output: " + nextOperator.calcScore_v2());
+                if (nextDelay < lastResponseTime) {
+                    lastResponseTime = nextDelay;
+                }
+                MSystemModel.getIns().setOperator(nextOperator);
+                currIndex += 1;
+            }
+        }
+
+        MAnalyser analyser = new MAnalyser(serverOperator);
+        MAnalyserResult analyserResult = analyser.analyse(new ArrayList<>());
+    }
+
+    private static int affectedDemandSize(MUserManager oldUserManager, MUserManager currUserManager) {
+        Set<String> oldUserDemandIdSet = new HashSet<>();
+        for (MUserDemand userDemand : oldUserManager.getAllUserDemands()) {
+            oldUserDemandIdSet.add(userDemand.getId());
+        }
+
+        Set<String> newUserDemandIdSet = new HashSet<>();
+        int newDemandSize = 0;
+        for (MUserDemand userDemand : currUserManager.getAllUserDemands()) {
+            if (!oldUserDemandIdSet.contains(userDemand.getId())) {
+                newDemandSize += 1;
+            }
+            newUserDemandIdSet.add(userDemand.getId());
+        }
+
+        oldUserDemandIdSet.removeAll(newUserDemandIdSet);
+        int removedDemandSize = oldUserDemandIdSet.size();
+
+        return newDemandSize + removedDemandSize;
+    }
+
+    private static MMajorAlgorithm.GA_TYPE prepareParameters(String[] args) {
         System.out.println("====== Start with data: " + args[0]
                 + " with algorithm " + args[1]
                 + " with max-round " + args[2]
@@ -69,11 +189,11 @@ public class MExperiment {
                 + ", verify children = " + args[5]
                 + ", composition threshold = " + args[6]
         );
-        MMajorAlgorithm.GA_TYPE gaType = MMajorAlgorithm.GA_TYPE.WSGA;
         Configuration.POPULATION_SIZE = Integer.parseInt(args[3]);
         Configuration.COMPOSITION_ALL_ENABLED = Boolean.parseBoolean(args[4]);
         Configuration.VERIFY_EVERY_CHILD = Boolean.parseBoolean(args[5]);
         MAdaptiveSystem.COMPOSITION_THRESHOLD = Double.parseDouble(args[6]);
+        MMajorAlgorithm.GA_TYPE gaType = MMajorAlgorithm.GA_TYPE.WSGA;
         switch (args[1]) {
             case "wsga":
                 gaType = MMajorAlgorithm.GA_TYPE.WSGA;
@@ -90,6 +210,6 @@ public class MExperiment {
             default:
                 break;
         }
-        runExperiment(args[0], gaType);
+        return gaType;
     }
 }

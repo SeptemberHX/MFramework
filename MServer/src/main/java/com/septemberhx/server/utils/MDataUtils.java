@@ -10,7 +10,10 @@ import com.septemberhx.server.core.*;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * @author SeptemberHX
@@ -168,6 +171,22 @@ public class MDataUtils {
             e.printStackTrace();
         }
         return serverOperator;
+    }
+
+    public static Map<Integer, MUserManager> loadUserManagerMap(String dirPath) {
+        Map<Integer, MUserManager> resultMap = new HashMap<>();
+
+        File dirFile = new File(dirPath);
+        for (File subFile : Objects.requireNonNull(dirFile.listFiles())) {
+            if (subFile.isFile()) {
+                resultMap.put(
+                        Integer.parseInt(subFile.getName().split(".")[0]),
+                        MDataUtils.loadUserManager(subFile.getAbsolutePath())
+                );
+            }
+        }
+
+        return resultMap;
     }
 
     public static void main(String[] args) {
