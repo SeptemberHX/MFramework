@@ -70,8 +70,10 @@ public class MExperiment {
 //                String.format("D:\\Workspace\\gitlab\\mdata\\Lab2\\ExperimentData\\%s\\%.2f\\prev_system.json", data_version, i)
 //            );
 //        }
-        MMajorAlgorithm.GA_TYPE gaType = prepareParameters(args);
-        runExperiment(args[0], gaType);
+//        MMajorAlgorithm.GA_TYPE gaType = prepareParameters(args);
+//        runExperiment(args[0], gaType);
+        calcPrevSystemState("/media/septemberhx/新加卷/Workspace/gitlab/mdata/Lab2/ExperimentData/switch/base/",
+                "/media/septemberhx/新加卷/Workspace/gitlab/mdata/Lab2/ExperimentData/switch/base/0.json");
     }
 
     public static void minor2MajorMain(String[] args) {

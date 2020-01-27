@@ -1259,7 +1259,7 @@ public class MServerOperator extends MObjectManager<MServerState> {
             logger.info("Size of demands on this new adjust instance: " + this.demandStateManager.getDemandStatesOnInstance(randomInstance.getId()).size());
         }
 
-        this.addNewJob(new MAdjustJob(randomInstance.getId(), targetS.getSlaId(), serviceOptional.get().getId(), targetS.getId(), randomInstance.getNodeId()));
+        this.addNewJob(new MAdjustJob(randomInstance.getId(), targetS.getRId(), serviceOptional.get().getId(), targetS.getId(), randomInstance.getNodeId()));
         leftR.free(oldR);
         leftR.assign(newR);
 
