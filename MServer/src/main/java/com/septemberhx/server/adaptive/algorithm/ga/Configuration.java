@@ -14,9 +14,9 @@ public class Configuration {
     public static int POPULATION_SIZE = 100;
     public static int MOEAD_NEIGHBOR_SIZE = 20;
 
-    public static int WSGA_MAX_ROUND = 300;
-    public static int NSGAII_MAX_ROUND = 300;
-    public static int MOEAD_MAX_ROUND = 300;
+    public static int WSGA_MAX_ROUND = 200;
+    public static int NSGAII_MAX_ROUND = 200;
+    public static int MOEAD_MAX_ROUND = 200;
 
     public static double WSGA_MUTATION_RATE = 0.2;
     public static double NSGAII_MUTATION_RATE = 0.2;

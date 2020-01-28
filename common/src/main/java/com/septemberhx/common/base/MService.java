@@ -24,7 +24,7 @@ public class MService extends MBaseObject {
     private Integer maxUserCap;
     private MArchitectInfo artifactInfo;
     private String dockerImageUrl;
-    private String rId;                             // same service will have different rId if require different resources
+    private String slaId;                           // same service will have different rId if require different resources
                                                     // and it should be ordered. Small stands for low resources, low sla
                                                     // Big stands for high resources, high sla
 
@@ -95,7 +95,7 @@ public class MService extends MBaseObject {
                 ", maxUserCap=" + maxUserCap +
                 ", artifactInfo=" + artifactInfo +
                 ", id='" + id + '\'' +
-                ", rId='" + rId + '\'' +
+                ", rId='" + slaId + '\'' +
                 '}';
     }
 }

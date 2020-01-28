@@ -172,7 +172,7 @@ public class MAnalyser {
                     MService tService = null;
                     try {
                         List<MService> serviceList = MSystemModel.getIns().getServiceManager().getAllServicesByServiceName(userDemand.getServiceId());
-                        serviceList.sort(Comparator.comparing(MService::getRId));
+                        serviceList.sort(Comparator.comparing(MService::getSlaId));
 
                         tService = serviceList.get(serviceList.size() - 1);
                     } catch (Exception e) {

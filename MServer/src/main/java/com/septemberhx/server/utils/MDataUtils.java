@@ -178,9 +178,10 @@ public class MDataUtils {
 
         File dirFile = new File(dirPath);
         for (File subFile : Objects.requireNonNull(dirFile.listFiles())) {
+            System.out.println(subFile.getName());
             if (subFile.isFile()) {
                 resultMap.put(
-                        Integer.parseInt(subFile.getName().split(".")[0]),
+                        Integer.parseInt(subFile.getName().split("\\.")[0]),
                         MDataUtils.loadUserManager(subFile.getAbsolutePath())
                 );
             }

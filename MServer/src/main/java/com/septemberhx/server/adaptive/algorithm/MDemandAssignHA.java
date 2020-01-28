@@ -57,7 +57,7 @@ public class MDemandAssignHA {
 
             // 1. find available composited-version services for this demand in his demand chains
             List<Triplet<MService, MServiceInterface, List<MUserDemand>>> potentialPairList =
-                    MCompositionAlgorithmInCommon.potentialPairListMap.get(userDemand.getId());
+                    MCompositionAlgorithmInCommon.potentialPairListMap.getOrDefault(userDemand.getId(), new LinkedList<>());
 
             boolean assignSuccessfully = false;
             for (MServerNode node : userId2NodeList.get(userDemand.getUserId())) {

@@ -72,24 +72,25 @@ public class MExperiment {
 //        }
 //        MMajorAlgorithm.GA_TYPE gaType = prepareParameters(args);
 //        runExperiment(args[0], gaType);
-        calcPrevSystemState("/media/septemberhx/新加卷/Workspace/gitlab/mdata/Lab2/ExperimentData/switch/base/",
-                "/media/septemberhx/新加卷/Workspace/gitlab/mdata/Lab2/ExperimentData/switch/base/0.json");
+//        calcPrevSystemState("/media/septemberhx/新加卷/Workspace/gitlab/mdata/Lab2/ExperimentData/switch/base/",
+//                "/media/septemberhx/新加卷/Workspace/gitlab/mdata/Lab2/ExperimentData/switch/base/prev_system.json");
+        minor2MajorMain(args);
     }
 
     public static void minor2MajorMain(String[] args) {
         // default configuration
-        Configuration.POPULATION_SIZE = 200;
+        Configuration.POPULATION_SIZE = 100;
         Configuration.COMPOSITION_ALL_ENABLED = true;
         Configuration.VERIFY_EVERY_CHILD = false;
         MAdaptiveSystem.COMPOSITION_THRESHOLD = 0.01;
         MMajorAlgorithm.GA_TYPE gaType = MMajorAlgorithm.GA_TYPE.NSGA_II;
-        Configuration.NSGAII_MAX_ROUND = 400;
+        Configuration.NSGAII_MAX_ROUND = 200;
 
-        // todo: paramters that control the switch between the minor and major
-        runExperiment2(args[0], args[1], gaType);
+        // parameters that control the switch between the minor and major
+        runExperiment2(args[0], args[1], gaType, Double.parseDouble(args[2]));
     }
 
-    public static void runExperiment2(String basicDirPath, String nextDirPath, MMajorAlgorithm.GA_TYPE gaType) {
+    public static void runExperiment2(String basicDirPath, String nextDirPath, MMajorAlgorithm.GA_TYPE gaType, double tolerance) {
         MDataUtils.loadDataFromDir(basicDirPath, false);
 
         // You should consider which part of the data is needed to load into the system
@@ -103,10 +104,10 @@ public class MExperiment {
 
         // fetch the parameters
         int maxMinorCount = 5;
-        double downTolerance = 0.1;
+        double downTolerance = tolerance;
 
         // keep doing the evolution
-        System.out.println("Experiment output 1: " + serverOperator.calcScore_v2());
+        System.out.println("Experiment output 1: " + serverOperator.calcScore_v2() + ", " + System.currentTimeMillis());
         long startTimestamp = System.currentTimeMillis();
         boolean expEnd = false;
         int currIndex = 0;
@@ -148,7 +149,7 @@ public class MExperiment {
                     nextDelay = nextOperator.calcScore_v2();
                     System.out.println("Experiment use major: " + nextDelay);
                 }
-                System.out.println("Experiment output: " + nextOperator.calcScore_v2());
+                System.out.println("Experiment output: " + nextOperator.calcScore_v2() + ", " + System.currentTimeMillis());
                 if (nextDelay < lastResponseTime) {
                     lastResponseTime = nextDelay;
                 }
