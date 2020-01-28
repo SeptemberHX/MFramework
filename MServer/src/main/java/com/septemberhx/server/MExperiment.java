@@ -103,7 +103,7 @@ public class MExperiment {
         Collections.sort(orderedTimeList);
 
         // fetch the parameters
-        int maxMinorCount = 5;
+        int maxMinorCount = 50;
         double downTolerance = tolerance;
 
         // keep doing the evolution
@@ -113,49 +113,55 @@ public class MExperiment {
         int currIndex = 0;
         double lastResponseTime = serverOperator.calcScore_v2();
         int minorCount = 0;
-        while (!expEnd) {
-            long currTimestamp = System.currentTimeMillis();
-            if (currTimestamp - startTimestamp < orderedTimeList.get(currIndex) * 1000) {
-                try {
-                    Thread.sleep(1000);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            } else {
-                MAnalyser analyser = new MAnalyser(serverOperator);
-                MAnalyserResult analyserResult = analyser.analyse(new ArrayList<>());
-                MServerOperator oldOperator = MSystemModel.getIns().getOperator();
-                System.out.println("Experiment affected demand size: " + affectedDemandSize(MSystemModel.getIns().getUserManager(), userManagerMap.get(orderedTimeList.get(currIndex))));
-                MSystemModel.getIns().setUserManager(userManagerMap.get(orderedTimeList.get(currIndex)));
-                MServerOperator nextOperator;
-                double nextDelay = 0;
-                if (minorCount < maxMinorCount) {
-                    minorCount += 1;
-                    MMinorAlgorithm minorAlgorithm = new MMinorAlgorithm();
-                    nextOperator = minorAlgorithm.calc(analyserResult, oldOperator).getServerOperator();
-                    nextDelay = nextOperator.calcScore_v2();
-                    System.out.println("Experiment use minor: " + nextDelay);
-                    if (nextDelay - lastResponseTime > lastResponseTime * downTolerance) {
-                        MMajorAlgorithm majorAlgorithm = new MMajorAlgorithm(MMajorAlgorithm.GA_TYPE.WSGA);
-                        nextOperator = majorAlgorithm.calc(analyserResult, oldOperator).getServerOperator();
-                        nextDelay = nextOperator.calcScore_v2();
-                        System.out.println("Experiment use major after minor: " + nextDelay);
-                        minorCount = 0;
-                    }
-                } else {
-                    minorCount = 0;
+//        while (!expEnd) {
+//            long currTimestamp = System.currentTimeMillis();
+//            if (currTimestamp - startTimestamp < orderedTimeList.get(currIndex) * 1000) {
+//                try {
+//                    Thread.sleep(1000);
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                }
+//            } else {
+//                ;
+//            }
+//        }
+
+        for (int i = 0; i < orderedTimeList.size(); ++i) {
+            MAnalyser analyser = new MAnalyser(serverOperator);
+            MAnalyserResult analyserResult = analyser.analyse(new ArrayList<>());
+            MServerOperator oldOperator = MSystemModel.getIns().getOperator();
+            System.out.println("Experiment affected demand size: " + affectedDemandSize(MSystemModel.getIns().getUserManager(), userManagerMap.get(orderedTimeList.get(currIndex))));
+            MSystemModel.getIns().setUserManager(userManagerMap.get(orderedTimeList.get(i)));
+            MServerOperator nextOperator;
+            double nextDelay = 0;
+            System.out.println("Experiment start: " + System.currentTimeMillis());
+            if (minorCount < maxMinorCount) {
+                minorCount += 1;
+                MMinorAlgorithm minorAlgorithm = new MMinorAlgorithm();
+                nextOperator = minorAlgorithm.calc(analyserResult, oldOperator).getServerOperator();
+                nextDelay = nextOperator.calcScore_v2();
+                System.out.println("Experiment use minor: " + nextDelay);
+                if (nextDelay - lastResponseTime > lastResponseTime * downTolerance) {
                     MMajorAlgorithm majorAlgorithm = new MMajorAlgorithm(MMajorAlgorithm.GA_TYPE.WSGA);
                     nextOperator = majorAlgorithm.calc(analyserResult, oldOperator).getServerOperator();
                     nextDelay = nextOperator.calcScore_v2();
-                    System.out.println("Experiment use major: " + nextDelay);
+                    System.out.println("Experiment use major after minor: " + nextDelay);
+                    minorCount = 0;
                 }
-                System.out.println("Experiment output: " + nextOperator.calcScore_v2() + ", " + System.currentTimeMillis());
-                if (nextDelay < lastResponseTime) {
-                    lastResponseTime = nextDelay;
-                }
-                MSystemModel.getIns().setOperator(nextOperator);
-                currIndex += 1;
+            } else {
+                minorCount = 0;
+                MMajorAlgorithm majorAlgorithm = new MMajorAlgorithm(MMajorAlgorithm.GA_TYPE.WSGA);
+                nextOperator = majorAlgorithm.calc(analyserResult, oldOperator).getServerOperator();
+                nextDelay = nextOperator.calcScore_v2();
+                System.out.println("Experiment use major: " + nextDelay);
             }
+            System.out.println("Experiment output: " + nextOperator.calcScore_v2() + ", " + System.currentTimeMillis());
+            if (nextDelay < lastResponseTime) {
+                lastResponseTime = nextDelay;
+            }
+            MSystemModel.getIns().setOperator(nextOperator);
+            MSystemModel.getIns().setServiceManager(nextOperator.getServiceManager().shallowClone());
+//            currIndex += 1;
         }
 
         MAnalyser analyser = new MAnalyser(serverOperator);
