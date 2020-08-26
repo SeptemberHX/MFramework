@@ -26,7 +26,7 @@ import java.util.*;
  */
 public class MCompositionAlgorithmInCommon {
 
-    public static Map<String, List<Triplet<MService, MServiceInterface, List<MUserDemand>>>> potentialPairListMap;
+    public static Map<String, List<Triplet<MService, MServiceInterface, List<MUserDemand>>>> potentialPairListMap = new HashMap<>();
 
     public static void initPotentialPairList(List<MUserDemand> userDemandList, MServiceManager serviceManager, MUserManager userManager) {
         potentialPairListMap = new HashMap<>();
