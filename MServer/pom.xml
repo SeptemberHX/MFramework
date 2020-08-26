@@ -88,7 +88,7 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
                     <fork>true</fork>
-                    <mainClass>com.septemberhx.server.MExperiment</mainClass>
+                    <mainClass>com.septemberhx.server.MServerMain</mainClass>
                     <!-- Enable io.kubernetes:client-java to find its model classes. -->
                     <requiresUnpack>
                         <dependency>

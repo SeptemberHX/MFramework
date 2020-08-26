@@ -47,16 +47,17 @@ public class MMajorAlgorithm implements MAlgorithmInterface {
         MServerOperator serverOperator = MSystemModel.getIns().getOperator();
         serverOperator.reInit();
         MIDUtils.reset(serverOperator.getAllInstances().stream().map(MServiceInstance::getId).collect(Collectors.toList()));
+
         // Then, do the composition job behind initialization. It will modify system model by operator
-        MCompositionAlgorithmInCommon.doCompositionPart(data.getCallGraph(), rawOperator, serverOperator);
-        if (Configuration.COMPOSITION_ALL_ENABLED) {
-            MCompositionAlgorithmInCommon.doCompositionPart(data.getAllCallGraph(), rawOperator, serverOperator);
-        }
-        MCompositionAlgorithmInCommon.initPotentialPairList(
-                MSystemModel.getIns().getUserManager().getAllUserDemands(),
-                serverOperator.getServiceManager(),
-                MSystemModel.getIns().getUserManager()
-        );
+//        if (Configuration.COMPOSITION_ALL_ENABLED) {
+//            MCompositionAlgorithmInCommon.doCompositionPart(data.getCallGraph(), rawOperator, serverOperator);
+//            MCompositionAlgorithmInCommon.doCompositionPart(data.getAllCallGraph(), rawOperator, serverOperator);
+//        }
+//        MCompositionAlgorithmInCommon.initPotentialPairList(
+//                MSystemModel.getIns().getUserManager().getAllUserDemands(),
+//                serverOperator.getServiceManager(),
+//                MSystemModel.getIns().getUserManager()
+//        );
         // DO NOT CHANGE THE ORDER ABOVE.
 
         // Due to the huge amount of the user demands, it's not likely to put demand-instance mapping in the result of
