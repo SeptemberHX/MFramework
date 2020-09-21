@@ -127,13 +127,15 @@ public class MServerController {
         }
     }
 
+    /*
+     * For test and debug
+     */
     @ResponseBody
     @RequestMapping(path = "/evolve", method = RequestMethod.GET)
     public void evolve(@RequestParam("type") int evolveType) {
         executor.execute(new Runnable() {
             @Override
             public void run() {
-                //另起线程执行逻辑
                 MAdaptiveSystem adaptiveSystem = new MAdaptiveSystem();
                 MEvolveType type = MEvolveType.NO_NEED;
                 switch (evolveType) {

@@ -88,7 +88,6 @@ public class MAdaptiveSystem {
         // do the plan until successfully get the plan which meets the requirements defined in the MPlanner
         MPlannerResult result = this.plan(analyserResult);
 //        while (!result.isSuccess()) {
-//            // todo: collect the data from the 'result' and pass it to analyzer
 //            analyserResult = this.analyze();
 //            if (analyserResult.getEvolveType() == MEvolveType.NO_NEED) {
 //                logger.warn("Evolve type cannot be NO_NEED in the while loop!");

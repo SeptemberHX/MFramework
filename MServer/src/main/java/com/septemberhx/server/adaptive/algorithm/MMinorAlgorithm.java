@@ -85,6 +85,17 @@ public class MMinorAlgorithm implements MAlgorithmInterface {
             }
         }
 
+        // tmp fix
+        for (MUser user : MSystemModel.getIns().getUserManager().getAllValues()) {
+            for (MDemandChain chain : user.getDemandChainList()) {
+                for (MUserDemand userDemand : chain.getDemandList()) {
+                    if (!MSystemModel.getIns().getDemandStateManager().containsById(userDemand.getId())) {
+                        demandList.add(userDemand);
+                    }
+                }
+            }
+        }
+
         // deal with all not good demands
         // filter the repeated demand out
         Map<String, MUserDemand> notSolvedDemandMap = new HashMap<>();
