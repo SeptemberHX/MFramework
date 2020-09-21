@@ -17,7 +17,7 @@
 1. export `JAVA_HOME` to java 8
 2. `mvn package`. A runnable `*.jar` file should exist in `*/target/` 
 
-### Deploy Kubernetes with several server nodes (Both cloud side and edge side)
+### Deploy Kubernetes with several server nodes
 
 1. deploy Kubernetes
 2. label each node with `node=XXX`. Replace XXX with the real node id
